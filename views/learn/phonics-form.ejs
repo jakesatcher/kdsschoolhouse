@@ -1,0 +1,24 @@
+<%- include('../partials/head') %>
+<h1>Phonics</h1>
+<div class="card">
+  <form method="get" action="/reading/phonics/worksheet" class="settings">
+    <%- include('../partials/errors', { errors: [] }) %>
+    <label>Phonics pattern
+      <select name="type" required>
+        <% categories.forEach(function (c) { %>
+          <optgroup label="<%= c.name %>">
+            <option value="<%= c.id %>" <%= q.type === c.id ? 'selected' : '' %>>All <%= c.name.split(' (')[0] %></option>
+            <% c.subtypes.forEach(function (s) { %><option value="<%= c.id %>/<%= s.id %>" <%= q.type === c.id + '/' + s.id ? 'selected' : '' %>><%= s.name %></option><% }) %>
+          </optgroup>
+        <% }) %>
+      </select>
+    </label>
+    <label>Words <select name="mix"><option value="mixed">Real and nonsense words (about 14 real + 6 nonsense)</option><option value="real" <%= q.mix === 'real' ? 'selected' : '' %>>Real words only</option><option value="nonsense" <%= q.mix === 'nonsense' ? 'selected' : '' %>>Nonsense words only</option></select></label>
+    <label>Format <select name="format"><option value="list">Word list (read aloud)</option><option value="write" <%= q.format === 'write' ? 'selected' : '' %>>Read and write (copy each word)</option></select></label>
+    <label class="check"><input type="checkbox" name="mark" value="1" checked> Mark nonsense words with a ◇ for students</label>
+    <label class="check"><input type="checkbox" name="key" value="1" checked> Include teacher key (shows which words are nonsense)</label>
+    <button type="submit">Create worksheet</button>
+  </form>
+</div>
+<p class="muted small-text"><%= guide %> Each sheet has 20 words, drawn at random, so every click makes a new sheet.</p>
+<%- include('../partials/foot') %>

@@ -1,0 +1,11 @@
+<%- include('partials/head') %>
+<h1>Welcome, <%= currentUser.name %></h1>
+<p class="muted">Pick a subject to build a printable worksheet for grades 1–5.</p>
+<div class="grid3">
+  <section class="card"><h2>Math</h2><ul class="plain">
+    <li><a href="/math/addition">Addition</a></li><li><a href="/math/subtraction">Subtraction</a></li><li><a href="/math/multiplication">Multiplication</a></li><li><a href="/math/division">Division</a></li><li><a href="/math/word-problems">Word Problems</a></li></ul></section>
+  <section class="card"><h2>Reading</h2><ul class="plain">
+    <li><a href="/reading/phonics">Phonics</a></li><li><a href="/reading/sight-words">Sight Words (Dolch)</a></li></ul></section>
+  <section class="card"><h2>Writing</h2><ul class="plain"><li><a href="/writing">Prompts &amp; Lined Paper</a></li></ul></section>
+</div>
+<%- include('partials/foot') %>

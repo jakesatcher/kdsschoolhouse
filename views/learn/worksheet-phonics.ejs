@@ -1,0 +1,18 @@
+<%- include('../partials/head') %>
+<%- include('_toolbar') %>
+<article class="sheet">
+  <% const subtitle = result.category.name + (result.subtypeName !== 'All' ? ' — ' + result.subtypeName : ''); %>
+  <%- include('_sheet-head', { subtitle }) %>
+  <% if (markNonsense && result.words.some(function (w) { return w.nonsense; })) { %><p class="legend">◇ = silly word (not a real word). Sound it out!</p><% } %>
+  <ol class="wordgrid <%= format %>">
+    <% result.words.forEach(function (w) { %><li><span class="w"><%= w.word %></span><% if (markNonsense && w.nonsense) { %> <span class="mark" aria-label="silly word">◇</span><% } %><% if (format === 'write') { %><i class="blank"></i><% } %></li><% }) %>
+  </ol>
+</article>
+<% if (includeKey) { %>
+<article class="sheet key">
+  <h1>Teacher Key</h1><p class="sheet-sub"><%= result.category.name %> · <%= result.subtypeName %></p>
+  <p><strong>Real words:</strong> <%= result.words.filter(function (w) { return !w.nonsense; }).map(function (w) { return w.word; }).join(', ') || 'none' %></p>
+  <p><strong>Nonsense words:</strong> <%= result.words.filter(function (w) { return w.nonsense; }).map(function (w) { return w.word; }).join(', ') || 'none' %></p>
+</article>
+<% } %>
+<%- include('../partials/foot') %>

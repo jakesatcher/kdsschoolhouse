@@ -1,0 +1,16 @@
+<%- include('../partials/head') %>
+<section class="card narrow">
+  <h1>Request access</h1>
+  <%- include('../partials/errors') %>
+  <form method="post" action="/register" autocomplete="on">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label>Name <input name="name" value="<%= values.name || '' %>" required maxlength="100" autocomplete="name"></label>
+    <label>Email <input type="email" name="email" value="<%= values.email || '' %>" required maxlength="254" autocomplete="username"></label>
+    <label>Password <small class="muted">(at least 12 characters)</small> <input type="password" name="password" required minlength="12" maxlength="72" autocomplete="new-password"></label>
+    <label>Confirm password <input type="password" name="password2" required minlength="12" maxlength="72" autocomplete="new-password"></label>
+    <label>Anything the administrator should know? <small class="muted">(optional)</small> <textarea name="request_note" maxlength="500" rows="3"><%= values.request_note || '' %></textarea></label>
+    <button type="submit">Request access</button>
+  </form>
+  <p class="muted"><a href="/login">Back to sign in</a></p>
+</section>
+<%- include('../partials/foot') %>

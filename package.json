@@ -1,0 +1,30 @@
+{
+  "name": "kdsschoolhouse",
+  "version": "0.1.0",
+  "private": true,
+  "description": "South Carolina grade 1-5 math, reading and writing worksheet generator",
+  "main": "src/server.js",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "migrate": "node src/db/migrate.js",
+    "test": "node --test --test-concurrency=1 \"test/**/*.test.js\""
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "connect-pg-simple": "^10.0.0",
+    "dotenv": "^18.0.5",
+    "ejs": "^7.0.1",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.7.0",
+    "express-session": "^1.19.0",
+    "helmet": "^8.3.0",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "supertest": "^7.3.1"
+  }
+}

@@ -1,0 +1,2 @@
+<% if (typeof errors !== 'undefined' && errors.length) { %><div class="alert err" role="alert"><ul><% errors.forEach(function (e) { %><li><%= e %></li><% }) %></ul></div><% } %>
+<% if (typeof error !== 'undefined' && error) { %><div class="alert err" role="alert"><%= error %></div><% } %>

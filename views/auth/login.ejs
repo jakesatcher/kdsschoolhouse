@@ -1,0 +1,13 @@
+<%- include('../partials/head') %>
+<section class="card narrow">
+  <h1>Sign in</h1>
+  <%- include('../partials/errors', { errors: [] }) %>
+  <form method="post" action="/login" autocomplete="on">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label>Email <input type="email" name="email" value="<%= email %>" required autocomplete="username" maxlength="254" autofocus></label>
+    <label>Password <input type="password" name="password" required autocomplete="current-password" maxlength="200"></label>
+    <button type="submit">Sign in</button>
+  </form>
+  <p class="muted">New here? <a href="/register">Request access</a>. An administrator must approve your account before you can sign in.</p>
+</section>
+<%- include('../partials/foot') %>

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title><%= title ? title + ' · ' : '' %><%= appName %></title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/css/app.css">
+  <script src="/static/js/app.js" defer></script>
+</head>
+<body>
+<header class="topbar no-print">
+  <a class="brand" href="/"><%= appName %></a>
+  <% if (currentUser) { %>
+  <nav aria-label="Main">
+    <details class="menu"><summary>Math</summary>
+      <div class="menu-items">
+        <a href="/math/addition">Addition</a><a href="/math/subtraction">Subtraction</a><a href="/math/multiplication">Multiplication</a><a href="/math/division">Division</a><a href="/math/word-problems">Word Problems</a>
+      </div></details>
+    <details class="menu"><summary>Reading</summary>
+      <div class="menu-items"><a href="/reading/phonics">Phonics</a><a href="/reading/sight-words">Sight Words</a></div></details>
+    <details class="menu"><summary>Writing</summary>
+      <div class="menu-items"><a href="/writing">Prompts &amp; Lined Paper</a></div></details>
+    <% if (currentUser.role === 'admin') { %>
+    <details class="menu"><summary>Admin</summary>
+      <div class="menu-items"><a href="/admin/users">Users</a><a href="/admin/audit">Audit log</a></div></details>
+    <% } %>
+  </nav>
+  <div class="who">
+    <a href="/account/password"><%= currentUser.name %></a>
+    <form method="post" action="/logout"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="link" type="submit">Sign out</button></form>
+  </div>
+  <% } %>
+</header>
+<main class="container">
+<%- include('flash') %>

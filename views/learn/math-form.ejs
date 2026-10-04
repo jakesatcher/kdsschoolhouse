@@ -1,0 +1,41 @@
+<%- include('../partials/head') %>
+<h1>Math</h1>
+<div class="card">
+  <form method="get" action="/math/<%= type %>/worksheet" class="settings">
+    <label>Problem type
+      <select data-nav>
+        <% Object.keys(types).forEach(function (k) { %><option value="/math/<%= k %>" <%= k === type ? 'selected' : '' %>><%= types[k] %></option><% }) %>
+      </select>
+    </label>
+    <noscript><p class="muted">Use the Math menu at the top to switch problem type.</p></noscript>
+    <%- include('../partials/errors', { errors: [] }) %>
+
+    <% if (type === 'addition' || type === 'subtraction') { %>
+      <label>Number of digits <select name="digits"><% for (let d = 2; d <= 7; d++) { %><option value="<%= d %>" <%= String(q.digits || 2) === String(d) ? 'selected' : '' %>><%= d %> digits</option><% } %></select></label>
+      <label>Regrouping <select name="regroup"><option value="always">Every problem needs regrouping</option><option value="any" <%= q.regroup === 'any' ? 'selected' : '' %>>Any (regrouping not guaranteed)</option></select></label>
+      <% if (type === 'addition') { %><label>Addends <select name="addends"><option value="2">2 numbers</option><option value="3" <%= q.addends === '3' ? 'selected' : '' %>>3 numbers</option></select></label><% } %>
+      <label>Problems <select name="count"><% [10, 20, 30, 40].forEach(function (n) { %><option <%= String(q.count || 20) === String(n) ? 'selected' : '' %>><%= n %></option><% }) %></select></label>
+      <label>Layout <select name="layout"><option value="vertical">Vertical (stacked)</option><option value="horizontal" <%= q.layout === 'horizontal' ? 'selected' : '' %>>Horizontal</option></select></label>
+    <% } else if (type === 'multiplication' || type === 'division') { %>
+      <label>Problem set <select name="mode"><option value="facts">Facts, 0 to 12</option><option value="mixed" <%= q.mode === 'mixed' ? 'selected' : '' %>>Mixed (facts plus multi-digit)</option></select></label>
+      <% if (type === 'multiplication') { %>
+        <label>Factor <small class="muted">(facts only)</small> <select name="factor"><option value="all">All facts (mixed problems)</option><% for (let f = 0; f <= 12; f++) { %><option value="<%= f %>" <%= q.factor === String(f) ? 'selected' : '' %>>Facts for <%= f %></option><% } %></select></label>
+      <% } else { %>
+        <label>Divisor <small class="muted">(facts only; no division by 0)</small> <select name="divisor"><option value="all">All facts (mixed problems)</option><% for (let f = 1; f <= 12; f++) { %><option value="<%= f %>" <%= q.divisor === String(f) ? 'selected' : '' %>>Divide by <%= f %></option><% } %></select></label>
+      <% } %>
+      <label>Problems <select name="count"><% [20, 30, 40, 60].forEach(function (n) { %><option <%= String(q.count || 30) === String(n) ? 'selected' : '' %>><%= n %></option><% }) %></select></label>
+      <label>Layout <select name="layout"><option value="vertical"><%= type === 'division' ? 'Long-division bracket' : 'Vertical (stacked)' %></option><option value="horizontal" <%= q.layout === 'horizontal' ? 'selected' : '' %>>Horizontal</option></select></label>
+    <% } else { %>
+      <label>Grade level <select name="grade"><% grades.forEach(function (g) { %><option value="<%= g %>" <%= String(q.grade || 3) === String(g) ? 'selected' : '' %>>Grade <%= g %></option><% }) %></select></label>
+      <label>Operation <select name="op"><% ops.forEach(function (o) { %><option value="<%= o %>" <%= q.op === o ? 'selected' : '' %>><%= { add: 'Addition', sub: 'Subtraction', mul: 'Multiplication', div: 'Division', mixed: 'All operations (mixed)' }[o] %></option><% }) %></select></label>
+      <label>Numbers <select name="kind"><% kinds.forEach(function (k) { %><option value="<%= k %>" <%= (q.kind || 'whole') === k ? 'selected' : '' %>><%= { whole: 'Whole numbers', decimal: 'Decimals (money and measurement)', fraction: 'Fractions', mixed: 'All number types (mixed)' }[k] %></option><% }) %></select></label>
+      <label>Steps <select name="steps"><% steps.forEach(function (s) { %><option value="<%= s %>" <%= (q.steps || 'mixed') === s ? 'selected' : '' %>><%= { single: 'One step', multi: 'Multi-step only', mixed: 'Mix of one-step and multi-step' }[s] %></option><% }) %></select></label>
+      <label>Problems <select name="count"><% [5, 8, 10, 12, 15].forEach(function (n) { %><option <%= String(q.count || 10) === String(n) ? 'selected' : '' %>><%= n %></option><% }) %></select></label>
+    <% } %>
+    <label class="check"><input type="checkbox" name="key" value="1" checked> Include answer key on a separate page</label>
+    <button type="submit">Create worksheet</button>
+  </form>
+</div>
+<p class="muted small-text"><%= (guide[q.grade] || '') %></p>
+<details class="muted small-text"><summary>SC grade-level guide</summary><ul><% Object.keys(guide).forEach(function (g) { %><li><%= guide[g] %></li><% }) %></ul><p>Planning hints only. Confirm against the SC College- and Career-Ready Standards.</p></details>
+<%- include('../partials/foot') %>

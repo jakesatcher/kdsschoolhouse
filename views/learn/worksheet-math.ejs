@@ -1,0 +1,15 @@
+<%- include('../partials/head') %>
+<%- include('_toolbar') %>
+<article class="sheet">
+  <%- include('_sheet-head') %>
+  <ol class="problems <%= layout %> d<%= digits %>">
+    <% problems.forEach(function (p) { %><li><%- include('_vproblem', { p, layout }) %></li><% }) %>
+  </ol>
+</article>
+<% if (includeKey) { %>
+<article class="sheet key">
+  <h1>Answer Key</h1><p class="sheet-sub"><%= subtitle %></p>
+  <ol class="keylist"><% problems.forEach(function (p) { %><li><%= p.operands.map(function (n) { return Number(n).toLocaleString('en-US'); }).join(' ' + p.op + ' ') %> = <strong><%= p.answerText %></strong></li><% }) %></ol>
+</article>
+<% } %>
+<%- include('../partials/foot') %>

@@ -1,0 +1,13 @@
+<%- include('../partials/head') %>
+<%- include('_toolbar') %>
+<article class="sheet">
+  <%- include('_sheet-head', { subtitle: result.list.name + ' sight words' }) %>
+  <% if (format === 'cards') { %>
+    <ul class="cards"><% result.words.forEach(function (w) { %><li><%= w %></li><% }) %></ul>
+  <% } else if (format === 'trace') { %>
+    <ol class="tracelist"><% result.words.forEach(function (w) { %><li><span class="w"><%= w %></span><span class="trace"><%= w %></span><i class="blank"></i></li><% }) %></ol>
+  <% } else { %>
+    <ol class="wordgrid list"><% result.words.forEach(function (w) { %><li><span class="w"><%= w %></span></li><% }) %></ol>
+  <% } %>
+</article>
+<%- include('../partials/foot') %>

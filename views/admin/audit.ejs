@@ -1,0 +1,10 @@
+<%- include('../partials/head') %>
+<h1>Audit log</h1>
+<p class="muted">Most recent 200 events.</p>
+<div class="table-wrap"><table>
+  <thead><tr><th>When</th><th>Who</th><th>Action</th><th>Target</th><th>IP</th></tr></thead>
+  <tbody>
+  <% rows.forEach(function (r) { %><tr><td><%= r.created_at.toLocaleString('en-US') %></td><td><%= r.actor || '—' %></td><td><%= r.action %></td><td><%= r.target_type ? r.target_type + ' ' + r.target_id : '' %></td><td><%= r.ip %></td></tr><% }) %>
+  </tbody>
+</table></div>
+<%- include('../partials/foot') %>

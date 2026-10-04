@@ -1,0 +1,15 @@
+<%- include('../partials/head') %>
+<%- include('_toolbar') %>
+<article class="sheet">
+  <%- include('_sheet-head') %>
+  <ol class="words-problems">
+    <% problems.forEach(function (p) { %><li><p><%= p.text %></p><div class="workspace"></div><p class="answerline">Answer: <i class="blank"></i></p></li><% }) %>
+  </ol>
+</article>
+<% if (includeKey) { %>
+<article class="sheet key">
+  <h1>Answer Key</h1><p class="sheet-sub"><%= subtitle %></p>
+  <ol class="keylist"><% problems.forEach(function (p) { %><li><strong><%= p.answerText %></strong> <small class="muted">(<%= p.steps > 1 ? 'multi-step' : 'one step' %>)</small></li><% }) %></ol>
+</article>
+<% } %>
+<%- include('../partials/foot') %>

@@ -1,0 +1,34 @@
+<%- include('../partials/head') %>
+<h1>Users</h1>
+<% if (tempPw) { %><div class="alert ok"><strong>Temporary password for <%= tempPw.email %>:</strong> <code><%= tempPw.password %></code><br>Shown once. Give it to the user securely; they must change it at next sign-in.</div><% } %>
+<p class="tabs">
+  <a href="/admin/users" class="<%= !filter ? 'on' : '' %>">All</a>
+  <% ['pending', 'approved', 'rejected', 'disabled'].forEach(function (s) { %><a href="/admin/users?status=<%= s %>" class="<%= filter === s ? 'on' : '' %>"><%= s %> (<%= counts[s] || 0 %>)</a><% }) %>
+</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Requested</th><th>Last sign-in</th><th>Actions</th></tr></thead>
+  <tbody>
+  <% users.forEach(function (u) { %>
+    <tr>
+      <td><%= u.name %><% if (u.request_note) { %><br><small class="muted"><%= u.request_note %></small><% } %></td>
+      <td><%= u.email %></td><td><%= u.role %></td><td><span class="badge <%= u.status %>"><%= u.status %></span></td>
+      <td><%= u.created_at.toLocaleDateString('en-US') %></td><td><%= u.last_login_at ? u.last_login_at.toLocaleDateString('en-US') : '—' %></td>
+      <td class="actions">
+        <%
+          const acts = [];
+          if (u.status === 'pending') acts.push(['approve', 'Approve'], ['reject', 'Reject']);
+          if (u.status === 'approved') acts.push(['disable', 'Disable'], [u.role === 'admin' ? 'make-user' : 'make-admin', u.role === 'admin' ? 'Make user' : 'Make admin'], ['reset-password', 'Reset password']);
+          if (u.status === 'rejected' || u.status === 'disabled') acts.push(['enable', 'Approve / enable']);
+        %>
+        <% acts.forEach(function (a) { %>
+          <form method="post" action="/admin/users/<%= u.id %>/<%= a[0] %>"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="small" type="submit"><%= a[1] %></button></form>
+        <% }) %>
+      </td>
+    </tr>
+  <% }) %>
+  <% if (!users.length) { %><tr><td colspan="7" class="muted">No users.</td></tr><% } %>
+  </tbody>
+</table>
+</div>
+<%- include('../partials/foot') %>

@@ -1,0 +1,13 @@
+<%- include('../partials/head') %>
+<h1>Writing</h1>
+<div class="card">
+  <form method="get" action="/writing/worksheet" class="settings">
+    <label>Grade <select name="grade"><% grades.forEach(function (g) { %><option value="<%= g %>" <%= String(q.grade || 2) === String(g) ? 'selected' : '' %>>Grade <%= g %></option><% }) %></select></label>
+    <label>Writing type <select name="type"><% types.forEach(function (t) { %><option value="<%= t %>" <%= q.type === t ? 'selected' : '' %>><%= { opinion: 'Opinion', informative: 'Informative / explanatory', narrative: 'Narrative' }[t] %></option><% }) %></select></label>
+    <label>Prompts per page <select name="count"><% [1, 2, 3, 4].forEach(function (n) { %><option <%= String(q.count || 2) === String(n) ? 'selected' : '' %>><%= n %></option><% }) %></select></label>
+    <label>Lines per prompt <select name="lines"><% [4, 6, 8, 10, 12].forEach(function (n) { %><option <%= String(q.lines || 8) === String(n) ? 'selected' : '' %>><%= n %></option><% }) %></select></label>
+    <button type="submit">Create worksheet</button>
+  </form>
+</div>
+<p class="muted small-text"><%= guide %> This section is a starter: prompts and lined paper only. Tell me what else you want here (graphic organizers, handwriting practice, etc.).</p>
+<%- include('../partials/foot') %>

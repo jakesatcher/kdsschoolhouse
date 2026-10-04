@@ -1,0 +1,13 @@
+<%- include('../partials/head') %>
+<h1>Sight Words (Dolch)</h1>
+<div class="card">
+  <form method="get" action="/reading/sight-words/worksheet" class="settings">
+    <%- include('../partials/errors', { errors: [] }) %>
+    <label>Word list <select name="list" required><% lists.forEach(function (l) { %><option value="<%= l.id %>" <%= q.list === l.id ? 'selected' : '' %>><%= l.name %> (<%= l.words.length %> words)</option><% }) %></select></label>
+    <label>How many words <select name="count"><option value="all">The whole list</option><option value="10" <%= q.count === '10' ? 'selected' : '' %>>10</option><option value="20" <%= q.count === '20' ? 'selected' : '' %>>20</option><option value="30" <%= q.count === '30' ? 'selected' : '' %>>30</option></select></label>
+    <label>Order <select name="order"><option value="alphabetical">Alphabetical</option><option value="random" <%= q.order === 'random' ? 'selected' : '' %>>Random (the first N of a shuffled list)</option></select></label>
+    <label>Format <select name="format"><option value="list">Word list</option><option value="cards" <%= q.format === 'cards' ? 'selected' : '' %>>Flash cards (cut out)</option><option value="trace" <%= q.format === 'trace' ? 'selected' : '' %>>Read, trace and write</option></select></label>
+    <button type="submit">Create worksheet</button>
+  </form>
+</div>
+<%- include('../partials/foot') %>
