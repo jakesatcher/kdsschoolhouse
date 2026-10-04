@@ -1,5 +1,6 @@
 <%- include('partials/head') %>
 <h1>Welcome, <%= currentUser.name %></h1>
+<% if (pendingCount) { %><div class="alert err" role="status"><strong><%= pendingCount %> access request<%= pendingCount === 1 ? '' : 's' %> waiting.</strong> <a href="/admin/users?status=pending">Review and approve</a></div><% } %>
 <p class="muted">Pick a subject to build a printable worksheet for grades 1–5.</p>
 <div class="grid3">
   <section class="card"><h2>Math</h2><ul class="plain">

@@ -4,11 +4,14 @@ const db = require('../db');
 
 async function loadUser(req, res, next) {
   res.locals.currentUser = null;
+  res.locals.pendingCount = 0;
   if (req.session && req.session.userId) {
     const user = await db.one('SELECT id, email, name, role, status, must_change_password FROM users WHERE id = $1', [req.session.userId]);
     if (user && user.status === 'approved') {
       req.user = user;
       res.locals.currentUser = user;
+      // Admins see how many access requests are waiting for approval.
+      res.locals.pendingCount = user.role === 'admin' ? (await db.one(`SELECT count(*)::int AS n FROM users WHERE status = 'pending'`)).n : 0;
     } else {
       delete req.session.userId; // removed, disabled or un-approved since login
     }

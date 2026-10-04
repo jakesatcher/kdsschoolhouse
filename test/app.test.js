@@ -163,3 +163,14 @@ test('SQL-injection style input in login does not authenticate', async () => {
   const res = await login(agent, `' OR '1'='1' --`, `' OR '1'='1' --`);
   assert.strictEqual(res.status, 401);
 });
+
+test('admins see a pending-request banner; regular users do not', async () => {
+  await createUser({ email: 'waiting@example.com', status: 'pending' });
+  const adminAgent = request.agent(app);
+  await login(adminAgent, 'admin@example.com');
+  assert.match((await adminAgent.get('/')).text, /access request[s]? waiting/);
+  assert.match((await adminAgent.get('/')).text, /\/admin\/users\?status=pending/);
+  const userAgent = request.agent(app);
+  await login(userAgent, 'u@example.com');
+  assert.doesNotMatch((await userAgent.get('/')).text, /access request/);
+});

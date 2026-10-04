@@ -23,8 +23,8 @@
     <details class="menu"><summary>Writing</summary>
       <div class="menu-items"><a href="/writing">Prompts &amp; Lined Paper</a></div></details>
     <% if (currentUser.role === 'admin') { %>
-    <details class="menu"><summary>Admin</summary>
-      <div class="menu-items"><a href="/admin/users">Users</a><a href="/admin/audit">Audit log</a></div></details>
+    <details class="menu"><summary>Admin<% if (pendingCount) { %> <span class="pill" title="Access requests waiting"><%= pendingCount %></span><% } %></summary>
+      <div class="menu-items"><a href="/admin/users">Users<% if (pendingCount) { %> (<%= pendingCount %> pending)<% } %></a><a href="/admin/audit">Audit log</a></div></details>
     <% } %>
   </nav>
   <div class="who">
