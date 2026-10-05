@@ -40,3 +40,8 @@ menus.forEach((d) => d.addEventListener('toggle', () => {
 }));
 document.addEventListener('click', (e) => { if (!e.target.closest('details.menu')) menus.forEach((o) => { o.open = false; }); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') menus.forEach((o) => { o.open = false; }); });
+
+// "Show password" checkbox on the request-access form.
+document.querySelectorAll('[data-reveal-toggle]').forEach((t) => t.addEventListener('change', () => {
+  document.querySelectorAll('[data-reveal]').forEach((i) => { i.type = t.checked ? 'text' : 'password'; });
+}));

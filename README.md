@@ -23,6 +23,10 @@ Node 22 · Express 5 · PostgreSQL · EJS (server-rendered, no client framework)
 
 Every worksheet has a **sheet code (seed)**; the answer key is generated from the same problems and prints on its own page.
 
+## Home page pep talk
+
+After sign-in the home page shows a random cheeky pep talk (picked once per sign-in). Edit the list in `src/lib/greetings.js`. Set `GREETING_LEVEL=mild` for a no-swearing version, or `off` to hide it (worth considering if teachers project the site in front of students).
+
 ## AI-written reading content
 
 Passages and questions are written by Claude through the Anthropic API.
@@ -33,9 +37,9 @@ Passages and questions are written by Claude through the Anthropic API.
 
 ## Accounts
 
-- Anyone can **request access** at `/register`; the account is `pending` and cannot sign in.
+- Anyone can **request access** at `/register` with just a name, username and password (no email); the account is `pending` and cannot sign in.
 - An **admin** approves/rejects/disables users, promotes/demotes, and issues one-time temporary passwords (`/admin/users`). Roles: `admin`, `user`.
-- The first admin is created at boot from `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
+- The first admin is created at boot from `ADMIN_USERNAME` (or the older `ADMIN_EMAIL`, used as the username) and `ADMIN_PASSWORD`. Existing accounts keep working: their old email became their username.
 - Nothing is reachable without signing in except `/login`, `/register`, `/healthz`, and the CSS/JS/icon under `/static`.
 
 ## Run locally
@@ -51,7 +55,7 @@ npm test               # (AI is stubbed in tests) needs TEST_DATABASE_URL, e.g. 
 ## Deploy on Railway
 
 1. New project → Deploy from GitHub repo → this repo. Add a **PostgreSQL** service.
-2. Variables: `DATABASE_URL=${{Postgres.DATABASE_URL}}`, `NODE_ENV=production`, `SESSION_SECRET` (`openssl rand -base64 48`), `ADMIN_EMAIL`, `ADMIN_PASSWORD` (12+ chars), `ADMIN_NAME`.
+2. Variables: `DATABASE_URL=${{Postgres.DATABASE_URL}}`, `NODE_ENV=production`, `SESSION_SECRET` (`openssl rand -base64 48`), `ADMIN_USERNAME`, `ADMIN_PASSWORD` (12+ chars), `ADMIN_NAME`.
 3. Settings → Networking → **Custom Domain**, add the CNAME at your registrar. TLS is automatic. Health check: `/healthz`.
 
 ## Security

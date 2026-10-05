@@ -6,10 +6,12 @@ const pw = require('../lib/password');
 const { audit } = require('../lib/audit');
 const { loginLimiter, registerLimiter } = require('../lib/limits');
 const { safeReturnTo } = require('../middleware/auth');
+const config = require('../config');
+const greetings = require('../lib/greetings');
 
 const router = express.Router();
 
-const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
+const USERNAME_RE = /^[A-Za-z0-9][A-Za-z0-9._@-]{2,39}$/;
 const MAX_FAILS = 5;
 const LOCK_MINUTES = 15;
 
@@ -26,17 +28,17 @@ function regenerate(req) {
 
 router.get('/login', (req, res) => {
   if (req.user) return res.redirect('/');
-  res.render('auth/login', { title: 'Sign in', email: '' });
+  res.render('auth/login', { title: 'Sign in', username: '' });
 });
 
 router.post('/login', loginLimiter, async (req, res) => {
-  const email = String(req.body.email || '').trim().toLowerCase().slice(0, 254);
+  const username = String(req.body.username || '').trim().slice(0, 100);
   const password = String(req.body.password || '');
-  const fail = (msg = 'Incorrect email or password.') => {
-    res.status(401).render('auth/login', { title: 'Sign in', email, error: msg });
+  const fail = (msg = 'Incorrect username or password.') => {
+    res.status(401).render('auth/login', { title: 'Sign in', username, error: msg });
   };
 
-  const user = await db.one('SELECT * FROM users WHERE lower(email) = $1', [email]);
+  const user = await db.one('SELECT * FROM users WHERE lower(username) = lower($1)', [username]);
   if (user && user.locked_until && new Date(user.locked_until) > new Date()) {
     await pw.verify(password, user.password_hash); // keep timing uniform
     return fail('Too many failed attempts. Try again in a few minutes.');
@@ -60,6 +62,7 @@ router.post('/login', loginLimiter, async (req, res) => {
   const returnTo = safeReturnTo(req.session.returnTo);
   await regenerate(req); // new session id on privilege change (session fixation defence)
   req.session.userId = user.id;
+  req.session.greeting = greetings.pick(config.greetingLevel); // a fresh pep talk each sign-in
   await db.query('UPDATE users SET failed_attempts = 0, locked_until = NULL, last_login_at = now() WHERE id = $1', [user.id]);
   await audit({ ip: req.ip, user: { id: user.id } }, 'login', 'user', user.id);
   res.redirect(user.must_change_password ? '/account/password' : returnTo);
@@ -73,27 +76,24 @@ router.get('/register', (req, res) => {
 router.post('/register', registerLimiter, async (req, res) => {
   const values = {
     name: String(req.body.name || '').trim().slice(0, 100),
-    email: String(req.body.email || '').trim().toLowerCase().slice(0, 254),
-    request_note: String(req.body.request_note || '').trim().slice(0, 500),
+    username: String(req.body.username || '').trim().slice(0, 40),
   };
   const password = String(req.body.password || '');
   const errors = [];
   if (!values.name) errors.push('Name is required.');
-  if (!EMAIL_RE.test(values.email)) errors.push('Enter a valid email address.');
+  if (!USERNAME_RE.test(values.username)) errors.push('Username must be 3 to 40 characters: letters, numbers, and . _ - @ (starting with a letter or number).');
   const pwErr = pw.passwordProblem(password, values);
   if (pwErr) errors.push(pwErr);
-  if (password !== String(req.body.password2 || '')) errors.push('Passwords do not match.');
-  if (errors.length) return res.status(422).render('auth/register', { title: 'Request access', values, errors });
+  const fail = (list) => res.status(422).render('auth/register', { title: 'Request access', values, errors: list });
+  if (errors.length) return fail(errors);
 
-  // Same response whether or not the email exists, so registration cannot be used to enumerate accounts.
-  const existing = await db.one('SELECT id FROM users WHERE lower(email) = $1', [values.email]);
-  if (!existing) {
-    const created = await db.one(
-      `INSERT INTO users (email, name, password_hash, request_note) VALUES ($1,$2,$3,$4) ON CONFLICT DO NOTHING RETURNING id`,
-      [values.email, values.name, await pw.hash(password), values.request_note || null]
-    );
-    if (created) await audit({ ip: req.ip }, 'register', 'user', created.id);
-  }
+  // Usernames are shown as taken so people can pick another (registration is rate-limited and needs approval).
+  const created = await db.one(
+    `INSERT INTO users (username, name, password_hash) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING RETURNING id`,
+    [values.username, values.name, await pw.hash(password)]
+  );
+  if (!created) return fail(['That username is already taken. Please choose another.']);
+  await audit({ ip: req.ip }, 'register', 'user', created.id);
   res.render('auth/registered', { title: 'Request received' });
 });
 

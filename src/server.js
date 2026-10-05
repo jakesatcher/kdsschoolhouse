@@ -7,26 +7,26 @@ const { migrate } = require('./db/migrate');
 const { createApp } = require('./app');
 
 async function bootstrapAdmin() {
-  const { email, password, name } = config.bootstrapAdmin;
-  if (!email) return;
-  const existing = await db.one('SELECT id, role, status FROM users WHERE lower(email) = lower($1)', [email]);
+  const { username, email, password, name } = config.bootstrapAdmin;
+  if (!username) return;
+  const existing = await db.one('SELECT id, role, status FROM users WHERE lower(username) = lower($1)', [username]);
   if (existing) {
     if (existing.role !== 'admin' || existing.status !== 'approved') {
       await db.query(`UPDATE users SET role = 'admin', status = 'approved', updated_at = now() WHERE id = $1`, [existing.id]);
-      console.log(`Promoted ${email} to approved admin`);
+      console.log(`Promoted ${username} to approved admin`);
     }
     return;
   }
-  const problem = pw.passwordProblem(password || '', { email });
+  const problem = pw.passwordProblem(password || '', { username });
   if (problem) {
-    console.warn(`ADMIN_EMAIL is set but ADMIN_PASSWORD is unusable (${problem}); skipping admin bootstrap.`);
+    console.warn(`ADMIN_USERNAME (or ADMIN_EMAIL) is set but ADMIN_PASSWORD is unusable (${problem}); skipping admin bootstrap.`);
     return;
   }
   await db.query(
-    `INSERT INTO users (email, name, password_hash, role, status, approved_at) VALUES ($1, $2, $3, 'admin', 'approved', now())`,
-    [email.trim().toLowerCase(), name, await pw.hash(password)]
+    `INSERT INTO users (username, email, name, password_hash, role, status, approved_at) VALUES ($1, $2, $3, $4, 'admin', 'approved', now())`,
+    [username.trim(), email ? email.trim().toLowerCase() : null, name, await pw.hash(password)]
   );
-  console.log(`Created bootstrap admin ${email}`);
+  console.log(`Created bootstrap admin ${username}`);
 }
 
 async function main() {

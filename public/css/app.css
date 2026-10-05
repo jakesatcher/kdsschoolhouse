@@ -159,3 +159,7 @@ ol.questions { padding-left: 24px; } ol.questions li { margin-bottom: 14px; brea
   ol.problems li, .words-problems li, .prompt, ol.questions li { break-inside: avoid; }
   .reading .passage, .lines .line, .blank { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+
+/* pep-talk bubble under the home page greeting */
+.greeting { display: inline-block; position: relative; margin: 6px 0 14px; padding: 10px 16px; max-width: 46em; background: var(--yellow); color: var(--ink); border: 3px solid var(--ink); border-radius: 14px; box-shadow: 4px 4px 0 var(--pink); font: 800 1.05rem/1.35 "Trebuchet MS", sans-serif; transform: rotate(-.6deg); }
+.greeting::before { content: ""; position: absolute; left: 22px; top: -13px; border: 7px solid transparent; border-bottom: 10px solid var(--ink); }

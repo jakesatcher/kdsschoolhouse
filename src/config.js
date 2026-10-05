@@ -22,12 +22,16 @@ module.exports = {
   databaseUrl: env.DATABASE_URL || 'postgres://localhost/kdsschoolhouse',
   databaseSsl: bool(env.DATABASE_SSL, false),
   sessionSecret,
+  // Pep-talk under "Hey, <name>!": spicy (default), mild (no swearing) or off.
+  greetingLevel: ['spicy', 'mild', 'off'].includes(env.GREETING_LEVEL) ? env.GREETING_LEVEL : 'spicy',
   // AI-written passages and questions (reading section). Without a key the teacher-written options still work.
   anthropicApiKey: env.ANTHROPIC_API_KEY || null,
   aiModel: env.AI_MODEL || 'claude-opus-5-5',
   aiHourlyLimit: Number(env.AI_HOURLY_LIMIT) || 30,
   bootstrapAdmin: {
-    email: env.ADMIN_EMAIL,
+    // ADMIN_USERNAME wins; ADMIN_EMAIL is still accepted so existing deployments keep working.
+    username: env.ADMIN_USERNAME || env.ADMIN_EMAIL,
+    email: env.ADMIN_EMAIL || null,
     password: env.ADMIN_PASSWORD,
     name: env.ADMIN_NAME || 'Admin',
   },

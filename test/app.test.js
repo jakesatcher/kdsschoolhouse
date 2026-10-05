@@ -40,41 +40,42 @@ test('security headers and cookie flags', async () => {
 test('registration creates a pending user and cannot sign in until approved', async () => {
   const agent = request.agent(app);
   const page = await agent.get('/register');
-  const res = await agent.post('/register').type('form').send({ _csrf: csrfFrom(page.text), name: 'Teacher T', email: 'T@Example.com', password: 'a long safe passphrase', password2: 'a long safe passphrase' });
+  const res = await agent.post('/register').type('form').send({ _csrf: csrfFrom(page.text), name: 'Teacher T', username: 'Teacher.T', password: 'a long safe passphrase' });
   assert.strictEqual(res.status, 200);
-  const u = await db.one(`SELECT * FROM users WHERE email = 't@example.com'`);
+  const u = await db.one(`SELECT * FROM users WHERE lower(username) = 'teacher.t'`);
   assert.strictEqual(u.status, 'pending');
   assert.strictEqual(u.role, 'user');
   assert.notStrictEqual(u.password_hash, 'a long safe passphrase');
 
-  const attempt = await login(request.agent(app), 't@example.com', 'a long safe passphrase');
+  const attempt = await login(request.agent(app), 'teacher.t', 'a long safe passphrase');
   assert.strictEqual(attempt.status, 401);
   assert.match(attempt.text, /waiting for admin approval/);
 
   // duplicate registration looks identical (no account enumeration) and does not overwrite
   const token = csrfFrom((await agent.get('/register')).text);
-  const again = await agent.post('/register').type('form').send({ _csrf: token, name: 'Evil', email: 't@example.com', password: 'another long passphrase', password2: 'another long passphrase' });
-  assert.strictEqual(again.status, 200);
-  assert.strictEqual((await db.one(`SELECT name FROM users WHERE email = 't@example.com'`)).name, 'Teacher T');
+  const again = await agent.post('/register').type('form').send({ _csrf: token, name: 'Evil', username: 'teacher.t', password: 'another long passphrase' });
+  assert.strictEqual(again.status, 422); // username taken: say so, never overwrite
+  assert.match(again.text, /already taken/);
+  assert.strictEqual((await db.one(`SELECT name FROM users WHERE lower(username) = 'teacher.t'`)).name, 'Teacher T');
 });
 
 test('registration rejects weak passwords and cannot self-assign role or status', async () => {
   const agent = request.agent(app);
   const page = await agent.get('/register');
-  const weak = await agent.post('/register').type('form').send({ _csrf: csrfFrom(page.text), name: 'X', email: 'x@example.com', password: 'short', password2: 'short' });
+  const weak = await agent.post('/register').type('form').send({ _csrf: csrfFrom(page.text), name: 'X', username: 'xuser', password: 'short', password2: 'short' });
   assert.strictEqual(weak.status, 422);
-  await agent.post('/register').type('form').send({ _csrf: csrfFrom(page.text), name: 'Sneaky', email: 'sneaky@example.com', password: 'a long safe passphrase', password2: 'a long safe passphrase', role: 'admin', status: 'approved' });
-  const u = await db.one(`SELECT role, status FROM users WHERE email = 'sneaky@example.com'`);
+  await agent.post('/register').type('form').send({ _csrf: csrfFrom(page.text), name: 'Sneaky', username: 'sneaky', password: 'a long safe passphrase', role: 'admin', status: 'approved' });
+  const u = await db.one(`SELECT role, status FROM users WHERE lower(username) = 'sneaky'`);
   assert.deepStrictEqual({ role: u.role, status: u.status }, { role: 'user', status: 'pending' });
 });
 
 test('CSRF: login without token is refused', async () => {
-  const res = await request(app).post('/login').type('form').send({ email: 'a@b.co', password: 'x' });
+  const res = await request(app).post('/login').type('form').send({ username: 'a@b.co', password: 'x' });
   assert.strictEqual(res.status, 403);
 });
 
 test('approved user signs in, sees worksheets; admin pages are forbidden', async () => {
-  await createUser({ email: 'u@example.com' });
+  await createUser({ username: 'u@example.com' });
   const agent = request.agent(app);
   const res = await login(agent, 'u@example.com');
   assert.strictEqual(res.status, 302);
@@ -109,7 +110,7 @@ test('every worksheet type renders for a signed-in user, and bad parameters fall
 });
 
 test('lockout after repeated failures', async () => {
-  await createUser({ email: 'lock@example.com' });
+  await createUser({ username: 'lock@example.com' });
   const agent = request.agent(app);
   for (let i = 0; i < 5; i++) await login(agent, 'lock@example.com', 'wrong password!!');
   const res = await login(agent, 'lock@example.com'); // right password, but locked
@@ -118,8 +119,8 @@ test('lockout after repeated failures', async () => {
 });
 
 test('admin approves a pending user; disabling kills their live session', async () => {
-  const admin = await createUser({ email: 'admin@example.com', role: 'admin' });
-  const pending = await createUser({ email: 'p@example.com', status: 'pending' });
+  const admin = await createUser({ username: 'admin@example.com', role: 'admin' });
+  const pending = await createUser({ username: 'p@example.com', status: 'pending' });
   const adminAgent = request.agent(app);
   await login(adminAgent, 'admin@example.com');
   const csrf = csrfFrom((await adminAgent.get('/admin/users')).text);
@@ -140,7 +141,7 @@ test('admin approves a pending user; disabling kills their live session', async 
 });
 
 test('admin password reset forces a change before anything else is reachable', async () => {
-  const target = await createUser({ email: 'reset@example.com' });
+  const target = await createUser({ username: 'reset@example.com' });
   const adminAgent = request.agent(app);
   await login(adminAgent, 'admin@example.com');
   const csrf = csrfFrom((await adminAgent.get('/admin/users')).text);
@@ -165,7 +166,7 @@ test('SQL-injection style input in login does not authenticate', async () => {
 });
 
 test('admins see a pending-request banner; regular users do not', async () => {
-  await createUser({ email: 'waiting@example.com', status: 'pending' });
+  await createUser({ username: 'waiting@example.com', status: 'pending' });
   const adminAgent = request.agent(app);
   await login(adminAgent, 'admin@example.com');
   assert.match((await adminAgent.get('/')).text, /access request[s]? waiting/);
@@ -173,4 +174,43 @@ test('admins see a pending-request banner; regular users do not', async () => {
   const userAgent = request.agent(app);
   await login(userAgent, 'u@example.com');
   assert.doesNotMatch((await userAgent.get('/')).text, /access request/);
+});
+
+test('registration asks only for name, username and password', async () => {
+  const html = (await request(app).get('/register')).text;
+  assert.match(html, /name="name"/);
+  assert.match(html, /name="username"/);
+  assert.match(html, /name="password"/);
+  assert.doesNotMatch(html, /name="email"|name="password2"|name="request_note"/);
+  const agent = request.agent(app);
+  const page = await agent.get('/register');
+  const bad = await agent.post('/register').type('form').send({ _csrf: csrfFrom(page.text), name: 'N', username: 'a b!', password: 'a long safe passphrase' });
+  assert.strictEqual(bad.status, 422);
+  assert.match(bad.text, /Username must be/);
+  const pwInName = await agent.post('/register').type('form').send({ _csrf: csrfFrom(page.text), name: 'N', username: 'jessica', password: 'my-jessica-is-great' });
+  assert.match(pwInName.text, /must not contain your username/);
+  // usernames are case-insensitive for sign-in
+  await createUser({ username: 'MixedCase' });
+  assert.strictEqual((await login(request.agent(app), 'mixedcase')).status, 302);
+});
+
+test('home page shows a pep talk chosen at sign-in, stable until the next sign-in', async () => {
+  const { GREETINGS } = require('../src/lib/greetings');
+  const agent = request.agent(app);
+  await login(agent, 'u@example.com');
+  const grab = (html) => /<p class="greeting">([^<]+)<\/p>/.exec(html)[1].replace(/&#39;/g, "'").replace(/&#34;/g, '"').replace(/&amp;/g, '&');
+  const first = grab((await agent.get('/')).text);
+  const second = grab((await agent.get('/')).text);
+  assert.strictEqual(first, second);
+  assert.ok(GREETINGS.some((g) => g.text === first), first);
+});
+
+test('greeting levels: mild never swears, off shows nothing', () => {
+  const { pick, GREETINGS } = require('../src/lib/greetings');
+  const rude = /\b(bitch|ass|damn|hell|badass|ass-kicker|damns)\b/i;
+  for (let i = 0; i < 300; i++) assert.doesNotMatch(pick('mild'), rude);
+  assert.strictEqual(pick('off'), null);
+  assert.ok(GREETINGS.filter((g) => g.spicy).every((g) => rude.test(g.text)), 'spicy greetings should be the swear ones');
+  assert.ok(GREETINGS.filter((g) => !g.spicy).every((g) => !rude.test(g.text)), 'mild greetings must be clean');
+  assert.ok(GREETINGS.some((g) => g.text === 'Make this day your bitch!'));
 });

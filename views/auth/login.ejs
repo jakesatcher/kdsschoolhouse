@@ -5,7 +5,7 @@
   <%- include('../partials/errors', { errors: [] }) %>
   <form method="post" action="/login" autocomplete="on">
     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-    <label>Email <input type="email" name="email" value="<%= email %>" required autocomplete="username" maxlength="254" autofocus></label>
+    <label>Username <input name="username" value="<%= username %>" required autocomplete="username" maxlength="100" autocapitalize="none" spellcheck="false" autofocus></label>
     <label>Password <input type="password" name="password" required autocomplete="current-password" maxlength="200"></label>
     <button type="submit">Sign in</button>
   </form>

@@ -8,7 +8,7 @@ async function loadUser(req, res, next) {
   res.locals.pendingCount = 0;
   res.locals.libCounts = { favorites: 0, print_later: 0 };
   if (req.session && req.session.userId) {
-    const user = await db.one('SELECT id, email, name, role, status, must_change_password FROM users WHERE id = $1', [req.session.userId]);
+    const user = await db.one('SELECT id, username, name, role, status, must_change_password FROM users WHERE id = $1', [req.session.userId]);
     if (user && user.status === 'approved') {
       req.user = user;
       res.locals.currentUser = user;

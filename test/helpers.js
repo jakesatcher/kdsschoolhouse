@@ -24,13 +24,13 @@ const csrfFrom = (html) => {
   return m[1];
 };
 
-async function createUser({ email, name = 'User', password = 'correct horse battery', role = 'user', status = 'approved' }) {
-  return db.one('INSERT INTO users (email, name, password_hash, role, status) VALUES ($1,$2,$3,$4,$5) RETURNING *', [email, name, await pw.hash(password), role, status]);
+async function createUser({ username, name = 'User', password = 'correct horse battery', role = 'user', status = 'approved' }) {
+  return db.one('INSERT INTO users (username, name, password_hash, role, status) VALUES ($1,$2,$3,$4,$5) RETURNING *', [username, name, await pw.hash(password), role, status]);
 }
 
-async function login(agent, email, password = 'correct horse battery') {
+async function login(agent, username, password = 'correct horse battery') {
   const page = await agent.get('/login');
-  return agent.post('/login').type('form').send({ _csrf: csrfFrom(page.text), email, password });
+  return agent.post('/login').type('form').send({ _csrf: csrfFrom(page.text), username, password });
 }
 
 module.exports = { request, db, createApp, resetDb, csrfFrom, createUser, login };

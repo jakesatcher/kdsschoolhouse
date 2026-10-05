@@ -18,7 +18,7 @@ router.get('/', (req, res) => res.redirect('/admin/users'));
 router.get('/users', async (req, res) => {
   const filter = STATUSES.includes(req.query.status) ? req.query.status : null;
   const users = await db.many(
-    `SELECT id, email, name, role, status, request_note, last_login_at, created_at FROM users
+    `SELECT id, username, name, role, status, request_note, last_login_at, created_at FROM users
      WHERE ($1::text IS NULL OR status = $1) ORDER BY (status = 'pending') DESC, created_at DESC LIMIT 500`,
     [filter]
   );
@@ -72,20 +72,20 @@ router.post('/users/:id/:action', async (req, res) => {
       const temp = tempPassword();
       await db.query(`UPDATE users SET password_hash = $2, must_change_password = true, failed_attempts = 0, locked_until = NULL, updated_at = now() WHERE id = $1`, [id, await pw.hash(temp)]);
       await dropSessions(id);
-      req.session.tempPw = { email: target.email, password: temp };
+      req.session.tempPw = { username: target.username, password: temp };
       break;
     }
     default:
       return res.status(404).render('error', { title: 'Not found', message: 'Unknown action.' });
   }
   await audit(req, `admin_${action}`, 'user', id);
-  if (action !== 'reset-password') req.flash('ok', `Done: ${action.replace('-', ' ')} ${target.email}.`);
+  if (action !== 'reset-password') req.flash('ok', `Done: ${action.replace('-', ' ')} ${target.username}.`);
   res.redirect('/admin/users');
 });
 
 router.get('/audit', async (req, res) => {
   const rows = await db.many(
-    `SELECT a.*, u.email AS actor FROM audit_log a LEFT JOIN users u ON u.id = a.user_id ORDER BY a.created_at DESC LIMIT 200`
+    `SELECT a.*, u.username AS actor FROM audit_log a LEFT JOIN users u ON u.id = a.user_id ORDER BY a.created_at DESC LIMIT 200`
   );
   res.render('admin/audit', { title: 'Audit log', rows });
 });

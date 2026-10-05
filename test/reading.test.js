@@ -31,8 +31,8 @@ const qa = (n) => Array.from({ length: n }, (_, i) => ({ type: i % 2 ? 'inferent
 let agent;
 test.before(async () => {
   await resetDb();
-  await createUser({ email: 't@example.com', name: 'Teacher' });
-  await createUser({ email: 'other@example.com', name: 'Other' });
+  await createUser({ username: 't@example.com', name: 'Teacher' });
+  await createUser({ username: 'other@example.com', name: 'Other' });
   agent = request.agent(app);
   await login(agent, 't@example.com');
 });

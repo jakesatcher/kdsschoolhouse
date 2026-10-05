@@ -1,6 +1,8 @@
 'use strict';
 
 const express = require('express');
+const config = require('../config');
+const greetings = require('../lib/greetings');
 const { oneOf } = require('../lib/params');
 const { generatorLimiter } = require('../lib/limits');
 const sheets = require('../lib/sheets');
@@ -17,7 +19,11 @@ router.use(['/math', '/reading', '/writing'], generatorLimiter);
 const GRADES = [1, 2, 3, 4, 5];
 const { MATH_TYPES } = sheets;
 
-router.get('/', (req, res) => res.render('home', { title: 'Home' }));
+router.get('/', (req, res) => {
+  // Chosen at sign-in; sessions that pre-date the feature get one now.
+  if (req.session.greeting === undefined) req.session.greeting = greetings.pick(config.greetingLevel);
+  res.render('home', { title: 'Home', greeting: req.session.greeting });
+});
 
 // ---------- settings forms ----------
 const mathForm = (res, type, q, error) =>
