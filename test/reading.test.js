@@ -288,3 +288,23 @@ test('library only accepts real, seeded worksheet URLs', async () => {
   const r = await post('/library/toggle', { flag: 'favorite', url: '/math/addition/worksheet?seed=5', back: 'https://evil.example' });
   assert.strictEqual(r.headers.location, '/'); // open redirects are refused
 });
+
+test('phonics: category + subtype fields (and old type=cat/sub links) both work', async () => {
+  const get = (u) => agent.get(u).redirects(1);
+  const a = await get('/reading/phonics/worksheet?category=blends&subtype=l-blends');
+  assert.match(a.text, /L-blends/);
+  const b = await get('/reading/phonics/worksheet?category=blends&subtype=all');
+  assert.match(b.text, /Blends/);
+  assert.doesNotMatch(b.text, /L-blends/);
+  const old = await get('/reading/phonics/worksheet?type=digraphs/sh');
+  assert.match(old.text, /Digraphs/);
+  assert.strictEqual((await get('/reading/phonics/worksheet?category=')).status, 422);
+  assert.strictEqual((await get('/reading/phonics/worksheet?category=blends&subtype=nope')).status, 422);
+  // the form: one category dropdown; the sub-type dropdown only shows after a choice
+  const empty = (await agent.get('/reading/phonics')).text;
+  assert.match(empty, /name="category"/);
+  assert.match(empty, /data-sub-wrap hidden/);
+  const picked = (await agent.get('/reading/phonics?category=vce&subtype=a-e')).text;
+  assert.doesNotMatch(picked, /data-sub-wrap hidden/);
+  assert.match(picked, /<option value="a-e" selected>/);
+});

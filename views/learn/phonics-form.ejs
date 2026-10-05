@@ -3,16 +3,20 @@
 <div class="card">
   <form method="get" action="/reading/phonics/worksheet" class="settings">
     <%- include('../partials/errors', { errors: [] }) %>
-    <label>Phonics pattern
-      <select name="type" required>
-        <% categories.forEach(function (c) { %>
-          <optgroup label="<%= c.name %>">
-            <option value="<%= c.id %>" <%= q.type === c.id ? 'selected' : '' %>>All <%= c.name.split(' (')[0] %></option>
-            <% c.subtypes.forEach(function (s) { %><option value="<%= c.id %>/<%= s.id %>" <%= q.type === c.id + '/' + s.id ? 'selected' : '' %>><%= s.name %></option><% }) %>
-          </optgroup>
-        <% }) %>
-      </select>
-    </label>
+    <% const subsByCat = {}; categories.forEach(function (c) { subsByCat[c.id] = [['all', 'All ' + c.name.split(' (')[0]]].concat(c.subtypes.map(function (x) { return [x.id, x.name]; })); }); %>
+    <div data-phonics-pick data-subs="<%= JSON.stringify(subsByCat) %>">
+      <label>Phonics type
+        <select name="category" required>
+          <option value="">Choose a phonics type…</option>
+          <% categories.forEach(function (c) { %><option value="<%= c.id %>" <%= sel.category === c.id ? 'selected' : '' %>><%= c.name %></option><% }) %>
+        </select>
+      </label>
+      <label data-sub-wrap <%= sel.category && subsByCat[sel.category] ? '' : 'hidden' %>>Sub-type
+        <select name="subtype">
+          <% (subsByCat[sel.category] || []).forEach(function (o) { %><option value="<%= o[0] %>" <%= sel.subtype === o[0] ? 'selected' : '' %>><%= o[1] %></option><% }) %>
+        </select>
+      </label>
+    </div>
     <label>Words <select name="mix"><option value="mixed">Real and nonsense words (about 14 real + 6 nonsense)</option><option value="real" <%= q.mix === 'real' ? 'selected' : '' %>>Real words only</option><option value="nonsense" <%= q.mix === 'nonsense' ? 'selected' : '' %>>Nonsense words only</option></select></label>
     <label>Format <select name="format"><option value="list">Word list (read aloud)</option><option value="write" <%= q.format === 'write' ? 'selected' : '' %>>Read and write (copy each word)</option></select></label>
     <label class="check"><input type="hidden" name="mark" value="0"><input type="checkbox" name="mark" value="1" checked> Mark nonsense words with a ◇ for students</label>

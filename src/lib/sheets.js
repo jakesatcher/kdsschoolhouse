@@ -65,7 +65,10 @@ function build(pathname, q) {
   }
 
   if (pathname === '/reading/phonics/worksheet') {
-    const [category, sub] = str(q.type).split('/');
+    // New forms send category + subtype; older saved links send type=category/subtype.
+    const legacy = str(q.type).split('/');
+    const category = str(q.category) || legacy[0];
+    const sub = str(q.category) ? str(q.subtype) : legacy[1];
     const result = phonics(rng, { category, subtype: sub || 'all', count: 20, mix: oneOf(q.mix, ['mixed', 'real', 'nonsense'], 'mixed') });
     const meta = { subject: 'reading', kind: 'phonics', title: 'Phonics Worksheet', formPath: '/reading/phonics', seed };
     if (result.error) return { ...meta, error: result.error };

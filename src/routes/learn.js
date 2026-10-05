@@ -22,7 +22,13 @@ router.get('/', (req, res) => res.render('home', { title: 'Home' }));
 // ---------- settings forms ----------
 const mathForm = (res, type, q, error) =>
   res.status(error ? 422 : 200).render('learn/math-form', { title: MATH_TYPES[type], type, types: MATH_TYPES, guide: scope.mathGuide, grades: GRADES, ops: wp.OPS, kinds: wp.KINDS, steps: wp.STEPS, q, error });
-const phonicsForm = (res, q, error) => res.status(error ? 422 : 200).render('learn/phonics-form', { title: 'Phonics', categories: CATEGORIES, guide: scope.readingGuide, q, error });
+const phonicsForm = (res, q, error) => {
+  // Works for both the new category/subtype fields and older type=category/subtype links.
+  const legacy = String(q.type || '').split('/');
+  const category = String(q.category || legacy[0] || '');
+  const subtype = String(q.category ? q.subtype || 'all' : legacy[1] || 'all');
+  res.status(error ? 422 : 200).render('learn/phonics-form', { title: 'Phonics', categories: CATEGORIES, guide: scope.readingGuide, q, sel: { category, subtype }, error });
+};
 const sightForm = (res, q, error) => res.status(error ? 422 : 200).render('learn/sight-form', { title: 'Sight Words', lists: LISTS, q, error });
 
 router.get('/math', (req, res) => res.redirect('/math/addition'));
