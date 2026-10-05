@@ -19,7 +19,7 @@ Node 22 · Express 5 · PostgreSQL · EJS (server-rendered, no client framework)
 
 **Names:** word problems and AI passages use Zach, AC, Screech, Kelly, Lisa and Jessie first; other names are only randomized when a story needs more than six characters.
 
-**Look and feel:** a 90s neon "Saved by the Bell"-inspired theme (original artwork), responsive down to phone width, with a clean black-on-white print stylesheet (the toolbar, header and colors are not printed).
+**Look and feel:** a 90s neon "Saved by the Bell"-inspired theme (original artwork), responsive down to phone width, with a clean black-on-white print stylesheet (the toolbar, header and colors are not printed). Math sheets print in 4 columns, shrinking automatically so up to 50 problems (60 for multiplication and division facts) fit on one Letter page; the answer key prints on its own page.
 
 Every worksheet has a **sheet code (seed)**; the answer key is generated from the same problems and prints on its own page.
 

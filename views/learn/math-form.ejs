@@ -14,7 +14,7 @@
       <label>Number of digits <select name="digits"><% for (let d = 2; d <= 7; d++) { %><option value="<%= d %>" <%= String(q.digits || 2) === String(d) ? 'selected' : '' %>><%= d %> digits</option><% } %></select></label>
       <label>Regrouping <select name="regroup"><option value="always">Every problem needs regrouping</option><option value="any" <%= q.regroup === 'any' ? 'selected' : '' %>>Any (regrouping not guaranteed)</option></select></label>
       <% if (type === 'addition') { %><label>Addends <select name="addends"><option value="2">2 numbers</option><option value="3" <%= q.addends === '3' ? 'selected' : '' %>>3 numbers</option></select></label><% } %>
-      <label>Problems <select name="count"><% [10, 20, 30, 40].forEach(function (n) { %><option <%= String(q.count || 20) === String(n) ? 'selected' : '' %>><%= n %></option><% }) %></select></label>
+      <label>Problems <select name="count"><% [10, 20, 30, 40, 50].forEach(function (n) { %><option <%= String(q.count || 20) === String(n) ? 'selected' : '' %>><%= n %></option><% }) %></select></label>
       <label>Layout <select name="layout"><option value="vertical">Vertical (stacked)</option><option value="horizontal" <%= q.layout === 'horizontal' ? 'selected' : '' %>>Horizontal</option></select></label>
     <% } else if (type === 'multiplication' || type === 'division') { %>
       <label>Problem set <select name="mode"><option value="facts">Facts, 0 to 12</option><option value="mixed" <%= q.mode === 'mixed' ? 'selected' : '' %>>Mixed (facts plus multi-digit)</option></select></label>

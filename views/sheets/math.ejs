@@ -1,6 +1,6 @@
 <article class="sheet">
   <%- include('_head') %>
-  <ol class="problems <%= layout %> d<%= digits %>">
+  <ol class="problems <%= layout %> d<%= digits %> fit-<%= fit %>">
     <% problems.forEach(function (p) { %><li><%- include('../learn/_vproblem', { p, layout }) %></li><% }) %>
   </ol>
 </article>

@@ -114,3 +114,23 @@ test('Dolch lists have the official sizes', () => {
   for (const l of LISTS) assert.strictEqual(new Set(l.words).size, l.words.length, `${l.id} duplicates`);
   assert.strictEqual(sightWords(makeRng(1), { list: 'first', count: '10', order: 'random' }).words.length, 10);
 });
+
+test('print: the phone-layout media query is screen-only (a printed page is ~720px wide and used to trigger it)', () => {
+  const css = require('fs').readFileSync(require('path').join(__dirname, '..', 'public', 'css', 'app.css'), 'utf8');
+  const bare = css.match(/@media\s*\(\s*max-width[^)]*\)/g) || [];
+  assert.deepStrictEqual(bare, [], 'every max-width media query must be "screen and (max-width ...)"');
+  assert.match(css, /@media screen and \(max-width: 760px\)/);
+  assert.match(css, /@media print\s*\{[\s\S]*ol\.problems \{ grid-template-columns: repeat\(4, 1fr\)/);
+});
+
+test('print: fit step shrinks with problem count and always has a matching CSS rule', () => {
+  const { fitFor, FITS } = require('../src/lib/sheets');
+  const css = require('fs').readFileSync(require('path').join(__dirname, '..', 'public', 'css', 'app.css'), 'utf8');
+  for (const f of FITS.slice(1)) assert.match(css, new RegExp(`ol\\.problems\\.fit-${f.id} \\{ --lh: ${f.lh}px`), `css for fit-${f.id}`);
+  assert.strictEqual(fitFor(2, 10, 'vertical'), 'a');          // few problems: roomy
+  const order = 'abcdef';
+  const fits = [10, 20, 30, 40, 50].map((n) => order.indexOf(fitFor(2, n, 'vertical')));
+  assert.deepStrictEqual(fits, fits.slice().sort((a, b) => a - b), 'more problems never gets roomier');
+  assert.ok(order.indexOf(fitFor(3, 50, 'vertical')) >= order.indexOf(fitFor(2, 50, 'vertical')), 'three addends need at least as much shrink');
+  assert.ok(FITS.some((f) => f.id === fitFor(3, 50, 'vertical')));
+});

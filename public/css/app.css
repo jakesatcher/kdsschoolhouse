@@ -101,7 +101,6 @@ ul.items { list-style: none; margin: 0; padding: 0; } ul.items li { display: fle
 .blank { display: inline-block; border-bottom: 1.5px solid #000; width: 200px; height: 1em; vertical-align: baseline; } .blank.short { width: 90px; }
 .legend { font-style: italic; margin: 0 0 12px; }
 ol.problems { list-style: none; margin: 0; padding: 0; display: grid; gap: 22px 12px; counter-reset: p; grid-template-columns: repeat(4, 1fr); }
-ol.problems.d5, ol.problems.d6, ol.problems.d7 { grid-template-columns: repeat(3, 1fr); }
 ol.problems.horizontal { grid-template-columns: repeat(2, 1fr); }
 ol.problems li { counter-increment: p; position: relative; padding-left: 26px; min-height: 90px; }
 ol.problems li::before { content: counter(p) "."; position: absolute; left: 0; top: 0; font-size: .85rem; }
@@ -129,7 +128,8 @@ ol.problems li::before { content: counter(p) "."; position: absolute; left: 0; t
 ol.questions { padding-left: 24px; } ol.questions li { margin-bottom: 14px; break-inside: avoid; font-size: 1.05rem; } ol.questions p { margin: 0 0 4px; }
 
 /* phones and tablets */
-@media (max-width: 760px) {
+/* screen only: a printed Letter page is ~720px wide, which must NOT trigger the phone layout */
+@media screen and (max-width: 760px) {
   .container { padding: 12px 12px 40px; }
   .topbar { padding: 8px 12px 20px; gap: 8px 10px; } .brand { flex: 1; font-size: 1.05rem; } .brand img { width: 32px; height: 32px; }
   .who { order: 2; font-size: .9rem; gap: 8px; } .who a { display: none; } nav { order: 3; width: 100%; gap: 6px; }
@@ -139,7 +139,7 @@ ol.questions { padding-left: 24px; } ol.questions li { margin-bottom: 14px; brea
   .card { padding: 16px; box-shadow: 5px 5px 0 var(--pink); }
   .locker .icon { width: 48px; height: 48px; }
   .sheet { padding: 16px 14px; min-height: 0; overflow-x: auto; }
-  ol.problems, ol.problems.d5, ol.problems.d6, ol.problems.d7 { grid-template-columns: repeat(2, 1fr); }
+  ol.problems { grid-template-columns: repeat(2, 1fr); }
   ol.problems.horizontal { grid-template-columns: 1fr; }
   .wordgrid, .cards { grid-template-columns: repeat(2, 1fr); } .wordgrid.write { grid-template-columns: 1fr; }
   .keylist { columns: 1; } .tracelist li { font-size: 1.3rem; }
@@ -163,3 +163,25 @@ ol.questions { padding-left: 24px; } ol.questions li { margin-bottom: 14px; brea
 /* pep-talk bubble under the home page greeting */
 .greeting { display: inline-block; position: relative; margin: 6px 0 14px; padding: 10px 16px; max-width: 46em; background: var(--yellow); color: var(--ink); border: 3px solid var(--ink); border-radius: 14px; box-shadow: 4px 4px 0 var(--pink); font: 800 1.05rem/1.35 "Trebuchet MS", sans-serif; transform: rotate(-.6deg); }
 .greeting::before { content: ""; position: absolute; left: 22px; top: -13px; border: 7px solid transparent; border-bottom: 10px solid var(--ink); }
+
+/* Printing math worksheets: always 4 columns (2 for horizontal) and shrink to fit one page. The fit-* class is chosen on
+   the server (lib/sheets.js, FITS) from the problem count so up to 50 problems (60 for facts) land on one page. */
+@media print {
+  ol.problems { grid-template-columns: repeat(4, 1fr); gap: 6px 10px; --lh: 30px; --fs: 20px; --space: 34px; }
+  ol.problems.horizontal { grid-template-columns: repeat(2, 1fr); }
+  ol.problems li { min-height: 0; padding-left: 22px; }
+  ol.problems li::before { font-size: .7rem; }
+  ol.problems .vp { font-size: var(--fs); }
+  ol.problems .vp .row { line-height: var(--lh); }
+  ol.problems .vp .rule { height: var(--space); }
+  ol.problems .hp { font-size: var(--fs); line-height: var(--lh); padding-top: 0; }
+  ol.problems .div-bracket { font-size: var(--fs); line-height: var(--lh); margin-top: 0; }
+  ol.problems .div-bracket .dividend { padding-bottom: var(--space); }
+  ol.problems .div-bracket .divisor { padding-top: 4px; }
+  ol.problems.fit-b { --lh: 26px; --fs: 18px; --space: 22px; }
+  ol.problems.fit-c { --lh: 23px; --fs: 16px; --space: 14px; }
+  ol.problems.fit-d { --lh: 20px; --fs: 15px; --space: 10px; }
+  ol.problems.fit-e { --lh: 18px; --fs: 14px; --space: 8px; }
+  ol.problems.fit-f { --lh: 15px; --fs: 12px; --space: 5px; }
+  .sheet-head h1 { font-size: 1.3rem; } .namedate { margin: 4px 0 10px; } .sheet-sub { margin-bottom: 2px; }
+}

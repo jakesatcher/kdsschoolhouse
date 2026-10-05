@@ -98,6 +98,16 @@ test('approved user signs in, sees worksheets; admin pages are forbidden', async
   assert.strictEqual((await agent.post('/admin/users/1/approve').type('form').send({ _csrf: csrf })).status, 403);
 });
 
+test('math worksheets accept up to 50 problems (60 for facts) and carry a print fit class', async () => {
+  const agent = request.agent(app);
+  await login(agent, 'u@example.com');
+  const html = (await agent.get('/math/addition/worksheet?digits=3&count=50&seed=9')).text;
+  assert.strictEqual((html.match(/<div class="vp">/g) || []).length, 50);
+  assert.match(html, /class="problems vertical d3 fit-[a-f]"/);
+  assert.strictEqual(((await agent.get('/math/multiplication/worksheet?count=60&seed=9')).text.match(/<div class="vp">/g) || []).length, 60);
+  assert.match((await agent.get('/math/addition')).text, /<option[^>]*>50<\/option>/);
+});
+
 test('every worksheet type renders for a signed-in user, and bad parameters fall back safely', async () => {
   const agent = request.agent(app);
   await login(agent, 'u@example.com');
