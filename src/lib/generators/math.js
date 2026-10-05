@@ -85,8 +85,8 @@ function cycle(rng, values, count) {
 
 const FACTS = Array.from({ length: 13 }, (_, i) => i); // 0..12
 
-// Number with `d` digits for a multi-digit factor. One-digit numbers start at 2 (x1 and x0 teach nothing here).
-const digitsNumber = (rng, d) => (d === 1 ? int(rng, 2, 9) : d === 2 ? int(rng, 11, 99) : int(rng, ...digitsRange(d)));
+// Number with `d` digits for a multi-digit factor. One-digit numbers are 0-9; longer ones span the whole range (10-99, 100-999, ...).
+const digitsNumber = (rng, d) => (d === 1 ? int(rng, 0, 9) : int(rng, ...digitsRange(d)));
 const pickDigits = (rng, v, lo, hi) => (v === 'mixed' ? int(rng, lo, hi) : Number(v));
 
 // Multiplication: facts (0-12), multi (choose the digits of each number: 1-4 digits x 1-2 digits), or mixed.
@@ -126,7 +126,7 @@ function multiplication(rng, { factor = 'all', mode = 'facts', count = 20, top =
 // The quotient is always at least 2 so the problem is worth working out. Returns null if no problem fits.
 function longDivision(rng, dd, vd, withRemainder) {
   const [lo, hi] = digitsRange(dd);
-  const vLo = vd === 1 ? 2 : 11;
+  const vLo = vd === 1 ? 2 : 10; // 1-digit divisors are 2-9; 2-digit divisors are 10-99
   const vHi = Math.min(vd === 1 ? 9 : 99, Math.floor(hi / 2));
   if (vLo > vHi) return null;
   for (let tries = 0; tries < 200; tries++) {

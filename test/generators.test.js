@@ -184,3 +184,21 @@ test('print: work space shrinks (problems are never dropped) so a full page of l
   assert.strictEqual(many.length, 50);
   assert.ok(many.every((p) => p.work < 3), 'work space trimmed to fit 50 on a page');
 });
+
+test('multi-digit ranges: 1-digit factors include 0 and 1, 2-digit factors/divisors include 10', () => {
+  const one = math.multiplication(makeRng(21), { mode: 'multi', top: '1', bottom: '1', count: 400 });
+  const nums = new Set(one.flatMap((p) => p.operands));
+  assert.deepStrictEqual([...nums].sort((a, b) => a - b), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  const two = math.multiplication(makeRng(22), { mode: 'multi', top: '2', bottom: '2', count: 600 });
+  const twoNums = two.flatMap((p) => p.operands);
+  assert.ok(twoNums.includes(10) && twoNums.includes(99) && twoNums.every((n) => n >= 10 && n <= 99));
+  const div = math.division(makeRng(23), { mode: 'multi', dividend: '2', vdigits: '2', remainders: 'mixed', count: 600 });
+  const divisors = div.map((p) => p.operands[1]);
+  assert.ok(divisors.includes(10), 'divisor 10 appears');
+  assert.ok(divisors.every((d) => d >= 10 && d <= 49));
+  const small = math.division(makeRng(24), { mode: 'multi', dividend: '3', vdigits: '1', remainders: 'none', count: 300 });
+  assert.deepStrictEqual([...new Set(small.map((p) => p.operands[1]))].sort((a, b) => a - b), [2, 3, 4, 5, 6, 7, 8, 9]);
+  const four = math.division(makeRng(25), { mode: 'multi', dividend: '4', vdigits: '2', remainders: 'mixed', count: 600 });
+  assert.ok(four.some((p) => p.operands[1] === 10) && four.some((p) => p.operands[1] === 99));
+  for (const p of [...div, ...four]) assert.strictEqual(p.operands[1] * p.answer + p.remainder, p.operands[0]);
+});
