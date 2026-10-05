@@ -1,0 +1,26 @@
+<% const sub = 'Grade ' + grade + ' · ' + skillName + (genre ? ' · ' + (genre === 'nonfiction' ? 'Nonfiction' : 'Fiction') : ''); %>
+<% const lineCount = grade <= 2 ? 2 : 3; %>
+<article class="sheet reading">
+  <%- include('_head', { title: title, subtitle: sub }) %>
+  <% if (skill === 'vocabulary' && word) { %><p class="vocab-box">Vocabulary word: <strong><%= word %></strong></p><% } %>
+  <div class="passage">
+    <% rtext.paragraphs(passage).forEach(function (par) { %>
+      <p><% rtext.segments(par, skill === 'vocabulary' ? word : '').forEach(function (s) { %><% if (s.bold) { %><strong><%= s.text %></strong><% } else { %><%= s.text %><% } %><% }) %></p>
+    <% }) %>
+  </div>
+  <% if (questions.length) { %>
+  <h2 class="q-head">Questions</h2>
+  <ol class="questions">
+    <% questions.forEach(function (q) { %>
+      <li><p><%= q.q %></p><div class="lines <%= grade <= 2 ? 'primary' : 'wide' %>"><% for (let k = 0; k < lineCount; k++) { %><div class="line"></div><% } %></div></li>
+    <% }) %>
+  </ol>
+  <% } %>
+</article>
+<% if (includeKey && (questions.some(function (q) { return q.a; }) || definition)) { %>
+<article class="sheet key">
+  <h1>Answer Key</h1><p class="sheet-sub"><%= title %> · <%= sub %></p>
+  <% if (definition) { %><p><strong><%= word %>:</strong> <%= definition %></p><% } %>
+  <ol class="keylist single"><% questions.forEach(function (q) { %><li><% if (q.type) { %><span class="tag"><%= q.type %></span> <% } %><%= q.q %><br><strong><%= q.a || '(no answer entered)' %></strong></li><% }) %></ol>
+</article>
+<% } %>

@@ -22,6 +22,10 @@ module.exports = {
   databaseUrl: env.DATABASE_URL || 'postgres://localhost/kdsschoolhouse',
   databaseSsl: bool(env.DATABASE_SSL, false),
   sessionSecret,
+  // AI-written passages and questions (reading section). Without a key the teacher-written options still work.
+  anthropicApiKey: env.ANTHROPIC_API_KEY || null,
+  aiModel: env.AI_MODEL || 'claude-opus-5-5',
+  aiHourlyLimit: Number(env.AI_HOURLY_LIMIT) || 30,
   bootstrapAdmin: {
     email: env.ADMIN_EMAIL,
     password: env.ADMIN_PASSWORD,

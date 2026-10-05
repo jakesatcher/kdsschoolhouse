@@ -1,0 +1,24 @@
+<% if (!groups.length) { %>
+  <div class="card"><p><%= empty %></p></div>
+<% } %>
+<% groups.forEach(function (g) { %>
+  <section class="card">
+    <h2><%= g.name %></h2>
+    <ul class="items">
+      <% g.items.forEach(function (i) { %>
+        <li>
+          <div class="item-main"><a href="<%= href(i) %>"><strong><%= i.title %></strong></a><br><span class="muted small-text"><%= i.subtitle || '' %> · saved <%= i.created_at.toLocaleDateString('en-US') %></span></div>
+          <div class="item-actions">
+            <a class="btn small" href="<%= href(i) %>"><%= flag === 'print_later' ? 'Open and print' : 'Open' %></a>
+            <% if (flag === 'favorite') { %>
+              <form method="post" action="/library/toggle" class="inline"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="id" value="<%= i.id %>"><input type="hidden" name="flag" value="print_later"><input type="hidden" name="back" value="/favorites"><button class="small secondary" type="submit"><%= i.print_later ? '⏰ Queued' : '⏰ Print Later' %></button></form>
+            <% } else { %>
+              <form method="post" action="/library/toggle" class="inline"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="id" value="<%= i.id %>"><input type="hidden" name="flag" value="favorite"><input type="hidden" name="back" value="/print-later"><button class="small secondary" type="submit"><%= i.favorite ? '★ Favorite' : '☆ Favorite' %></button></form>
+            <% } %>
+            <form method="post" action="/library/toggle" class="inline"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="id" value="<%= i.id %>"><input type="hidden" name="flag" value="<%= flag %>"><input type="hidden" name="back" value="<%= flag === 'favorite' ? '/favorites' : '/print-later' %>"><button class="small danger" type="submit">Remove</button></form>
+          </div>
+        </li>
+      <% }) %>
+    </ul>
+  </section>
+<% }) %>

@@ -15,8 +15,8 @@
     </label>
     <label>Words <select name="mix"><option value="mixed">Real and nonsense words (about 14 real + 6 nonsense)</option><option value="real" <%= q.mix === 'real' ? 'selected' : '' %>>Real words only</option><option value="nonsense" <%= q.mix === 'nonsense' ? 'selected' : '' %>>Nonsense words only</option></select></label>
     <label>Format <select name="format"><option value="list">Word list (read aloud)</option><option value="write" <%= q.format === 'write' ? 'selected' : '' %>>Read and write (copy each word)</option></select></label>
-    <label class="check"><input type="checkbox" name="mark" value="1" checked> Mark nonsense words with a ◇ for students</label>
-    <label class="check"><input type="checkbox" name="key" value="1" checked> Include teacher key (shows which words are nonsense)</label>
+    <label class="check"><input type="hidden" name="mark" value="0"><input type="checkbox" name="mark" value="1" checked> Mark nonsense words with a ◇ for students</label>
+    <label class="check"><input type="hidden" name="key" value="0"><input type="checkbox" name="key" value="1" checked> Include teacher key (shows which words are nonsense)</label>
     <button type="submit">Create worksheet</button>
   </form>
 </div>

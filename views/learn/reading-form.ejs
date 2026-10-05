@@ -1,0 +1,62 @@
+<%- include('../partials/head') %>
+<h1>Reading: <%= skill.name %></h1>
+<p class="muted"><%= skill.blurb %></p>
+<% if (!aiReady) { %><div class="alert err">AI-written passages and questions aren't set up on this server yet. You can still write your own passage and questions below.</div><% } %>
+<%- include('../partials/errors', { errors, error: undefined }) %>
+<div class="card">
+  <form method="post" action="/reading/<%= skill.id %>/generate" class="settings" data-busy="Writing your worksheet… this can take up to 30 seconds.">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <label>Reading skill
+      <select data-nav><% skills.forEach(function (s) { %><option value="/reading/<%= s.id %>" <%= s.id === skill.id ? 'selected' : '' %>><%= s.name %></option><% }) %></select>
+    </label>
+
+    <label>Grade level
+      <select name="grade"><% [1, 2, 3, 4, 5].forEach(function (g) { %><option value="<%= g %>" <%= v.grade === g ? 'selected' : '' %>>Grade <%= g %></option><% }) %></select>
+    </label>
+
+    <% if (skill.id === 'vocabulary') { %>
+    <fieldset>
+      <legend>Vocabulary word</legend>
+      <label class="check"><input type="radio" name="vocab_mode" value="random" <%= v.vocabMode !== 'custom' ? 'checked' : '' %>> Pick a word for me (matched to the grade)</label>
+      <label class="check"><input type="radio" name="vocab_mode" value="custom" <%= v.vocabMode === 'custom' ? 'checked' : '' %>> I'll choose the word</label>
+      <label data-show-if="vocab_mode:custom">Your word <input name="vocab_word" value="<%= v.vocabWord %>" maxlength="30" autocomplete="off"></label>
+    </fieldset>
+    <% } else { %>
+    <label>Type
+      <select name="genre"><option value="fiction" <%= v.genre === 'fiction' ? 'selected' : '' %>>Fiction (a story)</option><option value="nonfiction" <%= v.genre === 'nonfiction' ? 'selected' : '' %>>Nonfiction (informational)</option></select>
+    </label>
+    <label>Passage length
+      <select name="length"><% Object.keys(lengths).forEach(function (k) { %><option value="<%= k %>" <%= v.length === k ? 'selected' : '' %>><%= lengths[k].label %></option><% }) %></select>
+    </label>
+    <% } %>
+
+    <% if (skill.id === 'authors-purpose') { %>
+    <label>Author's purpose to feature
+      <select name="purpose"><% ['any', 'persuade', 'inform', 'entertain'].forEach(function (p) { %><option value="<%= p %>" <%= v.purpose === p ? 'selected' : '' %>><%= p === 'any' ? 'Any (let the writer choose)' : p.charAt(0).toUpperCase() + p.slice(1) %></option><% }) %></select>
+    </label>
+    <% } %>
+
+    <fieldset>
+      <legend>Passage</legend>
+      <label class="check"><input type="radio" name="passage_mode" value="generate" <%= v.passageMode !== 'custom' ? 'checked' : '' %>> Write a passage for me</label>
+      <label class="check"><input type="radio" name="passage_mode" value="custom" <%= v.passageMode === 'custom' ? 'checked' : '' %>> I'll write (or paste) my own passage</label>
+      <label data-show-if="passage_mode:generate">Topic or theme <small class="muted">(optional)</small> <input name="topic" value="<%= v.topic %>" maxlength="150" placeholder="e.g. a school science fair, the water cycle"></label>
+      <label data-show-if="passage_mode:custom">Your passage <textarea name="passage_text" rows="7" maxlength="3000"><%= v.passageText %></textarea></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Questions</legend>
+      <label class="check"><input type="radio" name="questions_mode" value="generate" <%= v.questionsMode !== 'custom' ? 'checked' : '' %>> Write the questions for me<%= skill.id === 'comprehension' ? ' (a mix of literal and inferential)' : '' %></label>
+      <label class="check"><input type="radio" name="questions_mode" value="custom" <%= v.questionsMode === 'custom' ? 'checked' : '' %>> I'll write my own questions</label>
+      <label data-show-if="questions_mode:generate">Number of questions
+        <select name="question_count"><% for (let n = 3; n <= 10; n++) { %><option <%= v.count === n ? 'selected' : '' %>><%= n %></option><% } %></select></label>
+      <label data-show-if="questions_mode:custom">Your questions <small class="muted">(one per line)</small> <textarea name="questions_text" rows="5" maxlength="3000"><%= v.questionsText %></textarea></label>
+    </fieldset>
+
+    <label class="check"><input type="hidden" name="key" value="0"><input type="checkbox" name="key" value="1" <%= v.includeKey ? 'checked' : '' %>> Include answer key on a separate page</label>
+    <p class="muted small-text">You can edit the passage, questions and answers on the next page before printing.</p>
+    <button type="submit">Create worksheet</button>
+  </form>
+</div>
+<%- include('../partials/foot') %>

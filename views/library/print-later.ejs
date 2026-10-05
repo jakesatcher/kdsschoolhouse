@@ -1,0 +1,11 @@
+<%- include('../partials/head') %>
+<h1>⏰ Time Out! Print Later</h1>
+<p class="muted">Sheets waiting for the printer. Print them one at a time, or all together.</p>
+<% if (groups.length) { %>
+<div class="toolbar">
+  <a class="btn" href="/print-later/all">🖨 Print everything in the queue</a>
+  <form method="post" action="/print-later/clear" class="inline"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="secondary" type="submit">Clear the queue</button></form>
+</div>
+<% } %>
+<%- include('_list', { flag: 'print_later', empty: 'Nothing queued. Use “Print Later” on any worksheet to save it here.' }) %>
+<%- include('../partials/foot') %>

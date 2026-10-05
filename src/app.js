@@ -80,6 +80,7 @@ function createApp() {
     res.locals.currentUser = null;
     res.locals.csrfToken = '';
     res.locals.flash = [];
+    res.locals.rtext = require('./lib/reading/text');
     next();
   });
   app.use(flash);
@@ -91,6 +92,8 @@ function createApp() {
   app.use(require('./routes/account'));
   app.use('/admin', require('./routes/admin'));
   app.use(require('./routes/learn'));
+  app.use(require('./routes/reading'));
+  app.use(require('./routes/library'));
 
   app.use((req, res) => {
     res.status(404).render('error', { title: 'Not found', message: "That page doesn't exist." });

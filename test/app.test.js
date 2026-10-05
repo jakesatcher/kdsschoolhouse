@@ -98,13 +98,13 @@ test('every worksheet type renders for a signed-in user, and bad parameters fall
     '/math/addition/worksheet?digits=99&count=-5&seed=abc&layout=<script>', '/math/multiplication/worksheet?factor=999&mode[]=x',
   ];
   for (const u of urls) {
-    const res = await agent.get(u);
+    const res = await agent.get(u).redirects(1);
     assert.strictEqual(res.status, 200, u);
     assert.ok(!/<script>/.test(res.text.replace(/<script src="[^"]+" defer><\/script>/, '')), `reflected markup in ${u}`);
   }
-  assert.strictEqual((await agent.get('/reading/phonics/worksheet?type=bogus')).status, 422);
-  assert.strictEqual((await agent.get('/reading/sight-words/worksheet?list=bogus')).status, 422);
-  assert.strictEqual((await agent.get('/math/word-problems/worksheet?grade=1&kind=fraction')).status, 422);
+  assert.strictEqual((await agent.get('/reading/phonics/worksheet?type=bogus').redirects(1)).status, 422);
+  assert.strictEqual((await agent.get('/reading/sight-words/worksheet?list=bogus').redirects(1)).status, 422);
+  assert.strictEqual((await agent.get('/math/word-problems/worksheet?grade=1&kind=fraction').redirects(1)).status, 422);
   assert.strictEqual((await agent.get('/math/bogus')).status, 404);
 });
 

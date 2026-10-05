@@ -1,7 +1,5 @@
-<%- include('../partials/head') %>
-<%- include('_toolbar') %>
 <article class="sheet">
-  <%- include('_sheet-head', { subtitle: result.list.name + ' sight words' }) %>
+  <%- include('_head') %>
   <% if (format === 'cards') { %>
     <ul class="cards"><% result.words.forEach(function (w) { %><li><%= w %></li><% }) %></ul>
   <% } else if (format === 'trace') { %>
@@ -10,4 +8,3 @@
     <ol class="wordgrid list"><% result.words.forEach(function (w) { %><li><span class="w"><%= w %></span></li><% }) %></ol>
   <% } %>
 </article>
-<%- include('../partials/foot') %>

@@ -32,7 +32,7 @@
       <label>Steps <select name="steps"><% steps.forEach(function (s) { %><option value="<%= s %>" <%= (q.steps || 'mixed') === s ? 'selected' : '' %>><%= { single: 'One step', multi: 'Multi-step only', mixed: 'Mix of one-step and multi-step' }[s] %></option><% }) %></select></label>
       <label>Problems <select name="count"><% [5, 8, 10, 12, 15].forEach(function (n) { %><option <%= String(q.count || 10) === String(n) ? 'selected' : '' %>><%= n %></option><% }) %></select></label>
     <% } %>
-    <label class="check"><input type="checkbox" name="key" value="1" checked> Include answer key on a separate page</label>
+    <label class="check"><input type="hidden" name="key" value="0"><input type="checkbox" name="key" value="1" checked> Include answer key on a separate page</label>
     <button type="submit">Create worksheet</button>
   </form>
 </div>

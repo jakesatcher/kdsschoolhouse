@@ -11,7 +11,8 @@
 | A07 | Identification & authentication failures | 12+ char passwords (length over composition; common/repetitive/email checks); lockout after 5 failures (15 min) plus IP rate limit; uniform error and dummy-hash timing for unknown emails; session ID regenerated on login; 8 h rolling idle timeout; HttpOnly + SameSite=Lax cookies; other sessions revoked on password change/reset/disable; logout destroys the session. **MFA not yet implemented.** | `routes/auth.js`, `routes/account.js` |
 | A08 | Software & data integrity | No user uploads, no deserialisation of user data, no third-party scripts (all assets same-origin). CSRF synchroniser token on every POST. | `middleware/security.js` |
 | A09 | Logging & monitoring | Audit log (login, failure, lockout, register, admin actions, password change) with IP, viewable by admins. **Alerting not yet implemented.** | `lib/audit.js` |
-| A10 | SSRF | The server makes no outbound requests based on user input. | n/a |
+| A03/A04 (AI) | LLM-specific risks | Teacher text is sent as quoted data with angle brackets stripped; model output is validated (JSON shape, word limits, question counts), length-capped, stripped of markdown, and always HTML-escaped when rendered (the only markup is the bolded vocabulary word, built from escaped segments). Per-teacher hourly cap on AI calls (cost abuse); API key only in an environment variable; error text from the API is logged, never shown. Drafts live in the user's own session; saved sheets are scoped to the owner's `user_id`. | `lib/reading/*`, `routes/reading.js`, `lib/library.js` |
+| A10 | SSRF | The only outbound call is to the fixed Anthropic API endpoint (SDK); no user-supplied URLs are fetched. Saved-sheet URLs are re-validated against a whitelist of our own worksheet routes before use. | `lib/sheets.js` |
 
 ## Known gaps / next steps
 - MFA (TOTP or email) at least for admins.

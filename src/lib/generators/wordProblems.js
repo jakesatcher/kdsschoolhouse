@@ -4,7 +4,10 @@ const { int, pick, shuffle } = require('./rng');
 const F = require('./fractions');
 const { fmt } = require('./math');
 
-const NAMES = ['Mia', 'Leo', 'Ava', 'Sam', 'Zoe', 'Max', 'Ella', 'Ben', 'Lily', 'Noah', 'Ruby', 'Eli', 'Maya', 'Jack', 'Nora', 'Owen', 'Tess', 'Cole'];
+// Character names are always the six main characters first; names outside this set are only used when a
+// template needs more than six people (none do today), and are randomized.
+const NAMES = ['Zach', 'AC', 'Screech', 'Kelly', 'Lisa', 'Jessie'];
+const EXTRA_NAMES = ['Mia', 'Leo', 'Ava', 'Sam', 'Zoe', 'Max', 'Ella', 'Ben', 'Lily', 'Noah', 'Ruby', 'Eli'];
 // [plural, singular] items that can be counted.
 const ITEMS = [
   ['apples', 'apple'], ['stickers', 'sticker'], ['marbles', 'marble'], ['pencils', 'pencil'], ['books', 'book'],
@@ -31,7 +34,7 @@ const dec = (tenthsOrHundredths, places) => (tenthsOrHundredths / 10 ** places).
 function ctx(rng) {
   const [n1, n2] = shuffle(rng, NAMES);
   const [items, item] = pick(rng, ITEMS);
-  return { n1, n2, items, item, group: pick(rng, GROUPS), shop: pick(rng, SHOP) };
+  return { n1, n2, extraName: () => pick(rng, EXTRA_NAMES), items, item, group: pick(rng, GROUPS), shop: pick(rng, SHOP) };
 }
 
 // Template: { id, op, kind:'whole'|'decimal'|'fraction', steps, grades:[min,max], make(rng, c, g) -> { text, answerText } }
@@ -114,4 +117,4 @@ function wordProblems(rng, { grade = 3, op = 'mixed', kind = 'whole', steps = 'm
   return { problems: out, error: null };
 }
 
-module.exports = { wordProblems, pool, OPS, KINDS, STEPS, TEMPLATES: T };
+module.exports = { wordProblems, pool, OPS, KINDS, STEPS, TEMPLATES: T, NAMES, EXTRA_NAMES };

@@ -11,7 +11,7 @@
 </head>
 <body>
 <header class="topbar no-print">
-  <a class="brand" href="/"><%= appName %></a>
+  <a class="brand" href="/"><img src="/static/img/bell.svg" alt="" width="40" height="40"><span><%= appName %><small>Time out for learning!</small></span></a>
   <% if (currentUser) { %>
   <nav aria-label="Main">
     <details class="menu"><summary>Math</summary>
@@ -19,9 +19,13 @@
         <a href="/math/addition">Addition</a><a href="/math/subtraction">Subtraction</a><a href="/math/multiplication">Multiplication</a><a href="/math/division">Division</a><a href="/math/word-problems">Word Problems</a>
       </div></details>
     <details class="menu"><summary>Reading</summary>
-      <div class="menu-items"><a href="/reading/phonics">Phonics</a><a href="/reading/sight-words">Sight Words</a></div></details>
+      <div class="menu-items">
+        <a href="/reading/comprehension">Comprehension</a><a href="/reading/vocabulary">Vocabulary</a><a href="/reading/inferences">Inferences</a><a href="/reading/main-idea">Main Idea</a><a href="/reading/cause-effect">Cause &amp; Effect</a><a href="/reading/problem-solution">Problem &amp; Solution</a><a href="/reading/authors-purpose">Author's Purpose</a>
+        <hr><a href="/reading/phonics">Phonics</a><a href="/reading/sight-words">Sight Words</a></div></details>
     <details class="menu"><summary>Writing</summary>
       <div class="menu-items"><a href="/writing">Prompts &amp; Lined Paper</a></div></details>
+    <a class="navlink" href="/favorites">★ Favorites<% if (libCounts.favorites) { %> <span class="pill alt"><%= libCounts.favorites %></span><% } %></a>
+    <a class="navlink" href="/print-later">⏰ Print Later<% if (libCounts.print_later) { %> <span class="pill alt"><%= libCounts.print_later %></span><% } %></a>
     <% if (currentUser.role === 'admin') { %>
     <details class="menu"><summary>Admin<% if (pendingCount) { %> <span class="pill" title="Access requests waiting"><%= pendingCount %></span><% } %></summary>
       <div class="menu-items"><a href="/admin/users">Users<% if (pendingCount) { %> (<%= pendingCount %> pending)<% } %></a><a href="/admin/audit">Audit log</a></div></details>

@@ -1,5 +1,20 @@
+<%# Locals: ref | sheetUrl, saved, settingsUrl, newUrl, editUrl, seed %>
 <div class="toolbar no-print">
-  <button type="button" data-print>Print</button>
-  <button type="button" class="secondary" data-back>Back to settings</button>
-  <span class="muted">Sheet code <%= seed %> · re-open this link to get the same sheet.</span>
+  <button type="button" data-print>🖨 Print</button>
+  <% if (typeof settingsUrl !== 'undefined' && settingsUrl) { %><a class="btn secondary" href="<%= settingsUrl %>">Change settings</a><% } %>
+  <% if (typeof newUrl !== 'undefined' && newUrl) { %><a class="btn secondary" href="<%= newUrl %>">🎲 New sheet</a><% } %>
+  <% if (typeof editUrl !== 'undefined' && editUrl) { %><a class="btn secondary" href="<%= editUrl %>">✏️ Edit</a><% } %>
+  <% const target = typeof ref !== 'undefined' && ref ? { name: 'ref', value: ref } : { name: 'url', value: sheetUrl }; %>
+  <% const back = typeof ref !== 'undefined' && ref ? '/reading/doc/' + ref : sheetUrl; %>
+  <form method="post" action="/library/toggle" class="inline">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="flag" value="favorite">
+    <input type="hidden" name="<%= target.name %>" value="<%= target.value %>"><input type="hidden" name="back" value="<%= back %>">
+    <button type="submit" class="secondary <%= saved && saved.favorite ? 'on' : '' %>"><%= saved && saved.favorite ? '★ In Favorites (remove)' : '☆ Add to Favorites' %></button>
+  </form>
+  <form method="post" action="/library/toggle" class="inline">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="flag" value="print_later">
+    <input type="hidden" name="<%= target.name %>" value="<%= target.value %>"><input type="hidden" name="back" value="<%= back %>">
+    <button type="submit" class="secondary <%= saved && saved.print_later ? 'on' : '' %>"><%= saved && saved.print_later ? '⏰ In Print Later (remove)' : '⏰ Print Later' %></button>
+  </form>
+  <% if (typeof seed !== 'undefined' && seed) { %><span class="muted small-text">Sheet code <%= seed %></span><% } %>
 </div>

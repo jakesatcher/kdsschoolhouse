@@ -1,15 +1,18 @@
 'use strict';
 
 const db = require('../db');
+const library = require('../lib/library');
 
 async function loadUser(req, res, next) {
   res.locals.currentUser = null;
   res.locals.pendingCount = 0;
+  res.locals.libCounts = { favorites: 0, print_later: 0 };
   if (req.session && req.session.userId) {
     const user = await db.one('SELECT id, email, name, role, status, must_change_password FROM users WHERE id = $1', [req.session.userId]);
     if (user && user.status === 'approved') {
       req.user = user;
       res.locals.currentUser = user;
+      res.locals.libCounts = await library.counts(user.id);
       // Admins see how many access requests are waiting for approval.
       res.locals.pendingCount = user.role === 'admin' ? (await db.one(`SELECT count(*)::int AS n FROM users WHERE status = 'pending'`)).n : 0;
     } else {

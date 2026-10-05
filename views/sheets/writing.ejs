@@ -1,11 +1,8 @@
-<%- include('../partials/head') %>
-<%- include('_toolbar') %>
 <article class="sheet">
-  <%- include('_sheet-head', { subtitle: 'Grade ' + grade + ' · ' + type + ' writing' }) %>
+  <%- include('_head') %>
   <% sheet.prompts.forEach(function (p, i) { %>
     <section class="prompt"><p><strong><%= i + 1 %>.</strong> <%= p %></p>
       <div class="lines <%= sheet.lineStyle %>"><% for (let k = 0; k < sheet.lines; k++) { %><div class="line"></div><% } %></div>
     </section>
   <% }) %>
 </article>
-<%- include('../partials/foot') %>

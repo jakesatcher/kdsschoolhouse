@@ -1,0 +1,8 @@
+<%- include('../partials/head') %>
+<div class="toolbar no-print">
+  <button type="button" data-print>🖨 Print all <%= count %> sheet<%= count === 1 ? '' : 's' %></button>
+  <a class="btn secondary" href="/print-later">Back to Print Later</a>
+  <form method="post" action="/print-later/clear" class="inline"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="secondary" type="submit">Done printing: clear the queue</button></form>
+</div>
+<% rendered.forEach(function (r) { %><%- include('../sheets/' + r.partial, r.locals) %><% }) %>
+<%- include('../partials/foot') %>

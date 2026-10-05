@@ -1,12 +1,12 @@
 <%- include('partials/head') %>
-<h1>Welcome, <%= currentUser.name %></h1>
+<h1>Hey, <%= currentUser.name %>!</h1>
 <% if (pendingCount) { %><div class="alert err" role="status"><strong><%= pendingCount %> access request<%= pendingCount === 1 ? '' : 's' %> waiting.</strong> <a href="/admin/users?status=pending">Review and approve</a></div><% } %>
-<p class="muted">Pick a subject to build a printable worksheet for grades 1–5.</p>
+<p class="lead">Pick a subject, build a worksheet, print it. Grades 1–5.</p>
 <div class="grid3">
-  <section class="card"><h2>Math</h2><ul class="plain">
+  <section class="card locker c-cyan"><img class="icon" src="/static/img/math.svg" alt="" width="64" height="64"><h2>Math</h2><ul class="plain">
     <li><a href="/math/addition">Addition</a></li><li><a href="/math/subtraction">Subtraction</a></li><li><a href="/math/multiplication">Multiplication</a></li><li><a href="/math/division">Division</a></li><li><a href="/math/word-problems">Word Problems</a></li></ul></section>
-  <section class="card"><h2>Reading</h2><ul class="plain">
-    <li><a href="/reading/phonics">Phonics</a></li><li><a href="/reading/sight-words">Sight Words (Dolch)</a></li></ul></section>
-  <section class="card"><h2>Writing</h2><ul class="plain"><li><a href="/writing">Prompts &amp; Lined Paper</a></li></ul></section>
+  <section class="card locker c-pink"><img class="icon" src="/static/img/reading.svg" alt="" width="64" height="64"><h2>Reading</h2><ul class="plain">
+    <li><a href="/reading/comprehension">Comprehension</a></li><li><a href="/reading/vocabulary">Vocabulary</a></li><li><a href="/reading/inferences">Inferences</a></li><li><a href="/reading/main-idea">Main Idea</a></li><li><a href="/reading/cause-effect">Cause &amp; Effect</a></li><li><a href="/reading/problem-solution">Problem &amp; Solution</a></li><li><a href="/reading/authors-purpose">Author's Purpose</a></li><li><a href="/reading/phonics">Phonics</a></li><li><a href="/reading/sight-words">Sight Words (Dolch)</a></li></ul></section>
+  <section class="card locker c-yellow"><img class="icon" src="/static/img/writing.svg" alt="" width="64" height="64"><h2>Writing</h2><ul class="plain"><li><a href="/writing">Prompts &amp; Lined Paper</a></li></ul></section>
 </div>
 <%- include('partials/foot') %>

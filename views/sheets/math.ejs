@@ -1,9 +1,7 @@
-<%- include('../partials/head') %>
-<%- include('_toolbar') %>
 <article class="sheet">
-  <%- include('_sheet-head') %>
+  <%- include('_head') %>
   <ol class="problems <%= layout %> d<%= digits %>">
-    <% problems.forEach(function (p) { %><li><%- include('_vproblem', { p, layout }) %></li><% }) %>
+    <% problems.forEach(function (p) { %><li><%- include('../learn/_vproblem', { p, layout }) %></li><% }) %>
   </ol>
 </article>
 <% if (includeKey) { %>
@@ -12,4 +10,3 @@
   <ol class="keylist"><% problems.forEach(function (p) { %><li><%= p.operands.map(function (n) { return Number(n).toLocaleString('en-US'); }).join(' ' + p.op + ' ') %> = <strong><%= p.answerText %></strong></li><% }) %></ol>
 </article>
 <% } %>
-<%- include('../partials/foot') %>

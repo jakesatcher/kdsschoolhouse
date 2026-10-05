@@ -1,0 +1,28 @@
+<%- include('../partials/head') %>
+<h1>Edit worksheet</h1>
+<p class="muted">Change anything: the title, the passage, the questions and the answers. Blank rows are ignored; add questions in the empty rows.</p>
+<%- include('../partials/errors', { error: undefined }) %>
+<div class="card">
+  <form method="post" action="/reading/doc/<%= ref %>/edit" class="settings">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label>Title <input name="title" value="<%= c.title %>" maxlength="120"></label>
+    <% if (c.skill === 'vocabulary') { %>
+      <label>Vocabulary word <small class="muted">(bolded wherever it appears in the passage)</small> <input name="word" value="<%= c.word %>" maxlength="30"></label>
+      <label>Definition <small class="muted">(shown in the answer key)</small> <input name="definition" value="<%= c.definition %>" maxlength="300"></label>
+    <% } %>
+    <label>Passage <small class="muted">(leave a blank line between paragraphs)</small> <textarea name="passage" rows="10" maxlength="3000"><%= c.passage %></textarea></label>
+    <h2>Questions and answers</h2>
+    <% const rows = c.questions.concat(Array.from({ length: Math.max(0, Math.min(12, c.questions.length + 3) - c.questions.length) }, function () { return { q: '', a: '', type: '' }; })).slice(0, 12); %>
+    <% rows.forEach(function (r, i) { %>
+      <div class="qrow">
+        <label>Question <%= i + 1 %> <input name="q_<%= i %>" value="<%= r.q %>" maxlength="400"></label>
+        <label>Answer <input name="a_<%= i %>" value="<%= r.a %>" maxlength="600"></label>
+        <label>Kind <small class="muted">(optional)</small> <input name="t_<%= i %>" value="<%= r.type %>" maxlength="24" placeholder="e.g. literal"></label>
+      </div>
+    <% }) %>
+    <label class="check"><input type="hidden" name="key" value="0"><input type="checkbox" name="key" value="1" <%= c.includeKey ? 'checked' : '' %>> Include answer key on a separate page</label>
+    <button type="submit">Save changes</button>
+    <a class="btn secondary" href="/reading/doc/<%= ref %>">Cancel</a>
+  </form>
+</div>
+<%- include('../partials/foot') %>
