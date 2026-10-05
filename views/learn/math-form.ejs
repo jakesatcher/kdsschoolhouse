@@ -17,13 +17,30 @@
       <label>Problems <select name="count"><% [10, 20, 30, 40, 50].forEach(function (n) { %><option <%= String(q.count || 20) === String(n) ? 'selected' : '' %>><%= n %></option><% }) %></select></label>
       <label>Layout <select name="layout"><option value="vertical">Vertical (stacked)</option><option value="horizontal" <%= q.layout === 'horizontal' ? 'selected' : '' %>>Horizontal</option></select></label>
     <% } else if (type === 'multiplication' || type === 'division') { %>
-      <label>Problem set <select name="mode"><option value="facts">Facts, 0 to 12</option><option value="mixed" <%= q.mode === 'mixed' ? 'selected' : '' %>>Mixed (facts plus multi-digit)</option></select></label>
+      <% const sel = function (name, dflt) { return q[name] || dflt; }; %>
+      <label>Problem set
+        <select name="mode">
+          <option value="facts" <%= sel('mode', 'facts') === 'facts' ? 'selected' : '' %>>Facts, 0 to 12</option>
+          <option value="multi" <%= q.mode === 'multi' ? 'selected' : '' %>>Multi-digit (you choose the sizes)</option>
+          <option value="mixed" <%= q.mode === 'mixed' ? 'selected' : '' %>>Mixed (facts plus multi-digit)</option>
+        </select>
+      </label>
       <% if (type === 'multiplication') { %>
-        <label>Factor <small class="muted">(facts only)</small> <select name="factor"><option value="all">All facts (mixed problems)</option><% for (let f = 0; f <= 12; f++) { %><option value="<%= f %>" <%= q.factor === String(f) ? 'selected' : '' %>>Facts for <%= f %></option><% } %></select></label>
+        <label data-show-if="mode:facts">Factor <select name="factor"><option value="all">All facts (mixed problems)</option><% for (let f = 0; f <= 12; f++) { %><option value="<%= f %>" <%= q.factor === String(f) ? 'selected' : '' %>>Facts for <%= f %></option><% } %></select></label>
+        <div data-show-if="mode:multi">
+          <label>Top number <select name="top"><% [['1', '1 digit'], ['2', '2 digits'], ['3', '3 digits'], ['4', '4 digits'], ['mixed', 'Mix of 1 to 4 digits']].forEach(function (o) { %><option value="<%= o[0] %>" <%= sel('top', '3') === o[0] ? 'selected' : '' %>><%= o[1] %></option><% }) %></select></label>
+          <label>Bottom number (multiplier) <select name="bottom"><% [['1', '1 digit'], ['2', '2 digits'], ['mixed', 'Mix of 1 and 2 digits']].forEach(function (o) { %><option value="<%= o[0] %>" <%= sel('bottom', '1') === o[0] ? 'selected' : '' %>><%= o[1] %></option><% }) %></select></label>
+        </div>
       <% } else { %>
-        <label>Divisor <small class="muted">(facts only; no division by 0)</small> <select name="divisor"><option value="all">All facts (mixed problems)</option><% for (let f = 1; f <= 12; f++) { %><option value="<%= f %>" <%= q.divisor === String(f) ? 'selected' : '' %>>Divide by <%= f %></option><% } %></select></label>
+        <label data-show-if="mode:facts">Divisor <small class="muted">(no division by 0)</small> <select name="divisor"><option value="all">All facts (mixed problems)</option><% for (let f = 1; f <= 12; f++) { %><option value="<%= f %>" <%= q.divisor === String(f) ? 'selected' : '' %>>Divide by <%= f %></option><% } %></select></label>
+        <div data-show-if="mode:multi">
+          <label>Dividend (the number being divided) <select name="dividend"><% [['2', '2 digits'], ['3', '3 digits'], ['4', '4 digits'], ['mixed', 'Mix of 2 to 4 digits']].forEach(function (o) { %><option value="<%= o[0] %>" <%= sel('dividend', '3') === o[0] ? 'selected' : '' %>><%= o[1] %></option><% }) %></select></label>
+          <label>Divisor <select name="vdigits"><% [['1', '1 digit'], ['2', '2 digits'], ['mixed', 'Mix of 1 and 2 digits']].forEach(function (o) { %><option value="<%= o[0] %>" <%= sel('vdigits', '1') === o[0] ? 'selected' : '' %>><%= o[1] %></option><% }) %></select></label>
+          <label>Remainders <select name="remainders"><% [['none', 'No remainders (divides evenly)'], ['with', 'All with remainders'], ['mixed', 'A mix of both']].forEach(function (o) { %><option value="<%= o[0] %>" <%= sel('remainders', 'mixed') === o[0] ? 'selected' : '' %>><%= o[1] %></option><% }) %></select></label>
+        </div>
       <% } %>
-      <label>Problems <select name="count"><% [20, 30, 40, 60].forEach(function (n) { %><option <%= String(q.count || 30) === String(n) ? 'selected' : '' %>><%= n %></option><% }) %></select></label>
+      <label>Problems <select name="count"><% [6, 8, 12, 16, 20, 30, 40, 50, 60].forEach(function (n) { %><option <%= String(q.count || (q.mode === 'multi' ? 12 : 30)) === String(n) ? 'selected' : '' %>><%= n %></option><% }) %></select></label>
+      <p class="muted small-text">Multi-digit problems leave extra work space under each one, so use fewer problems per page (about 12 to 20) for long division.</p>
       <label>Layout <select name="layout"><option value="vertical"><%= type === 'division' ? 'Long-division bracket' : 'Vertical (stacked)' %></option><option value="horizontal" <%= q.layout === 'horizontal' ? 'selected' : '' %>>Horizontal</option></select></label>
     <% } else { %>
       <label>Grade level <select name="grade"><% grades.forEach(function (g) { %><option value="<%= g %>" <%= String(q.grade || 3) === String(g) ? 'selected' : '' %>>Grade <%= g %></option><% }) %></select></label>

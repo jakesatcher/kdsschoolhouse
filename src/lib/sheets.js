@@ -30,12 +30,29 @@ const FITS = [
   { id: 'a', lh: 30, space: 34 }, { id: 'b', lh: 26, space: 22 }, { id: 'c', lh: 23, space: 14 },
   { id: 'd', lh: 20, space: 10 }, { id: 'e', lh: 18, space: 8 }, { id: 'f', lh: 15, space: 5 },
 ];
-const PRINT_BUDGET_PX = 820; // usable height for the problem grid on Letter with 0.5in margins, after the header
-function fitFor(operands, count, layout) {
+const PRINT_BUDGET_PX = 820;
+const digitLabel = (v, mixedText) => (v === 'mixed' ? `${mixedText}-digit` : `${v}-digit`); // usable height for the problem grid on Letter with 0.5in margins, after the header
+function fitsOnPage(lines, count, layout) {
   const cols = layout === 'horizontal' ? 2 : 4;
   const rows = Math.ceil(count / cols);
-  const rowHeight = (f) => (layout === 'horizontal' ? f.lh + 10 : operands * f.lh + f.space + 8);
-  return (FITS.find((f) => rows * rowHeight(f) <= PRINT_BUDGET_PX) || FITS[FITS.length - 1]).id;
+  const rowHeight = (f) => (layout === 'horizontal' ? f.lh + 10 : lines * f.lh + f.space + 8);
+  const f = FITS.find((x) => rows * rowHeight(x) <= PRINT_BUDGET_PX);
+  return f ? f.id : null;
+}
+const fitFor = (lines, count, layout) => fitsOnPage(lines, count, layout) || FITS[FITS.length - 1].id;
+
+// Multi-digit problems ask for extra work lines. If the page is too full for that (e.g. 50 long-division problems),
+// trim the work space until everything fits on one page; the problems themselves are never dropped.
+function fitSheet(problems, layout) {
+  const want = Math.max(0, ...problems.map((p) => p.work || 0));
+  for (let cap = want; cap >= 0; cap--) {
+    const id = fitsOnPage(2 + cap, problems.length, layout);
+    if (id) {
+      problems.forEach((p) => { if (p.work > cap) p.work = cap; });
+      return id;
+    }
+  }
+  return FITS[FITS.length - 1].id;
 }
 
 function build(pathname, q) {
@@ -59,18 +76,26 @@ function build(pathname, q) {
       return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits, problems, fit: fitFor(Math.max(...problems.map((p) => p.operands.length)), problems.length, base.layout) } };
     }
     if (type === 'multiplication') {
-      const mode = oneOf(q.mode, ['facts', 'mixed'], 'facts');
+      const mode = oneOf(q.mode, ['facts', 'multi', 'mixed'], 'facts');
       const factor = oneOf(q.factor, ['all', ...Array.from({ length: 13 }, (_, i) => i)], 'all');
-      const problems = math.multiplication(rng, { mode, factor, count: intIn(q.count, 5, 60, 30) });
-      const subtitle = mode === 'mixed' ? 'Mixed multiplication' : factor === 'all' ? 'Multiplication facts 0-12 (mixed)' : `Multiplication facts: ${factor}s`;
-      return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: mode === 'mixed' ? 3 : 2, problems, fit: fitFor(2, problems.length, base.layout) } };
+      const top = oneOf(q.top, ['1', '2', '3', '4', 'mixed'], '2');
+      const bottom = oneOf(q.bottom, ['1', '2', 'mixed'], '1');
+      const problems = math.multiplication(rng, { mode, factor, top, bottom, count: intIn(q.count, 5, 60, 30) });
+      const subtitle = mode === 'multi' ? `Multiplication: ${digitLabel(top, '1 to 4')} number × ${digitLabel(bottom, '1 to 2')} number`
+        : mode === 'mixed' ? 'Mixed multiplication' : factor === 'all' ? 'Multiplication facts 0-12 (mixed)' : `Multiplication facts: ${factor}s`;
+      return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: mode === 'facts' ? 2 : 3, problems, fit: fitSheet(problems, base.layout) } };
     }
     if (type === 'division') {
-      const mode = oneOf(q.mode, ['facts', 'mixed'], 'facts');
+      const mode = oneOf(q.mode, ['facts', 'multi', 'mixed'], 'facts');
       const divisor = oneOf(q.divisor, ['all', ...Array.from({ length: 12 }, (_, i) => i + 1)], 'all');
-      const problems = math.division(rng, { mode, divisor, count: intIn(q.count, 5, 60, 30) });
-      const subtitle = mode === 'mixed' ? 'Mixed division (with remainders)' : divisor === 'all' ? 'Division facts 0-12 (mixed)' : `Division facts: divide by ${divisor}`;
-      return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: mode === 'mixed' ? 4 : 2, problems, fit: fitFor(2, problems.length, base.layout) } };
+      const dividend = oneOf(q.dividend, ['2', '3', '4', 'mixed'], '3');
+      const vdigits = oneOf(q.vdigits, ['1', '2', 'mixed'], '1');
+      const remainders = oneOf(q.remainders, ['none', 'with', 'mixed'], 'mixed');
+      const problems = math.division(rng, { mode, divisor, dividend, vdigits, remainders, count: intIn(q.count, 5, 60, 30) });
+      const remText = { none: 'no remainders', with: 'with remainders', mixed: 'with and without remainders' }[remainders];
+      const subtitle = mode === 'multi' ? `Division: ${digitLabel(dividend, '2 to 4')} dividend ÷ ${digitLabel(vdigits, '1 to 2')} divisor, ${remText}`
+        : mode === 'mixed' ? 'Mixed division (with remainders)' : divisor === 'all' ? 'Division facts 0-12 (mixed)' : `Division facts: divide by ${divisor}`;
+      return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: mode === 'facts' ? 2 : 4, problems, fit: fitSheet(problems, base.layout) } };
     }
     const result = wp.wordProblems(rng, { grade, op: oneOf(q.op, wp.OPS, 'mixed'), kind: oneOf(q.kind, wp.KINDS, 'whole'), steps: oneOf(q.steps, wp.STEPS, 'mixed'), count: intIn(q.count, 3, 20, 10) });
     if (result.error) return { ...meta, error: result.error };
@@ -120,4 +145,4 @@ function fromUrl(url) {
   return { built, url: `${pathname}?${search}` };
 }
 
-module.exports = { fitFor, FITS, build, fromUrl, isSheetPath, validSeed, newSeed, MATH_TYPES, WRITING_TYPES };
+module.exports = { fitFor, fitSheet, FITS, build, fromUrl, isSheetPath, validSeed, newSeed, MATH_TYPES, WRITING_TYPES };

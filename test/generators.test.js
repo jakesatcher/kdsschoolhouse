@@ -134,3 +134,53 @@ test('print: fit step shrinks with problem count and always has a matching CSS r
   assert.ok(order.indexOf(fitFor(3, 50, 'vertical')) >= order.indexOf(fitFor(2, 50, 'vertical')), 'three addends need at least as much shrink');
   assert.ok(FITS.some((f) => f.id === fitFor(3, 50, 'vertical')));
 });
+
+test('multi-digit multiplication: 1-4 digit number x 1-2 digit number, exact products', () => {
+  const len = (n) => String(n).length;
+  for (const top of ['1', '2', '3', '4']) for (const bottom of ['1', '2']) {
+    for (const p of math.multiplication(makeRng(Number(top) * 7 + Number(bottom)), { mode: 'multi', top, bottom, count: 60 })) {
+      const [a, b] = p.operands;
+      assert.strictEqual(len(a), Number(top), `${a} should have ${top} digits`);
+      assert.strictEqual(len(b), Number(bottom), `${b} should have ${bottom} digits`);
+      assert.strictEqual(p.answer, a * b);
+      assert.strictEqual(p.work, Number(bottom) === 2 ? 2 : 0);
+    }
+  }
+  const mixed = math.multiplication(makeRng(5), { mode: 'multi', top: 'mixed', bottom: 'mixed', count: 200 });
+  assert.deepStrictEqual([...new Set(mixed.map((p) => len(p.operands[0])))].sort(), [1, 2, 3, 4]);
+  assert.deepStrictEqual([...new Set(mixed.map((p) => len(p.operands[1])))].sort(), [1, 2]);
+});
+
+test('multi-digit division: up to 4-digit dividends by 1-2 digit divisors, with and without remainders', () => {
+  const len = (n) => String(n).length;
+  for (const dividend of ['2', '3', '4']) for (const vdigits of ['1', '2']) for (const remainders of ['none', 'with', 'mixed']) {
+    const ps = math.division(makeRng(Number(dividend) * 11 + Number(vdigits)), { mode: 'multi', dividend, vdigits, remainders, count: 80 });
+    assert.strictEqual(ps.length, 80);
+    for (const p of ps) {
+      const [n, d] = p.operands;
+      assert.strictEqual(len(n), Number(dividend), `dividend ${n} digits`);
+      assert.strictEqual(len(d), Number(vdigits), `divisor ${d} digits`);
+      assert.strictEqual(d * p.answer + p.remainder, n, `${n} / ${d}`);
+      assert.ok(p.remainder >= 0 && p.remainder < d);
+      assert.ok(p.answer >= 2, 'quotient is at least 2');
+      if (remainders === 'none') assert.strictEqual(p.remainder, 0);
+      if (remainders === 'with') assert.ok(p.remainder >= 1);
+      assert.strictEqual(p.answerText, p.remainder ? `${p.answer.toLocaleString('en-US')} R ${p.remainder}` : p.answer.toLocaleString('en-US'));
+    }
+    if (remainders === 'mixed') assert.ok(ps.some((p) => p.remainder === 0) && ps.some((p) => p.remainder > 0), 'mixed has both kinds');
+  }
+  const mixed = math.division(makeRng(3), { mode: 'multi', dividend: 'mixed', vdigits: 'mixed', remainders: 'mixed', count: 300 });
+  assert.deepStrictEqual([...new Set(mixed.map((p) => len(p.operands[0])))].sort(), [2, 3, 4]);
+  assert.deepStrictEqual([...new Set(mixed.map((p) => len(p.operands[1])))].sort(), [1, 2]);
+});
+
+test('print: work space shrinks (problems are never dropped) so a full page of long division still fits', () => {
+  const { fitSheet } = require('../src/lib/sheets');
+  const few = math.division(makeRng(1), { mode: 'multi', dividend: '4', vdigits: '2', count: 12 });
+  fitSheet(few, 'vertical');
+  assert.ok(few.every((p) => p.work === 3), 'plenty of room: full work space kept');
+  const many = math.division(makeRng(1), { mode: 'multi', dividend: '4', vdigits: '2', count: 50 });
+  fitSheet(many, 'vertical');
+  assert.strictEqual(many.length, 50);
+  assert.ok(many.every((p) => p.work < 3), 'work space trimmed to fit 50 on a page');
+});

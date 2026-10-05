@@ -8,8 +8,9 @@ document.querySelectorAll('[data-back]').forEach((b) => b.addEventListener('clic
 function syncShowIf() {
   document.querySelectorAll('[data-show-if]').forEach((el) => {
     const [name, value] = el.dataset.showIf.split(':');
-    const checked = document.querySelector(`input[name="${name}"]:checked`);
-    el.hidden = !(checked && checked.value === value);
+    // works for radio groups and for <select>
+    const field = document.querySelector(`input[name="${name}"]:checked`) || document.querySelector(`select[name="${name}"]`);
+    el.hidden = !(field && field.value === value);
   });
 }
 document.addEventListener('change', syncShowIf);
@@ -45,3 +46,13 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') menus.forE
 document.querySelectorAll('[data-reveal-toggle]').forEach((t) => t.addEventListener('change', () => {
   document.querySelectorAll('[data-reveal]').forEach((i) => { i.type = t.checked ? 'text' : 'password'; });
 }));
+
+// Multiplication / division: suggest fewer problems per page when switching to multi-digit (unless the teacher already chose a count).
+(() => {
+  const mode = document.querySelector('select[name=mode]');
+  const count = document.querySelector('select[name=count]');
+  if (!mode || !count) return;
+  let touched = false;
+  count.addEventListener('change', () => { touched = true; });
+  mode.addEventListener('change', () => { if (!touched) count.value = mode.value === 'multi' ? '12' : '30'; });
+})();

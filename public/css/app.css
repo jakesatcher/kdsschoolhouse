@@ -106,10 +106,14 @@ ol.problems li { counter-increment: p; position: relative; padding-left: 26px; m
 ol.problems li::before { content: counter(p) "."; position: absolute; left: 0; top: 0; font-size: .85rem; }
 .vp { display: inline-block; font-variant-numeric: tabular-nums; font-size: 1.25rem; }
 .vp .row { display: flex; justify-content: flex-end; gap: 10px; } .vp .opsym { min-width: 1ch; }
-.vp .rule { border-top: 2px solid #000; margin-top: 2px; height: 34px; }
+/* --lh / --space are the line height and answer space; print sets them per fit-* class below. wN = N extra lines of work space */
+ol.problems { --lh: 30px; --fs: 20px; --space: 34px; }
+.vp .rule { border-top: 2px solid #000; margin-top: 2px; height: var(--space); }
+.vp .rule.w1 { height: calc(var(--space) + var(--lh)); } .vp .rule.w2 { height: calc(var(--space) + 2 * var(--lh)); } .vp .rule.w3 { height: calc(var(--space) + 3 * var(--lh)); }
 .hp { font-size: 1.25rem; padding-top: 6px; }
 .div-bracket { display: inline-flex; align-items: flex-start; font-size: 1.25rem; font-variant-numeric: tabular-nums; margin-top: 8px; }
-.div-bracket .divisor { padding: 6px 8px 0 0; } .div-bracket .dividend { border-left: 2px solid #000; border-top: 2px solid #000; padding: 6px 12px 28px 8px; border-top-left-radius: 8px; }
+.div-bracket .divisor { padding: 6px 8px 0 0; } .div-bracket .dividend { border-left: 2px solid #000; border-top: 2px solid #000; padding: 6px 12px var(--space) 8px; border-top-left-radius: 8px; }
+.div-bracket.w2 .dividend { padding-bottom: calc(var(--space) + 2 * var(--lh)); } .div-bracket.w3 .dividend { padding-bottom: calc(var(--space) + 3 * var(--lh)); }
 .words-problems { padding-left: 22px; } .words-problems li { margin-bottom: 8px; break-inside: avoid; font-size: 1.1rem; }
 .workspace { height: 100px; border: 1px dashed #aaa; border-radius: 6px; margin: 6px 0; } .answerline { margin: 4px 0 16px; }
 .keylist { columns: 2; font-size: 1.05rem; } .keylist.single { columns: 1; } .keylist.single li { margin-bottom: 10px; break-inside: avoid; }
@@ -173,10 +177,8 @@ ol.questions { padding-left: 24px; } ol.questions li { margin-bottom: 14px; brea
   ol.problems li::before { font-size: .7rem; }
   ol.problems .vp { font-size: var(--fs); }
   ol.problems .vp .row { line-height: var(--lh); }
-  ol.problems .vp .rule { height: var(--space); }
   ol.problems .hp { font-size: var(--fs); line-height: var(--lh); padding-top: 0; }
   ol.problems .div-bracket { font-size: var(--fs); line-height: var(--lh); margin-top: 0; }
-  ol.problems .div-bracket .dividend { padding-bottom: var(--space); }
   ol.problems .div-bracket .divisor { padding-top: 4px; }
   ol.problems.fit-b { --lh: 26px; --fs: 18px; --space: 22px; }
   ol.problems.fit-c { --lh: 23px; --fs: 16px; --space: 14px; }

@@ -1,10 +1,10 @@
 <% const f = (n) => Number(n).toLocaleString('en-US'); %>
 <% if (p.op === '÷' && layout === 'vertical') { %>
-  <div class="div-bracket"><span class="divisor"><%= f(p.operands[1]) %></span><span class="dividend"><%= f(p.operands[0]) %></span></div>
+  <div class="div-bracket w<%= p.work || 0 %>"><span class="divisor"><%= f(p.operands[1]) %></span><span class="dividend"><%= f(p.operands[0]) %></span></div>
 <% } else if (layout === 'vertical') { %>
   <div class="vp">
     <% p.operands.forEach(function (n, k) { %><div class="row"><span class="opsym"><%= k === p.operands.length - 1 ? p.op : '' %></span><span class="n"><%= f(n) %></span></div><% }) %>
-    <div class="rule"></div>
+    <div class="rule w<%= p.work || 0 %>"></div>
   </div>
 <% } else { %>
   <div class="hp"><%= p.operands.map(f).join(' ' + p.op + ' ') %> = <i class="blank short"></i></div>

@@ -234,3 +234,23 @@ test('greeting levels: mild never swears, off shows nothing', () => {
   assert.ok(GREETINGS.filter((g) => !g.spicy).every((g) => !rude.test(g.text)), 'mild greetings must be clean');
   assert.ok(GREETINGS.some((g) => g.text === 'Make this day your bitch!'));
 });
+
+test('multi-digit multiplication and division worksheets render with the right headings and work space', async () => {
+  const agent = request.agent(app);
+  await login(agent, 'u@example.com');
+  const m = (await agent.get('/math/multiplication/worksheet?mode=multi&top=4&bottom=2&count=12&seed=4')).text;
+  assert.match(m, /Multiplication: 4-digit number × 2-digit number/);
+  assert.match(m, /class="rule w2"/);
+  const m1 = (await agent.get('/math/multiplication/worksheet?mode=multi&top=3&bottom=1&count=12&seed=4')).text;
+  assert.match(m1, /3-digit number × 1-digit number/);
+  assert.doesNotMatch(m1, /class="rule w2"/);
+  const d = (await agent.get('/math/division/worksheet?mode=multi&dividend=4&vdigits=2&remainders=with&count=12&seed=4')).text;
+  assert.match(d, /Division: 4-digit dividend ÷ 2-digit divisor, with remainders/);
+  assert.match(d, /class="div-bracket w3"/);
+  assert.match(d, / R \d+/); // answer key shows remainders
+  assert.match((await agent.get('/math/division/worksheet?mode=multi&dividend=bogus&vdigits=9&remainders=x&seed=4')).text, /3-digit dividend ÷ 1-digit divisor, with and without remainders/); // bad params fall back safely
+  const form = (await agent.get('/math/division')).text;
+  assert.match(form, /name="dividend"/);
+  assert.match(form, /name="remainders"/);
+  assert.match((await agent.get('/math/multiplication')).text, /name="top"/);
+});
