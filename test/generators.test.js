@@ -197,8 +197,35 @@ test('multi-digit ranges: 1-digit factors include 0 and 1, 2-digit factors/divis
   assert.ok(divisors.includes(10), 'divisor 10 appears');
   assert.ok(divisors.every((d) => d >= 10 && d <= 49));
   const small = math.division(makeRng(24), { mode: 'multi', dividend: '3', vdigits: '1', remainders: 'none', count: 300 });
-  assert.deepStrictEqual([...new Set(small.map((p) => p.operands[1]))].sort((a, b) => a - b), [2, 3, 4, 5, 6, 7, 8, 9]);
+  assert.deepStrictEqual([...new Set(small.map((p) => p.operands[1]))].sort((a, b) => a - b), [1, 2, 3, 4, 5, 6, 7, 8, 9]); // ÷1 included
   const four = math.division(makeRng(25), { mode: 'multi', dividend: '4', vdigits: '2', remainders: 'mixed', count: 600 });
   assert.ok(four.some((p) => p.operands[1] === 10) && four.some((p) => p.operands[1] === 99));
   for (const p of [...div, ...four]) assert.strictEqual(p.operands[1] * p.answer + p.remainder, p.operands[0]);
+});
+
+test('the include-x0/x1/÷1/÷10 option: on by default, off removes them, a factor the teacher picks is still honoured', () => {
+  const set = (a) => [...new Set(a)].sort((x, y) => x - y);
+  // multiplication
+  assert.ok(math.multiplication(makeRng(1), { mode: 'multi', top: '1', bottom: '1', count: 300 }).some((p) => p.operands.includes(0) && true));
+  for (const mode of ['facts', 'multi', 'mixed']) {
+    const off = math.multiplication(makeRng(2), { mode, top: '1', bottom: '1', special: false, count: 300 });
+    const smallOnes = off.filter((p) => p.work === 0 && p.operands.every((n) => n < 100)); // single-digit style problems
+    assert.ok(smallOnes.every((p) => !p.operands.includes(0) && !p.operands.includes(1)), `${mode}: no x0 / x1`);
+  }
+  assert.deepStrictEqual(set(math.multiplication(makeRng(3), { factor: '7', special: false, count: 200 }).flatMap((p) => p.operands)), [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+  assert.ok(math.multiplication(makeRng(3), { factor: '0', special: false, count: 60 }).every((p) => p.operands.includes(0)), 'picked factor 0 is kept');
+  assert.ok(math.multiplication(makeRng(3), { factor: '1', special: false, count: 60 }).some((p) => p.operands.includes(0)), 'picked factor 1 keeps its facts');
+  // division
+  const facts = (sp) => set(math.division(makeRng(4), { special: sp, count: 300 }).map((p) => p.operands[1]));
+  assert.deepStrictEqual(facts(true), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+  assert.deepStrictEqual(facts(false), [2, 3, 4, 5, 6, 7, 8, 9, 11, 12]);
+  assert.deepStrictEqual(set(math.division(makeRng(5), { divisor: '10', special: false, count: 20 }).map((p) => p.operands[1])), [10]);
+  const multi = (sp, vd, rem) => math.division(makeRng(6), { mode: 'multi', dividend: '3', vdigits: vd, remainders: rem, special: sp, count: 500 });
+  assert.ok(multi(true, '1', 'none').some((p) => p.operands[1] === 1), '÷1 appears');
+  assert.ok(multi(true, '1', 'with').every((p) => p.operands[1] >= 2), 'no remainder is possible when dividing by 1');
+  assert.ok(multi(true, '2', 'mixed').some((p) => p.operands[1] === 10), '÷10 appears');
+  assert.ok(multi(false, '1', 'mixed').every((p) => p.operands[1] >= 2));
+  assert.ok(multi(false, '2', 'mixed').every((p) => p.operands[1] >= 11));
+  assert.ok(math.division(makeRng(7), { mode: 'mixed', special: false, count: 300 }).every((p) => p.operands[1] !== 1 && p.operands[1] !== 10));
+  for (const p of multi(true, 'mixed', 'mixed')) assert.strictEqual(p.operands[1] * p.answer + p.remainder, p.operands[0]);
 });

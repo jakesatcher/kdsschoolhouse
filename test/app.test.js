@@ -254,3 +254,19 @@ test('multi-digit multiplication and division worksheets render with the right h
   assert.match(form, /name="remainders"/);
   assert.match((await agent.get('/math/multiplication')).text, /name="top"/);
 });
+
+test('x0/x1 and ÷1/÷10 option: checkbox on the forms, honoured on the sheet', async () => {
+  const agent = request.agent(app);
+  await login(agent, 'u@example.com');
+  const mf = (await agent.get('/math/multiplication')).text;
+  assert.match(mf, /type="hidden" name="special" value="0"/);
+  assert.match(mf, /Include multiplying by 0 and 1/);
+  assert.match((await agent.get('/math/division')).text, /Include dividing by 1 and 10/);
+  assert.match((await agent.get('/math/multiplication?special=0')).text, /name="special" value="1" >/); // unchecked when turned off
+  const on = (await agent.get('/math/multiplication/worksheet?mode=multi&top=1&bottom=1&count=50&seed=3&special=0&special=1')).text;
+  assert.doesNotMatch(on, /no ×0 or ×1/);
+  const off = (await agent.get('/math/multiplication/worksheet?mode=multi&top=1&bottom=1&count=50&seed=3&special=0')).text;
+  assert.match(off, /\(no ×0 or ×1\)/);
+  assert.doesNotMatch(off.slice(off.indexOf('<ol class="problems')), /<span class="n">[01]<\/span>/);
+  assert.match((await agent.get('/math/division/worksheet?special=0&seed=3')).text, /\(no ÷1 or ÷10\)/);
+});

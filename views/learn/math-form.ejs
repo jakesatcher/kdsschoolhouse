@@ -40,6 +40,7 @@
         </div>
       <% } %>
       <label>Problems <select name="count"><% [6, 8, 12, 16, 20, 30, 40, 50, 60].forEach(function (n) { %><option <%= String(q.count || (q.mode === 'multi' ? 12 : 30)) === String(n) ? 'selected' : '' %>><%= n %></option><% }) %></select></label>
+      <label class="check"><input type="hidden" name="special" value="0"><input type="checkbox" name="special" value="1" <%= q.special === undefined || q.special === '1' || (Array.isArray(q.special) && q.special[q.special.length - 1] === '1') ? 'checked' : '' %>> <%= type === 'multiplication' ? 'Include multiplying by 0 and 1' : 'Include dividing by 1 and 10' %></label>
       <p class="muted small-text">Multi-digit problems leave extra work space under each one, so use fewer problems per page (about 12 to 20) for long division.</p>
       <label>Layout <select name="layout"><option value="vertical"><%= type === 'division' ? 'Long-division bracket' : 'Vertical (stacked)' %></option><option value="horizontal" <%= q.layout === 'horizontal' ? 'selected' : '' %>>Horizontal</option></select></label>
     <% } else { %>

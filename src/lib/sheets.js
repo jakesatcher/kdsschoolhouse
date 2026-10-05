@@ -80,9 +80,10 @@ function build(pathname, q) {
       const factor = oneOf(q.factor, ['all', ...Array.from({ length: 13 }, (_, i) => i)], 'all');
       const top = oneOf(q.top, ['1', '2', '3', '4', 'mixed'], '2');
       const bottom = oneOf(q.bottom, ['1', '2', 'mixed'], '1');
-      const problems = math.multiplication(rng, { mode, factor, top, bottom, count: intIn(q.count, 5, 60, 30) });
-      const subtitle = mode === 'multi' ? `Multiplication: ${digitLabel(top, '1 to 4')} number × ${digitLabel(bottom, '1 to 2')} number`
-        : mode === 'mixed' ? 'Mixed multiplication' : factor === 'all' ? 'Multiplication facts 0-12 (mixed)' : `Multiplication facts: ${factor}s`;
+      const special = flag(q.special, true);
+      const problems = math.multiplication(rng, { mode, factor, top, bottom, special, count: intIn(q.count, 5, 60, 30) });
+      const subtitle = (mode === 'multi' ? `Multiplication: ${digitLabel(top, '1 to 4')} number × ${digitLabel(bottom, '1 to 2')} number`
+        : mode === 'mixed' ? 'Mixed multiplication' : factor === 'all' ? 'Multiplication facts 0-12 (mixed)' : `Multiplication facts: ${factor}s`) + (special ? '' : ' (no ×0 or ×1)');
       return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: mode === 'facts' ? 2 : 3, problems, fit: fitSheet(problems, base.layout) } };
     }
     if (type === 'division') {
@@ -91,10 +92,11 @@ function build(pathname, q) {
       const dividend = oneOf(q.dividend, ['2', '3', '4', 'mixed'], '3');
       const vdigits = oneOf(q.vdigits, ['1', '2', 'mixed'], '1');
       const remainders = oneOf(q.remainders, ['none', 'with', 'mixed'], 'mixed');
-      const problems = math.division(rng, { mode, divisor, dividend, vdigits, remainders, count: intIn(q.count, 5, 60, 30) });
+      const special = flag(q.special, true);
+      const problems = math.division(rng, { mode, divisor, dividend, vdigits, remainders, special, count: intIn(q.count, 5, 60, 30) });
       const remText = { none: 'no remainders', with: 'with remainders', mixed: 'with and without remainders' }[remainders];
-      const subtitle = mode === 'multi' ? `Division: ${digitLabel(dividend, '2 to 4')} dividend ÷ ${digitLabel(vdigits, '1 to 2')} divisor, ${remText}`
-        : mode === 'mixed' ? 'Mixed division (with remainders)' : divisor === 'all' ? 'Division facts 0-12 (mixed)' : `Division facts: divide by ${divisor}`;
+      const subtitle = (mode === 'multi' ? `Division: ${digitLabel(dividend, '2 to 4')} dividend ÷ ${digitLabel(vdigits, '1 to 2')} divisor, ${remText}`
+        : mode === 'mixed' ? 'Mixed division (with remainders)' : divisor === 'all' ? 'Division facts 0-12 (mixed)' : `Division facts: divide by ${divisor}`) + (special ? '' : ' (no ÷1 or ÷10)');
       return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: mode === 'facts' ? 2 : 4, problems, fit: fitSheet(problems, base.layout) } };
     }
     const result = wp.wordProblems(rng, { grade, op: oneOf(q.op, wp.OPS, 'mixed'), kind: oneOf(q.kind, wp.KINDS, 'whole'), steps: oneOf(q.steps, wp.STEPS, 'mixed'), count: intIn(q.count, 3, 20, 10) });
