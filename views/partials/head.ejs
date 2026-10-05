@@ -6,8 +6,8 @@
   <meta name="robots" content="noindex, nofollow">
   <title><%= title ? title + ' · ' : '' %><%= appName %></title>
   <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/static/css/app.css">
-  <script src="/static/js/app.js" defer></script>
+  <link rel="stylesheet" href="/static/css/app.css?v=<%= assetV %>">
+  <script src="/static/js/app.js?v=<%= assetV %>" defer></script>
 </head>
 <body>
 <header class="topbar no-print">

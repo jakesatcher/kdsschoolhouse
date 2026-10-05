@@ -24,6 +24,16 @@ test('unauthenticated visitors only see login/register; everything else redirect
   assert.strictEqual((await request(app).post('/logout')).status, 403); // no CSRF token
 });
 
+test('CSS and JS URLs are versioned so a stale cached stylesheet can never be paired with new pages', async () => {
+  const html = (await request(app).get('/login')).text;
+  const m = /\/static\/css\/app\.css\?v=([0-9a-f]{10})/.exec(html);
+  assert.ok(m, 'stylesheet link has a content hash');
+  assert.match(html, new RegExp(`/static/js/app\\.js\\?v=${m[1]}`));
+  const css = await request(app).get(`/static/css/app.css?v=${m[1]}`);
+  assert.strictEqual(css.status, 200);
+  assert.match(css.headers['content-type'], /css/);
+});
+
 test('security headers and cookie flags', async () => {
   const res = await request(app).get('/login');
   assert.match(res.headers['content-security-policy'], /default-src 'self'/);

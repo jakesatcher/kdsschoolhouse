@@ -10,6 +10,7 @@ const config = require('./config');
 const db = require('./db');
 const { csrf, flash, noStore } = require('./middleware/security');
 const { loadUser, requireAuthGlobally } = require('./middleware/auth');
+const assetV = require('./lib/assets').version();
 
 function createApp() {
   const app = express();
@@ -50,7 +51,7 @@ function createApp() {
   });
 
   // Static assets: CSS, JS and the icon only (needed to draw the login page). No user data lives here.
-  app.use('/static', express.static(path.join(__dirname, '..', 'public'), { maxAge: config.isProd ? '7d' : 0, dotfiles: 'ignore', index: false }));
+  app.use('/static', express.static(path.join(__dirname, '..', 'public'), { maxAge: config.isProd ? '1h' : 0, dotfiles: 'ignore', index: false }));
   app.get('/favicon.ico', (req, res) => res.redirect(301, '/static/favicon.svg'));
 
   app.use(express.urlencoded({ extended: false, limit: '20kb' }));
@@ -81,6 +82,7 @@ function createApp() {
     res.locals.csrfToken = '';
     res.locals.flash = [];
     res.locals.rtext = require('./lib/reading/text');
+    res.locals.assetV = assetV;
     next();
   });
   app.use(flash);
