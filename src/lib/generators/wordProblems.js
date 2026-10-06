@@ -8,11 +8,21 @@ const { fmt } = require('./math');
 // template needs more than six people (none do today), and are randomized.
 const NAMES = ['Zach', 'AC', 'Screech', 'Kelly', 'Lisa', 'Jessie'];
 const EXTRA_NAMES = ['Mia', 'Leo', 'Ava', 'Sam', 'Zoe', 'Max', 'Ella', 'Ben', 'Lily', 'Noah', 'Ruby', 'Eli'];
-// [plural, singular] items that can be counted.
-const ITEMS = [
-  ['apples', 'apple'], ['stickers', 'sticker'], ['marbles', 'marble'], ['pencils', 'pencil'], ['books', 'book'],
-  ['cookies', 'cookie'], ['cards', 'card'], ['shells', 'shell'], ['crayons', 'crayon'], ['balloons', 'balloon'],
-  ['toy cars', 'toy car'], ['stamps', 'stamp'], ['beads', 'bead'], ['coins', 'coin'], ['blocks', 'block'],
+// Settings paired with things that are natural to count there: [plural, singular].
+const THEMES = [
+  { setting: 'At the school carnival', items: [['tickets', 'ticket'], ['balloons', 'balloon'], ['prizes', 'prize'], ['stickers', 'sticker']] },
+  { setting: 'During the book fair', items: [['bookmarks', 'bookmark'], ['books', 'book'], ['posters', 'poster'], ['pencils', 'pencil']] },
+  { setting: 'At the bake sale', items: [['cookies', 'cookie'], ['cupcakes', 'cupcake'], ['brownies', 'brownie'], ['muffins', 'muffin']] },
+  { setting: 'On the field trip', items: [['photos', 'photo'], ['postcards', 'postcard'], ['seashells', 'seashell'], ['rocks', 'rock']] },
+  { setting: 'At the farmers market', items: [['apples', 'apple'], ['pumpkins', 'pumpkin'], ['peaches', 'peach'], ['jars of honey', 'jar of honey']] },
+  { setting: 'At soccer practice', items: [['soccer balls', 'soccer ball'], ['cones', 'cone'], ['water bottles', 'water bottle'], ['jerseys', 'jersey']] },
+  { setting: 'At the science fair', items: [['magnets', 'magnet'], ['rocks', 'rock'], ['plants', 'plant'], ['posters', 'poster']] },
+  { setting: 'In the school garden', items: [['seeds', 'seed'], ['flowers', 'flower'], ['tomatoes', 'tomato'], ['carrots', 'carrot']] },
+  { setting: 'At the library', items: [['library books', 'library book'], ['bookmarks', 'bookmark'], ['chairs', 'chair'], ['puzzles', 'puzzle']] },
+  { setting: 'During art class', items: [['crayons', 'crayon'], ['markers', 'marker'], ['beads', 'bead'], ['paper cranes', 'paper crane']] },
+  { setting: 'At the pet shelter', items: [['dog treats', 'dog treat'], ['toys', 'toy'], ['blankets', 'blanket'], ['cans of food', 'can of food']] },
+  { setting: 'On the camping trip', items: [['marshmallows', 'marshmallow'], ['sticks', 'stick'], ['flashlights', 'flashlight'], ['granola bars', 'granola bar']] },
+  { setting: 'At the card swap', items: [['trading cards', 'trading card'], ['stamps', 'stamp'], ['coins', 'coin'], ['marbles', 'marble']] },
 ];
 const GROUPS = ['bags', 'boxes', 'baskets', 'jars', 'packs'];
 const SHOP = [['notebook', 'notebooks'], ['lunch', 'lunches'], ['toy', 'toys'], ['kite', 'kites'], ['puzzle', 'puzzles'], ['book', 'books'], ['hat', 'hats'], ['ball', 'balls']];
@@ -32,15 +42,16 @@ const cents = (c) => `$${(c / 100).toFixed(2)}`;
 const dec = (tenthsOrHundredths, places) => (tenthsOrHundredths / 10 ** places).toFixed(places);
 
 function ctx(rng) {
-  const [n1, n2] = shuffle(rng, NAMES);
-  const [items, item] = pick(rng, ITEMS);
-  return { n1, n2, extraName: () => pick(rng, EXTRA_NAMES), items, item, group: pick(rng, GROUPS), shop: pick(rng, SHOP) };
+  const [n1, n2, n3] = shuffle(rng, NAMES);
+  const theme = pick(rng, THEMES);
+  const [items, item] = pick(rng, theme.items);
+  return { n1, n2, n3, setting: theme.setting, extraName: () => pick(rng, EXTRA_NAMES), items, item, group: pick(rng, GROUPS), shop: pick(rng, SHOP) };
 }
 
 // Template: { id, op, kind:'whole'|'decimal'|'fraction', steps, grades:[min,max], make(rng, c, g) -> { text, answerText } }
 // "op" is the main operation tag used by the operation filter; multi-step templates are tagged 'multi' and with each op they use.
 const T = [];
-const t = (def) => T.push(def);
+const t = (def) => T.push({ level: 1, ...def }); // level 1 = standard, 2 = challenge
 
 // ---------- whole numbers, single step ----------
 t({ id: 'w-add-1', ops: ['add'], kind: 'whole', steps: 1, grades: [1, 5], make: (r, c, g) => { const [a, b] = PROFILE[g].addPair(r); return { text: `${c.n1} has ${fmt(a)} ${c.items}. ${c.n2} has ${fmt(b)} ${c.items}. How many ${c.items} do they have in all?`, answerText: fmt(a + b) }; } });
@@ -78,8 +89,8 @@ const DEN_LIKE = [3, 4, 5, 6, 8, 10, 12];
 t({ id: 'f-set-3', ops: ['mul', 'div'], kind: 'fraction', steps: 1, grades: [3, 3], make: (r, c) => { const d = pick(r, [2, 3, 4, 5, 6]); const q = int(r, 2, 8); return { text: `${c.n1} has ${d * q} ${c.items}. ${c.n1} gives 1/${d} of them to ${c.n2}. How many ${c.items} does ${c.n1} give away?`, answerText: String(q) }; } });
 t({ id: 'f-add-like', ops: ['add'], kind: 'fraction', steps: 1, grades: [4, 5], make: (r, c) => { const d = pick(r, DEN_LIKE); const a = int(r, 1, d - 1), b = int(r, 1, d - 1); const food = pick(r, FOODS); return { text: `${c.n1} ate ${F.raw(a, d)} of a ${food}. ${c.n2} ate ${F.raw(b, d)} of the same ${food}. How much of the ${food} did they eat in all?`, answerText: F.show(F.add(F.frac(a, d), F.frac(b, d))) }; } });
 t({ id: 'f-sub-like', ops: ['sub'], kind: 'fraction', steps: 1, grades: [4, 5], make: (r, c) => { const d = pick(r, DEN_LIKE); const a = int(r, 2, d - 1), b = int(r, 1, a - 1); const t1 = pick(r, THINGS_LONG); return { text: `${c.n1} has a ${t1} that is ${F.raw(a, d)} of a yard long. ${c.n1} cuts off ${F.raw(b, d)} of a yard. How much of a yard is left?`, answerText: `${F.show(F.sub(F.frac(a, d), F.frac(b, d)))} of a yard` }; } });
-t({ id: 'f-mul-whole', ops: ['mul'], kind: 'fraction', steps: 1, grades: [4, 5], make: (r, c) => { const d = pick(r, [2, 3, 4, 5, 6, 8]); const a = int(r, 1, d - 1); const k = int(r, 2, 9); return { text: `One bag needs ${F.raw(a, d)} cup of flour. ${c.n1} makes ${k} bags. How many cups of flour does ${c.n1} need?`, answerText: `${F.show(F.mul(F.frac(a, d), F.frac(k)))} cups` }; } });
-t({ id: 'f-add-unlike', ops: ['add'], kind: 'fraction', steps: 1, grades: [5, 5], make: (r, c) => { const pairs = [[2, 3], [2, 4], [3, 4], [2, 5], [3, 6], [4, 6], [2, 6], [3, 5], [4, 8], [2, 8]]; const [d1, d2] = pick(r, pairs); const a = int(r, 1, d1 - 1), b = int(r, 1, d2 - 1); return { text: `${c.n1} walked ${F.raw(a, d1)} mile in the morning and ${F.raw(b, d2)} mile after school. How many miles did ${c.n1} walk in all?`, answerText: `${F.show(F.add(F.frac(a, d1), F.frac(b, d2)))} miles` }; } });
+t({ id: 'f-mul-whole', ops: ['mul'], kind: 'fraction', steps: 1, grades: [4, 5], make: (r, c) => { const d = pick(r, [2, 3, 4, 5, 6, 8]); const a = int(r, 1, d - 1); const k = int(r, 2, 9); return { text: `One bag needs ${F.raw(a, d)} cup of flour. ${c.n1} makes ${k} bags. How many cups of flour does ${c.n1} need?`, answerText: F.unit(F.mul(F.frac(a, d), F.frac(k)), 'cup', 'cups') }; } });
+t({ id: 'f-add-unlike', ops: ['add'], kind: 'fraction', steps: 1, grades: [5, 5], make: (r, c) => { const pairs = [[2, 3], [2, 4], [3, 4], [2, 5], [3, 6], [4, 6], [2, 6], [3, 5], [4, 8], [2, 8]]; const [d1, d2] = pick(r, pairs); const a = int(r, 1, d1 - 1), b = int(r, 1, d2 - 1); return { text: `${c.n1} walked ${F.raw(a, d1)} mile in the morning and ${F.raw(b, d2)} mile after school. How many miles did ${c.n1} walk in all?`, answerText: F.unit(F.add(F.frac(a, d1), F.frac(b, d2)), 'mile', 'miles') }; } });
 t({ id: 'f-sub-unlike', ops: ['sub'], kind: 'fraction', steps: 1, grades: [5, 5], make: (r, c) => { for (;;) { const pairs = [[2, 3], [2, 4], [3, 4], [2, 5], [3, 6], [4, 6], [3, 5], [4, 8]]; const [d1, d2] = pick(r, pairs); const a = int(r, 1, d1 - 1), b = int(r, 1, d2 - 1); const x = F.frac(a, d1), y = F.frac(b, d2); if (x.n * y.d > y.n * x.d) return { text: `${c.n1} had ${F.raw(a, d1)} of a pizza left. ${c.n1} ate ${F.raw(b, d2)} of the whole pizza. How much of the pizza is left?`, answerText: F.show(F.sub(x, y)) }; } } });
 t({ id: 'f-mul-frac', ops: ['mul'], kind: 'fraction', steps: 1, grades: [5, 5], make: (r, c) => { const d1 = pick(r, [2, 3, 4, 5]), d2 = pick(r, [2, 3, 4, 5, 6]); const a = int(r, 1, d1 - 1), b = int(r, 1, d2 - 1); return { text: `${c.n1} has ${F.raw(a, d1)} of a pan of brownies left. ${c.n1} eats ${F.raw(b, d2)} of what is left. How much of the whole pan does ${c.n1} eat?`, answerText: F.show(F.mul(F.frac(a, d1), F.frac(b, d2))) }; } });
 t({ id: 'f-div-unit', ops: ['div'], kind: 'fraction', steps: 1, grades: [5, 5], make: (r, c) => { if (r() < 0.5) { const w = int(r, 2, 6), d = pick(r, [2, 3, 4]); return { text: `${c.n1} has ${w} pies. ${c.n1} cuts each pie into pieces that are 1/${d} of a pie. How many pieces does ${c.n1} have?`, answerText: String(w * d) }; } const d = pick(r, [2, 3, 4]); const k = int(r, 2, 5); return { text: `${c.n1} has 1/${d} of a pound of trail mix. ${c.n1} shares it equally among ${k} friends. How much of a pound does each friend get?`, answerText: `${F.show(F.frac(1, d * k))} of a pound` }; } });
@@ -90,31 +101,38 @@ const OPS = ['add', 'sub', 'mul', 'div', 'mixed'];
 const KINDS = ['whole', 'decimal', 'fraction', 'mixed'];
 const STEPS = ['single', 'multi', 'mixed'];
 
-function pool({ grade, op, kind, steps }) {
+const LEVELS = ['mixed', 'standard', 'challenge'];
+
+function pool({ grade, op, kind, steps, level = 'mixed' }) {
   return T.filter(
     (x) =>
       grade >= x.grades[0] && grade <= x.grades[1] &&
+      (level === 'mixed' || x.level === (level === 'challenge' ? 2 : 1)) &&
       (kind === 'mixed' || x.kind === kind) &&
       (op === 'mixed' || x.ops.includes(op)) &&
       (steps === 'mixed' || (steps === 'single' ? x.steps === 1 : x.steps > 1))
   );
 }
 
-function wordProblems(rng, { grade = 3, op = 'mixed', kind = 'whole', steps = 'mixed', count = 10 }) {
-  const available = pool({ grade, op, kind, steps });
+function wordProblems(rng, { grade = 3, op = 'mixed', kind = 'whole', steps = 'mixed', level = 'mixed', count = 10 }) {
+  const available = pool({ grade, op, kind, steps, level });
   if (!available.length) return { problems: [], error: 'No word problems match those choices for this grade. Try a different grade, number type or step setting.' };
   const out = [];
   const seen = new Set();
+  let deck = [];
   let guard = 0;
   while (out.length < count && guard++ < count * 40) {
-    // Rotate through templates so a sheet is varied before any template repeats.
-    const tpl = out.length < available.length * 4 ? available[(out.length + int(rng, 0, available.length - 1)) % available.length] : pick(rng, available);
+    // Walk a shuffled deck of templates so a sheet uses as many different structures as possible before repeating one.
+    if (deck.length === 0) deck = shuffle(rng, available);
+    const tpl = deck.pop();
     const p = tpl.make(rng, ctx(rng), grade);
     if (seen.has(p.text)) continue;
     seen.add(p.text);
-    out.push({ text: p.text, answerText: p.answerText, steps: tpl.steps, kind: tpl.kind });
+    out.push({ text: p.text, answerText: p.answerText, steps: tpl.steps, kind: tpl.kind, level: tpl.level });
   }
   return { problems: out, error: null };
 }
 
-module.exports = { wordProblems, pool, OPS, KINDS, STEPS, TEMPLATES: T, NAMES, EXTRA_NAMES };
+require('./wordProblemsExtra')(t, { PROFILE, int, pick, F, fmt, cents, dec });
+
+module.exports = { wordProblems, pool, ctx, OPS, KINDS, STEPS, LEVELS, TEMPLATES: T, NAMES, EXTRA_NAMES, THEMES };

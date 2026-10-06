@@ -21,5 +21,7 @@ function show(f) {
   return whole ? `${whole} ${rem}/${f.d}` : `${rem}/${f.d}`;
 }
 const raw = (n, d) => `${n}/${d}`;
+// Value with its unit: amounts of one or less take the singular ("1/2 cup", "1 cup"), more than one the plural ("1 1/2 cups").
+const unit = (f, one, many) => `${show(f)} ${f.n <= f.d ? one : many}`;
 
-module.exports = { gcd, lcm, frac, add, sub, mul, div, show, raw };
+module.exports = { gcd, lcm, frac, add, sub, mul, div, show, raw, unit };

@@ -282,3 +282,22 @@ test('x0/x1 and ÷1/÷10 option: checkbox on the forms, honoured on the sheet', 
   assert.doesNotMatch(off.slice(off.indexOf('<ol class="problems')), /<span class="n">[01]<\/span>/);
   assert.match((await agent.get('/math/division/worksheet?special=0&seed=3')).text, /\(no ÷1 or ÷10\)/);
 });
+
+test('word problems: difficulty setting on the form and on the sheet', async () => {
+  const agent = request.agent(app);
+  await login(agent, 'u@example.com');
+  const form = (await agent.get('/math/word-problems')).text;
+  assert.match(form, /name="level"/);
+  assert.match(form, /value="challenge"/);
+  const std = (await agent.get('/math/word-problems/worksheet?grade=4&level=standard&seed=8&count=10')).text;
+  assert.doesNotMatch(std, /\(challenge\)/);
+  const ch = (await agent.get('/math/word-problems/worksheet?grade=4&level=challenge&seed=8&count=10')).text;
+  assert.match(ch, /Grade 4 word problems \(challenge\)/);
+  assert.strictEqual(((await agent.get('/math/word-problems/worksheet?grade=3&level=bogus&seed=8')).status), 200); // bad value falls back to mixed
+  // every grade/number-type/difficulty combination either works or explains itself, and never shows a stack trace
+  for (let g = 1; g <= 5; g++) for (const kind of ['whole', 'decimal', 'fraction', 'mixed']) for (const level of ['mixed', 'standard', 'challenge']) {
+    const res = await agent.get(`/math/word-problems/worksheet?grade=${g}&kind=${kind}&level=${level}&seed=5&count=12`);
+    assert.ok([200, 422].includes(res.status), `${g} ${kind} ${level}: ${res.status}`);
+    if (res.status === 200) assert.ok((res.text.match(/class="workspace"/g) || []).length >= 1);
+  }
+});

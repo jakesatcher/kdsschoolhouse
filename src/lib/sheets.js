@@ -73,9 +73,10 @@ function build(pathname, q) {
         : mode === 'mixed' ? 'Mixed division (with remainders)' : divisor === 'all' ? 'Division facts 0-12 (mixed)' : `Division facts: divide by ${divisor}`) + (special ? '' : ' (no ÷1 or ÷10)');
       return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: mode === 'facts' ? 2 : 4, problems, perPage: PER_PAGE[base.layout] } };
     }
-    const result = wp.wordProblems(rng, { grade, op: oneOf(q.op, wp.OPS, 'mixed'), kind: oneOf(q.kind, wp.KINDS, 'whole'), steps: oneOf(q.steps, wp.STEPS, 'mixed'), count: intIn(q.count, 3, 20, 10) });
+    const level = oneOf(q.level, wp.LEVELS, 'mixed');
+    const result = wp.wordProblems(rng, { grade, level, op: oneOf(q.op, wp.OPS, 'mixed'), kind: oneOf(q.kind, wp.KINDS, 'whole'), steps: oneOf(q.steps, wp.STEPS, 'mixed'), count: intIn(q.count, 3, 20, 10) });
     if (result.error) return { ...meta, error: result.error };
-    const subtitle = `Grade ${grade} word problems`;
+    const subtitle = `Grade ${grade} word problems${level === 'challenge' ? ' (challenge)' : ''}`;
     return { ...meta, subtitle, partial: 'words', locals: { ...base, subtitle, problems: result.problems } };
   }
 
