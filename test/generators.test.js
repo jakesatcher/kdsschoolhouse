@@ -120,19 +120,17 @@ test('print: the phone-layout media query is screen-only (a printed page is ~720
   const bare = css.match(/@media\s*\(\s*max-width[^)]*\)/g) || [];
   assert.deepStrictEqual(bare, [], 'every max-width media query must be "screen and (max-width ...)"');
   assert.match(css, /@media screen and \(max-width: 760px\)/);
-  assert.match(css, /@media print\s*\{[\s\S]*ol\.problems \{ grid-template-columns: repeat\(4, 1fr\)/);
+  assert.match(css, /@media print\s*\{[\s\S]*ol\.problems \{ grid-template-columns: repeat\(5, 1fr\)/);
 });
 
-test('print: fit step shrinks with problem count and always has a matching CSS rule', () => {
-  const { fitFor, FITS } = require('../src/lib/sheets');
+test('print layout: vertical 5 columns x 5 rows (25/page), horizontal 3 columns x 5 rows (15/page)', () => {
+  const { PER_PAGE } = require('../src/lib/sheets');
+  assert.deepStrictEqual(PER_PAGE, { vertical: 25, horizontal: 15 });
   const css = require('fs').readFileSync(require('path').join(__dirname, '..', 'public', 'css', 'app.css'), 'utf8');
-  for (const f of FITS.slice(1)) assert.match(css, new RegExp(`ol\\.problems\\.fit-${f.id} \\{ --lh: ${f.lh}px`), `css for fit-${f.id}`);
-  assert.strictEqual(fitFor(2, 10, 'vertical'), 'a');          // few problems: roomy
-  const order = 'abcdef';
-  const fits = [10, 20, 30, 40, 50].map((n) => order.indexOf(fitFor(2, n, 'vertical')));
-  assert.deepStrictEqual(fits, fits.slice().sort((a, b) => a - b), 'more problems never gets roomier');
-  assert.ok(order.indexOf(fitFor(3, 50, 'vertical')) >= order.indexOf(fitFor(2, 50, 'vertical')), 'three addends need at least as much shrink');
-  assert.ok(FITS.some((f) => f.id === fitFor(3, 50, 'vertical')));
+  const print = css.slice(css.indexOf('@media print', css.indexOf('Printing math worksheets')));
+  assert.match(print, /ol\.problems \{ grid-template-columns: repeat\(5, 1fr\); grid-auto-rows: 1\.6in/);
+  assert.match(print, /ol\.problems\.horizontal \{ grid-template-columns: repeat\(3, 1fr\)/);
+  assert.doesNotMatch(css, /fit-[a-f]/, 'the old shrink-to-fit classes are gone');
 });
 
 test('multi-digit multiplication: 1-4 digit number x 1-2 digit number, exact products', () => {
@@ -172,17 +170,6 @@ test('multi-digit division: up to 4-digit dividends by 1-2 digit divisors, with 
   const mixed = math.division(makeRng(3), { mode: 'multi', dividend: 'mixed', vdigits: 'mixed', remainders: 'mixed', count: 300 });
   assert.deepStrictEqual([...new Set(mixed.map((p) => len(p.operands[0])))].sort(), [2, 3, 4]);
   assert.deepStrictEqual([...new Set(mixed.map((p) => len(p.operands[1])))].sort(), [1, 2]);
-});
-
-test('print: work space shrinks (problems are never dropped) so a full page of long division still fits', () => {
-  const { fitSheet } = require('../src/lib/sheets');
-  const few = math.division(makeRng(1), { mode: 'multi', dividend: '4', vdigits: '2', count: 12 });
-  fitSheet(few, 'vertical');
-  assert.ok(few.every((p) => p.work === 3), 'plenty of room: full work space kept');
-  const many = math.division(makeRng(1), { mode: 'multi', dividend: '4', vdigits: '2', count: 50 });
-  fitSheet(many, 'vertical');
-  assert.strictEqual(many.length, 50);
-  assert.ok(many.every((p) => p.work < 3), 'work space trimmed to fit 50 on a page');
 });
 
 test('multi-digit ranges: 1-digit factors include 0 and 1, 2-digit factors/divisors include 10', () => {

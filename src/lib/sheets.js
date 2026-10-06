@@ -24,36 +24,10 @@ const isSheetPath = (p) => WORKSHEET_RE.some((re) => re.test(p));
 const validSeed = (q) => intIn(q.seed, 1, 2147483647, 0);
 const newSeed = () => Math.floor(Math.random() * 2147483646) + 1;
 
-// Print sizing for vertical/horizontal math sheets. Each step must match an `ol.problems.fit-*` rule in app.css
-// (lh = line height px, space = answer space under the rule). We pick the roomiest step whose rows fit the page.
-const FITS = [
-  { id: 'a', lh: 30, space: 34 }, { id: 'b', lh: 26, space: 22 }, { id: 'c', lh: 23, space: 14 },
-  { id: 'd', lh: 20, space: 10 }, { id: 'e', lh: 18, space: 8 }, { id: 'f', lh: 15, space: 5 },
-];
-const PRINT_BUDGET_PX = 820;
-const digitLabel = (v, mixedText) => (v === 'mixed' ? `${mixedText}-digit` : `${v}-digit`); // usable height for the problem grid on Letter with 0.5in margins, after the header
-function fitsOnPage(lines, count, layout) {
-  const cols = layout === 'horizontal' ? 2 : 4;
-  const rows = Math.ceil(count / cols);
-  const rowHeight = (f) => (layout === 'horizontal' ? f.lh + 10 : lines * f.lh + f.space + 8);
-  const f = FITS.find((x) => rows * rowHeight(x) <= PRINT_BUDGET_PX);
-  return f ? f.id : null;
-}
-const fitFor = (lines, count, layout) => fitsOnPage(lines, count, layout) || FITS[FITS.length - 1].id;
-
-// Multi-digit problems ask for extra work lines. If the page is too full for that (e.g. 50 long-division problems),
-// trim the work space until everything fits on one page; the problems themselves are never dropped.
-function fitSheet(problems, layout) {
-  const want = Math.max(0, ...problems.map((p) => p.work || 0));
-  for (let cap = want; cap >= 0; cap--) {
-    const id = fitsOnPage(2 + cap, problems.length, layout);
-    if (id) {
-      problems.forEach((p) => { if (p.work > cap) p.work = cap; });
-      return id;
-    }
-  }
-  return FITS[FITS.length - 1].id;
-}
+// Print layout: vertical sheets are 5 columns x 5 rows (25 problems per page), horizontal sheets 3 columns x 5 rows
+// (15 per page). Longer sheets continue on more pages. These must match the grid rules in public/css/app.css.
+const PER_PAGE = { vertical: 25, horizontal: 15 };
+const digitLabel = (v, mixedText) => (v === 'mixed' ? `${mixedText}-digit` : `${v}-digit`);
 
 function build(pathname, q) {
   const seed = validSeed(q) || newSeed();
@@ -73,7 +47,7 @@ function build(pathname, q) {
         ? math.addition(rng, { digits, count, addends: intIn(q.addends, 2, 3, 2), regroup })
         : math.subtraction(rng, { digits, count, regroup });
       const subtitle = `${digits}-digit ${type}${regroup === 'any' ? '' : ' with regrouping'}`;
-      return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits, problems, fit: fitFor(Math.max(...problems.map((p) => p.operands.length)), problems.length, base.layout) } };
+      return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits, problems, perPage: PER_PAGE[base.layout] } };
     }
     if (type === 'multiplication') {
       const mode = oneOf(q.mode, ['facts', 'multi', 'mixed'], 'facts');
@@ -84,7 +58,7 @@ function build(pathname, q) {
       const problems = math.multiplication(rng, { mode, factor, top, bottom, special, count: intIn(q.count, 5, 60, 30) });
       const subtitle = (mode === 'multi' ? `Multiplication: ${digitLabel(top, '1 to 4')} number × ${digitLabel(bottom, '1 to 2')} number`
         : mode === 'mixed' ? 'Mixed multiplication' : factor === 'all' ? 'Multiplication facts 0-12 (mixed)' : `Multiplication facts: ${factor}s`) + (special ? '' : ' (no ×0 or ×1)');
-      return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: mode === 'facts' ? 2 : 3, problems, fit: fitSheet(problems, base.layout) } };
+      return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: mode === 'facts' ? 2 : 3, problems, perPage: PER_PAGE[base.layout] } };
     }
     if (type === 'division') {
       const mode = oneOf(q.mode, ['facts', 'multi', 'mixed'], 'facts');
@@ -97,7 +71,7 @@ function build(pathname, q) {
       const remText = { none: 'no remainders', with: 'with remainders', mixed: 'with and without remainders' }[remainders];
       const subtitle = (mode === 'multi' ? `Division: ${digitLabel(dividend, '2 to 4')} dividend ÷ ${digitLabel(vdigits, '1 to 2')} divisor, ${remText}`
         : mode === 'mixed' ? 'Mixed division (with remainders)' : divisor === 'all' ? 'Division facts 0-12 (mixed)' : `Division facts: divide by ${divisor}`) + (special ? '' : ' (no ÷1 or ÷10)');
-      return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: mode === 'facts' ? 2 : 4, problems, fit: fitSheet(problems, base.layout) } };
+      return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: mode === 'facts' ? 2 : 4, problems, perPage: PER_PAGE[base.layout] } };
     }
     const result = wp.wordProblems(rng, { grade, op: oneOf(q.op, wp.OPS, 'mixed'), kind: oneOf(q.kind, wp.KINDS, 'whole'), steps: oneOf(q.steps, wp.STEPS, 'mixed'), count: intIn(q.count, 3, 20, 10) });
     if (result.error) return { ...meta, error: result.error };
@@ -147,4 +121,4 @@ function fromUrl(url) {
   return { built, url: `${pathname}?${search}` };
 }
 
-module.exports = { fitFor, fitSheet, FITS, build, fromUrl, isSheetPath, validSeed, newSeed, MATH_TYPES, WRITING_TYPES };
+module.exports = { PER_PAGE, build, fromUrl, isSheetPath, validSeed, newSeed, MATH_TYPES, WRITING_TYPES };

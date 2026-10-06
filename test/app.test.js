@@ -98,14 +98,26 @@ test('approved user signs in, sees worksheets; admin pages are forbidden', async
   assert.strictEqual((await agent.post('/admin/users/1/approve').type('form').send({ _csrf: csrf })).status, 403);
 });
 
-test('math worksheets accept up to 50 problems (60 for facts) and carry a print fit class', async () => {
+test('math worksheets paginate: 25 vertical / 15 horizontal per page, numbering continues, up to 50 (60 facts) allowed', async () => {
   const agent = request.agent(app);
   await login(agent, 'u@example.com');
-  const html = (await agent.get('/math/addition/worksheet?digits=3&count=50&seed=9')).text;
-  assert.strictEqual((html.match(/<div class="vp">/g) || []).length, 50);
-  assert.match(html, /class="problems vertical d3 fit-[a-f]"/);
-  assert.strictEqual(((await agent.get('/math/multiplication/worksheet?count=60&seed=9')).text.match(/<div class="vp">/g) || []).length, 60);
+  const count = (html, re) => (html.match(re) || []).length;
+  const v = (await agent.get('/math/addition/worksheet?digits=3&count=50&seed=9&key=0')).text;
+  assert.strictEqual(count(v, /<div class="vp">/g), 50);
+  assert.strictEqual(count(v, /<ol class="problems vertical d3">/g), 2); // two pages of 25
+  assert.match(v, /<span class="pn">26\.<\/span>/); // page 2 continues the numbering
+  assert.strictEqual(count(v, /<span class="pn">25\.<\/span>/g), 1);
+  const one = (await agent.get('/math/addition/worksheet?digits=3&count=25&seed=9&key=0')).text;
+  assert.strictEqual(count(one, /<ol class="problems/g), 1);
+  const small = (await agent.get('/math/addition/worksheet?digits=3&count=20&seed=9&key=0')).text;
+  assert.strictEqual(count(small, /<ol class="problems/g), 1);
+  const h = (await agent.get('/math/addition/worksheet?digits=3&count=40&layout=horizontal&seed=9&key=0')).text;
+  assert.strictEqual(count(h, /<ol class="problems horizontal/g), 3); // 15 + 15 + 10
+  assert.strictEqual(count(h, /class="hp"/g), 40);
+  assert.strictEqual(count((await agent.get('/math/multiplication/worksheet?count=60&seed=9&key=0')).text, /<div class="vp">/g), 60);
   assert.match((await agent.get('/math/addition')).text, /<option[^>]*>50<\/option>/);
+  // each page repeats the title and name/date header
+  assert.strictEqual(count(v, /Name: <i class="blank">/g), 2);
 });
 
 test('every worksheet type renders for a signed-in user, and bad parameters fall back safely', async () => {

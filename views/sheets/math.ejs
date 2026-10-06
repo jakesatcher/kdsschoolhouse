@@ -1,9 +1,12 @@
+<% const pages = []; for (let i = 0; i < problems.length; i += perPage) pages.push(problems.slice(i, i + perPage)); %>
+<% pages.forEach(function (page, pi) { %>
 <article class="sheet">
   <%- include('_head') %>
-  <ol class="problems <%= layout %> d<%= digits %> fit-<%= fit %>">
-    <% problems.forEach(function (p) { %><li><%- include('../learn/_vproblem', { p, layout }) %></li><% }) %>
+  <ol class="problems <%= layout %> d<%= digits %>">
+    <% page.forEach(function (p, i) { %><li><span class="pn"><%= pi * perPage + i + 1 %>.</span><%- include('../learn/_vproblem', { p, layout }) %></li><% }) %>
   </ol>
 </article>
+<% }) %>
 <% if (includeKey) { %>
 <article class="sheet key">
   <h1>Answer Key</h1><p class="sheet-sub"><%= subtitle %></p>
