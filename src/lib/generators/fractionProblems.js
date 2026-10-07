@@ -24,7 +24,7 @@ function denominators(rng, den, maxDen) {
   if (like) return [d1, d1];
   for (let i = 0; i < 100; i++) {
     const d2 = int(rng, 2, maxDen);
-    if (d2 !== d1 && F.lcm(d1, d2) <= 72) return [d1, d2];
+    if (d2 !== d1 && F.lcm(d1, d2) <= Math.max(72, maxDen * 6)) return [d1, d2];
   }
   return [d1, d1 === 2 ? 3 : 2];
 }
@@ -51,7 +51,8 @@ function fractionProblems(rng, { op = 'add', den = 'mixed', form = 'proper', max
     }
     if (op === 'div' && a.n === 0 && b.n === 0) continue;
     const result = { add: F.add, sub: F.sub, mul: F.mul, div: F.div }[op](va, vb);
-    if (result.d > (op === 'add' || op === 'sub' ? 72 : 64) || result.n > 80) continue;
+    const big = Math.max(maxDen > 12 ? 400 : 0, 80); // larger denominators allow larger (but still exact) results
+    if (result.d > (op === 'add' || op === 'sub' ? Math.max(72, maxDen * 6) : Math.max(64, maxDen * maxDen)) || result.n > big) continue;
     if (text(a) === text(b)) continue;
     const key = `${text(a)}${sym}${text(b)}`;
     if (seen.has(key) && guard < count * 100) continue; // repeats only when the choices are nearly used up

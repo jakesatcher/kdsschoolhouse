@@ -86,3 +86,17 @@ test('decimals: whole-number part goes up to the thousands', () => {
   }
   assert.strictEqual(sheets.build('/math/decimals/worksheet', { op: 'add', digits: '4', seed: '2' }).locals.digits, 8);
 });
+
+test('fractions: largest denominator goes up to 20 and is respected', () => {
+  for (const op of ['add', 'sub', 'mul', 'div']) {
+    for (const den of ['like', 'unlike', 'mixed']) {
+      const ps = fractionProblems(makeRng(31), { op, den, form: 'mix', maxDen: 20, count: 50 });
+      assert.strictEqual(ps.length, 50, `${op}/${den}`);
+      for (const p of ps) p.operands.forEach((o) => assert.ok(o.d <= 20 && (o.n === 0 || o.d >= 2)));
+      assert.ok(ps.some((p) => p.operands.some((o) => o.d > 12)), `${op}/${den} uses the larger denominators`);
+    }
+  }
+  assert.strictEqual(sheets.build('/math/fractions/worksheet', { op: 'add', maxden: '20', seed: '3' }).locals.problems.length, 20);
+  const over = sheets.build('/math/fractions/worksheet', { op: 'add', maxden: '99', seed: '3' }).locals.problems;
+  assert.ok(over.every((p) => p.operands.every((o) => o.d <= 8)), 'out-of-range value falls back to the default');
+});

@@ -92,7 +92,7 @@ function build(pathname, q) {
       const form = oneOf(q.form, ['proper', 'mixed', 'mix'], 'proper');
       // multiplying and dividing fractions are written across the page; adding and subtracting can be stacked
       const layout = op === 'add' || op === 'sub' ? base.layout : 'horizontal';
-      const problems = fractionProblems(rng, { op, den, form, maxDen: intIn(q.maxden, 4, 12, 8), count: intIn(q.count, 5, 50, 20) });
+      const problems = fractionProblems(rng, { op, den, form, maxDen: intIn(q.maxden, 4, 20, 8), count: intIn(q.count, 5, 50, 20) });
       const verb = { add: 'addition', sub: 'subtraction', mul: 'multiplication', div: 'division' }[op];
       const subtitle = `Fraction ${verb} (${{ like: 'like denominators', unlike: 'unlike denominators', mixed: 'like and unlike denominators' }[den]}${form === 'mixed' ? ', mixed numbers' : form === 'mix' ? ', fractions and mixed numbers' : ''})`;
       return { ...meta, subtitle, partial: 'math', locals: { ...base, layout, subtitle, digits: 3, problems, perPage: PER_PAGE[layout] } };

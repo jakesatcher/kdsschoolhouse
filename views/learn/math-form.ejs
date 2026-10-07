@@ -58,7 +58,7 @@
       <label>Operation <select name="op"><%- opts('op', [['add', 'Addition'], ['sub', 'Subtraction'], ['mul', 'Multiplication'], ['div', 'Division']], 'add') %></select></label>
       <label>Denominators <select name="den"><%- opts('den', [['like', 'Like (same) denominators'], ['unlike', 'Unlike (different) denominators'], ['mixed', 'A mix of like and unlike']], 'unlike') %></select></label>
       <label>Numbers <select name="form"><%- opts('form', [['proper', 'Fractions'], ['mixed', 'Mixed numbers'], ['mix', 'Fractions, mixed numbers and (for × and ÷) whole numbers']], 'proper') %></select></label>
-      <label>Largest denominator <select name="maxden"><%- opts('maxden', [['4', '4'], ['6', '6'], ['8', '8'], ['10', '10'], ['12', '12']], '8') %></select></label>
+      <label>Largest denominator <select name="maxden"><%- opts('maxden', [['4', '4'], ['6', '6'], ['8', '8'], ['10', '10'], ['12', '12'], ['15', '15'], ['20', '20']], '8') %></select></label>
       <label>Problems <select name="count"><% [10, 15, 20, 25, 30, 40, 50].forEach(function (n) { %><option <%= String(q.count || 20) === String(n) ? 'selected' : '' %>><%= n %></option><% }) %></select></label>
       <label>Layout <small class="muted">(× and ÷ are always across)</small> <select name="layout"><%- opts('layout', [['vertical', 'Vertical (stacked)'], ['horizontal', 'Horizontal']], 'vertical') %></select></label>
       <p class="muted small-text">Answers are in simplest form (improper results shown as mixed numbers). Multiplication and division are always written across the page.</p>
