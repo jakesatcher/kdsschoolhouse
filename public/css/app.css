@@ -174,7 +174,7 @@ ol.questions { padding-left: 24px; } ol.questions li { margin-bottom: 14px; brea
 @media print {
   ol.problems { grid-template-columns: repeat(5, 1fr); grid-auto-rows: 1.6in; gap: 0 10px; --lh: 26px; --fs: 18px; --space: 20px; }
   ol.problems.horizontal { grid-template-columns: repeat(3, 1fr); }
-  ol.problems.d6, ol.problems.d7 { --fs: 16px; --lh: 24px; } /* 6-7 digit numbers: keep five columns readable */
+  ol.problems.d6, ol.problems.d7, ol.problems.d8 { --fs: 16px; --lh: 24px; } /* 6-7 digit numbers: keep five columns readable */
   ol.problems li { min-height: 0; padding-left: 23px; }
   ol.problems .pn { font-size: .7rem; }
   ol.problems .vp { font-size: var(--fs); }

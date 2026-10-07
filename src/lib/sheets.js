@@ -79,7 +79,7 @@ function build(pathname, q) {
       const op = oneOf(q.op, ['add', 'sub', 'mul', 'div'], 'add');
       const places = oneOf(q.places, ['1', '2', '3', 'mixed'], '2');
       const second = oneOf(q.second, ['whole', 'decimal', 'mixed'], 'whole');
-      const digits = intIn(q.digits, 1, 3, op === 'add' || op === 'sub' ? 2 : 1);
+      const digits = intIn(q.digits, 1, 4, op === 'add' || op === 'sub' ? 2 : 1);
       const problems = decimals(rng, { op, places, digits, second, addends: intIn(q.addends, 2, 3, 2), count: intIn(q.count, 5, 50, 20) });
       const placeText = { 1: 'tenths', 2: 'hundredths', 3: 'thousandths', mixed: 'tenths to thousandths' }[places];
       const verb = { add: 'addition', sub: 'subtraction', mul: 'multiplication', div: 'division' }[op];

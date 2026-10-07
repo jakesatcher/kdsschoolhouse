@@ -84,9 +84,11 @@ function divide(rng, { digits = 1, places = '2', count = 20, second = 'whole' })
     const qp = Math.max(0, p - dp); // dividend always has p places
     const divisor = asDecimal ? pick(rng, [2, 3, 4, 5, 6, 8, 12, 15, 24, 25, 32, 45]) : pick(rng, [2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 15, 25]);
     if (asDecimal && divisor % 10 === 0) continue;
-    const q = decimal(rng, digits, qp);
+    // "digits" is the size of the number being divided: the quotient has fewer digits (a 1-digit answer for 1 and 2 digits)
+    const q = decimal(rng, Math.max(1, digits - 1), qp);
     if (q.value <= 0) continue;
     const dividend = divisor * q.value;
+    if (digits >= 2 && Math.floor(dividend / 10 ** p) > 10 ** digits - 1) continue;
     out.push({
       op: '÷',
       operands: [trim(dividend, dp + qp), show(divisor, dp)],

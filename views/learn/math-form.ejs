@@ -47,7 +47,7 @@
       <% const opts = function (name, list, dflt) { return list.map(function (o) { return '<option value="' + o[0] + '"' + ((q[name] || dflt) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join(''); }; %>
       <label>Operation <select name="op"><%- opts('op', [['add', 'Addition'], ['sub', 'Subtraction'], ['mul', 'Multiplication'], ['div', 'Division']], 'add') %></select></label>
       <label>Decimal places <select name="places"><%- opts('places', [['1', 'Tenths (1 place)'], ['2', 'Hundredths (2 places)'], ['3', 'Thousandths (3 places)'], ['mixed', 'Mixed: 1 to 3 places in a problem']], '2') %></select></label>
-      <label>Digits before the point <select name="digits"><%- opts('digits', [['1', '1 digit'], ['2', '2 digits'], ['3', '3 digits']], (q.op === 'mul' || q.op === 'div') ? '1' : '2') %></select></label>
+      <label>Whole-number digits (before the point) <select name="digits"><%- opts('digits', [['1', '1 digit'], ['2', '2 digits'], ['3', '3 digits'], ['4', '4 digits (thousands)']], (q.op === 'mul' || q.op === 'div') ? '1' : '2') %></select></label>
       <label data-show-if="op:add">Addends <select name="addends"><%- opts('addends', [['2', '2 numbers'], ['3', '3 numbers']], '2') %></select></label>
       <label>Second number <small class="muted">(multiplying and dividing only)</small> <select name="second"><%- opts('second', [['whole', 'Whole number'], ['decimal', 'Decimal'], ['mixed', 'A mix of both']], 'whole') %></select></label>
       <label>Problems <select name="count"><% [10, 15, 20, 25, 30, 40, 50].forEach(function (n) { %><option <%= String(q.count || 20) === String(n) ? 'selected' : '' %>><%= n %></option><% }) %></select></label>

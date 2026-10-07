@@ -15,7 +15,7 @@ test('decimals: every answer is exact and no place exceeds thousandths', () => {
   for (const op of ['add', 'sub', 'mul', 'div']) {
     for (const pl of ['1', '2', '3', 'mixed']) {
       for (const second of ['whole', 'decimal', 'mixed']) {
-        const ps = decimals(makeRng(11), { op, places: pl, digits: 2, second, addends: 3, count: 40 });
+        const ps = decimals(makeRng(11), { op, places: pl, digits: 4, second, addends: 3, count: 40 });
         assert.strictEqual(ps.length, 40);
         for (const p of ps) {
           const [a, b, c] = p.operands.map(num);
@@ -76,4 +76,13 @@ test('sheets: decimals and fractions build, validate input, and stay reproducibl
   }
   assert.strictEqual(sheets.build('/math/fractions/worksheet', { op: 'div', layout: 'vertical', seed: '3' }).locals.layout, 'horizontal');
   assert.strictEqual(sheets.build('/math/fractions/worksheet', { op: 'add', layout: 'vertical', seed: '3' }).locals.layout, 'vertical');
+});
+
+test('decimals: whole-number part goes up to the thousands', () => {
+  for (const op of ['add', 'sub', 'mul', 'div']) {
+    const ps = decimals(makeRng(8), { op, places: '3', digits: 4, count: 30, second: 'whole', addends: 2 });
+    assert.ok(ps.some((p) => num(p.operands[0].split('.')[0]) >= 1000), op);
+    assert.ok(ps.every((p) => num(p.operands[0].split('.')[0]) <= 9999), op); // the number being divided is also at most 4 digits
+  }
+  assert.strictEqual(sheets.build('/math/decimals/worksheet', { op: 'add', digits: '4', seed: '2' }).locals.digits, 8);
 });
