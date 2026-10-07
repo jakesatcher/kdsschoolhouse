@@ -43,6 +43,25 @@
       <label class="check"><input type="hidden" name="special" value="0"><input type="checkbox" name="special" value="1" <%= q.special === undefined || q.special === '1' || (Array.isArray(q.special) && q.special[q.special.length - 1] === '1') ? 'checked' : '' %>> <%= type === 'multiplication' ? 'Include multiplying by 0 and 1' : 'Include dividing by 1 and 10' %></label>
       <p class="muted small-text">Multi-digit problems leave extra work space under each one, so use fewer problems per page (about 12 to 20) for long division.</p>
       <label>Layout <select name="layout"><option value="vertical"><%= type === 'division' ? 'Long-division bracket' : 'Vertical (stacked)' %></option><option value="horizontal" <%= q.layout === 'horizontal' ? 'selected' : '' %>>Horizontal</option></select></label>
+    <% } else if (type === 'decimals') { %>
+      <% const opts = function (name, list, dflt) { return list.map(function (o) { return '<option value="' + o[0] + '"' + ((q[name] || dflt) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join(''); }; %>
+      <label>Operation <select name="op"><%- opts('op', [['add', 'Addition'], ['sub', 'Subtraction'], ['mul', 'Multiplication'], ['div', 'Division']], 'add') %></select></label>
+      <label>Decimal places <select name="places"><%- opts('places', [['1', 'Tenths (1 place)'], ['2', 'Hundredths (2 places)'], ['3', 'Thousandths (3 places)'], ['mixed', 'Mixed: 1 to 3 places in a problem']], '2') %></select></label>
+      <label>Digits before the point <select name="digits"><%- opts('digits', [['1', '1 digit'], ['2', '2 digits'], ['3', '3 digits']], (q.op === 'mul' || q.op === 'div') ? '1' : '2') %></select></label>
+      <label data-show-if="op:add">Addends <select name="addends"><%- opts('addends', [['2', '2 numbers'], ['3', '3 numbers']], '2') %></select></label>
+      <label>Second number <small class="muted">(multiplying and dividing only)</small> <select name="second"><%- opts('second', [['whole', 'Whole number'], ['decimal', 'Decimal'], ['mixed', 'A mix of both']], 'whole') %></select></label>
+      <label>Problems <select name="count"><% [10, 15, 20, 25, 30, 40, 50].forEach(function (n) { %><option <%= String(q.count || 20) === String(n) ? 'selected' : '' %>><%= n %></option><% }) %></select></label>
+      <label>Layout <select name="layout"><%- opts('layout', [['vertical', 'Vertical (stacked, points lined up)'], ['horizontal', 'Horizontal']], 'vertical') %></select></label>
+      <p class="muted small-text">Division problems always come out evenly (no repeating decimals). Using a decimal divisor means moving the point first.</p>
+    <% } else if (type === 'fractions') { %>
+      <% const opts = function (name, list, dflt) { return list.map(function (o) { return '<option value="' + o[0] + '"' + ((q[name] || dflt) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join(''); }; %>
+      <label>Operation <select name="op"><%- opts('op', [['add', 'Addition'], ['sub', 'Subtraction'], ['mul', 'Multiplication'], ['div', 'Division']], 'add') %></select></label>
+      <label>Denominators <select name="den"><%- opts('den', [['like', 'Like (same) denominators'], ['unlike', 'Unlike (different) denominators'], ['mixed', 'A mix of like and unlike']], 'unlike') %></select></label>
+      <label>Numbers <select name="form"><%- opts('form', [['proper', 'Fractions'], ['mixed', 'Mixed numbers'], ['mix', 'Fractions, mixed numbers and (for × and ÷) whole numbers']], 'proper') %></select></label>
+      <label>Largest denominator <select name="maxden"><%- opts('maxden', [['4', '4'], ['6', '6'], ['8', '8'], ['10', '10'], ['12', '12']], '8') %></select></label>
+      <label>Problems <select name="count"><% [10, 15, 20, 25, 30, 40, 50].forEach(function (n) { %><option <%= String(q.count || 20) === String(n) ? 'selected' : '' %>><%= n %></option><% }) %></select></label>
+      <label>Layout <small class="muted">(× and ÷ are always across)</small> <select name="layout"><%- opts('layout', [['vertical', 'Vertical (stacked)'], ['horizontal', 'Horizontal']], 'vertical') %></select></label>
+      <p class="muted small-text">Answers are in simplest form (improper results shown as mixed numbers). Multiplication and division are always written across the page.</p>
     <% } else { %>
       <label>Grade level <select name="grade"><% grades.forEach(function (g) { %><option value="<%= g %>" <%= String(q.grade || 3) === String(g) ? 'selected' : '' %>>Grade <%= g %></option><% }) %></select></label>
       <label>Operation <select name="op"><% ops.forEach(function (o) { %><option value="<%= o %>" <%= q.op === o ? 'selected' : '' %>><%= { add: 'Addition', sub: 'Subtraction', mul: 'Multiplication', div: 'Division', mixed: 'All operations (mixed)' }[o] %></option><% }) %></select></label>

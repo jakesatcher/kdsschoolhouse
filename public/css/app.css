@@ -184,3 +184,13 @@ ol.questions { padding-left: 24px; } ol.questions li { margin-bottom: 14px; brea
   ol.problems .div-bracket .divisor { padding-top: 4px; }
   .sheet-head h1 { font-size: 1.3rem; } .namedate { margin: 4px 0 10px; } .sheet-sub { margin-bottom: 2px; }
 }
+
+/* stacked fractions and mixed numbers */
+.mn { display: inline-flex; align-items: center; gap: 4px; vertical-align: middle; }
+.mn .wh { font-size: 1.1em; }
+.fr { display: inline-flex; flex-direction: column; align-items: center; line-height: 1.15; }
+.fr .nu { border-bottom: 2px solid currentColor; padding: 0 4px; }
+.fr .de { padding: 0 4px; }
+.vp .pad { visibility: hidden; } /* invisible zeros that line up the decimal points */
+.fvp .row { align-items: center; padding: 3px 0; }
+.fhp { display: flex; align-items: center; gap: 8px; }

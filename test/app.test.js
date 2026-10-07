@@ -8,7 +8,7 @@ const app = createApp();
 test.before(resetDb);
 test.after(() => db.pool.end());
 
-const PROTECTED = ['/', '/math/addition', '/math/addition/worksheet?digits=3', '/math/word-problems', '/reading/phonics', '/reading/phonics/worksheet?category=cvc&subtype=all',
+const PROTECTED = ['/', '/math/addition', '/math/decimals', '/math/fractions', '/math/fractions/worksheet?op=add&seed=3', '/math/addition/worksheet?digits=3', '/math/word-problems', '/reading/phonics', '/reading/phonics/worksheet?category=cvc&subtype=all',
   '/reading/sight-words', '/reading/sight-words/worksheet?list=primer', '/writing', '/writing/worksheet', '/admin/users', '/admin/audit', '/account/password'];
 
 test('unauthenticated visitors only see login/register; everything else redirects to /login', async () => {

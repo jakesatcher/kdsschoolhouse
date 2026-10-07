@@ -10,6 +10,6 @@
 <% if (includeKey) { %>
 <article class="sheet key">
   <h1>Answer Key</h1><p class="sheet-sub"><%= subtitle %></p>
-  <ol class="keylist"><% problems.forEach(function (p) { %><li><%= p.operands.map(function (n) { return Number(n).toLocaleString('en-US'); }).join(' ' + p.op + ' ') %> = <strong><%= p.answerText %></strong></li><% }) %></ol>
+  <ol class="keylist"><% problems.forEach(function (p) { %><li><%= p.expr || p.operands.map(function (n) { return typeof n === 'string' ? n : Number(n).toLocaleString('en-US'); }).join(' ' + p.op + ' ') %> = <strong><%= p.answerText %></strong></li><% }) %></ol>
 </article>
 <% } %>

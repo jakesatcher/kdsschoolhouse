@@ -6,15 +6,17 @@ const querystring = require('querystring');
 const { oneOf, intIn, flag, str } = require('./params');
 const { makeRng } = require('./generators/rng');
 const math = require('./generators/math');
+const { decimals } = require('./generators/decimals');
+const { fractionProblems } = require('./generators/fractionProblems');
 const wp = require('./generators/wordProblems');
 const { phonics } = require('./generators/phonics');
 const { sightWords } = require('./generators/sight');
 const { writing, TYPES: WRITING_TYPES } = require('./generators/writing');
 
-const MATH_TYPES = { addition: 'Addition', subtraction: 'Subtraction', multiplication: 'Multiplication', division: 'Division', 'word-problems': 'Word Problems' };
+const MATH_TYPES = { addition: 'Addition', subtraction: 'Subtraction', multiplication: 'Multiplication', division: 'Division', decimals: 'Decimals', fractions: 'Fractions', 'word-problems': 'Word Problems' };
 
 const WORKSHEET_RE = [
-  /^\/math\/(addition|subtraction|multiplication|division|word-problems)\/worksheet$/,
+  /^\/math\/(addition|subtraction|multiplication|division|decimals|fractions|word-problems)\/worksheet$/,
   /^\/reading\/phonics\/worksheet$/,
   /^\/reading\/sight-words\/worksheet$/,
   /^\/writing\/worksheet$/,
@@ -72,6 +74,28 @@ function build(pathname, q) {
       const subtitle = (mode === 'multi' ? `Division: ${digitLabel(dividend, '2 to 4')} dividend ÷ ${digitLabel(vdigits, '1 to 2')} divisor, ${remText}`
         : mode === 'mixed' ? 'Mixed division (with remainders)' : divisor === 'all' ? 'Division facts 0-12 (mixed)' : `Division facts: divide by ${divisor}`) + (special ? '' : ' (no ÷1 or ÷10)');
       return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: mode === 'facts' ? 2 : 4, problems, perPage: PER_PAGE[base.layout] } };
+    }
+    if (type === 'decimals') {
+      const op = oneOf(q.op, ['add', 'sub', 'mul', 'div'], 'add');
+      const places = oneOf(q.places, ['1', '2', '3', 'mixed'], '2');
+      const second = oneOf(q.second, ['whole', 'decimal', 'mixed'], 'whole');
+      const digits = intIn(q.digits, 1, 3, op === 'add' || op === 'sub' ? 2 : 1);
+      const problems = decimals(rng, { op, places, digits, second, addends: intIn(q.addends, 2, 3, 2), count: intIn(q.count, 5, 50, 20) });
+      const placeText = { 1: 'tenths', 2: 'hundredths', 3: 'thousandths', mixed: 'tenths to thousandths' }[places];
+      const verb = { add: 'addition', sub: 'subtraction', mul: 'multiplication', div: 'division' }[op];
+      const subtitle = `Decimal ${verb} (${placeText})`;
+      return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: digits + 4, problems, perPage: PER_PAGE[base.layout] } };
+    }
+    if (type === 'fractions') {
+      const op = oneOf(q.op, ['add', 'sub', 'mul', 'div'], 'add');
+      const den = oneOf(q.den, ['like', 'unlike', 'mixed'], 'unlike');
+      const form = oneOf(q.form, ['proper', 'mixed', 'mix'], 'proper');
+      // multiplying and dividing fractions are written across the page; adding and subtracting can be stacked
+      const layout = op === 'add' || op === 'sub' ? base.layout : 'horizontal';
+      const problems = fractionProblems(rng, { op, den, form, maxDen: intIn(q.maxden, 4, 12, 8), count: intIn(q.count, 5, 50, 20) });
+      const verb = { add: 'addition', sub: 'subtraction', mul: 'multiplication', div: 'division' }[op];
+      const subtitle = `Fraction ${verb} (${{ like: 'like denominators', unlike: 'unlike denominators', mixed: 'like and unlike denominators' }[den]}${form === 'mixed' ? ', mixed numbers' : form === 'mix' ? ', fractions and mixed numbers' : ''})`;
+      return { ...meta, subtitle, partial: 'math', locals: { ...base, layout, subtitle, digits: 3, problems, perPage: PER_PAGE[layout] } };
     }
     const level = oneOf(q.level, wp.LEVELS, 'mixed');
     const result = wp.wordProblems(rng, { grade, level, op: oneOf(q.op, wp.OPS, 'mixed'), kind: oneOf(q.kind, wp.KINDS, 'whole'), steps: oneOf(q.steps, wp.STEPS, 'mixed'), count: intIn(q.count, 3, 20, 10) });
