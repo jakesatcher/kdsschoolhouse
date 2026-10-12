@@ -33,3 +33,15 @@ test('ADMIN_RESET_PASSWORD recovers a locked-out admin, forces a new password, a
   assert.strictEqual(res.headers.location, '/account/password');
   assert.ok(await db.one(`SELECT 1 FROM audit_log WHERE action = 'admin_password_reset_by_env'`));
 });
+
+test('admin bootstrap finds the account by email when the username differs, and never crashes on a clash', async () => {
+  await resetDb();
+  await db.query(`INSERT INTO users (username, email, name, password_hash, role, status) VALUES ('oldadmin', 'boss@example.com', 'Boss', 'x', 'admin', 'approved')`);
+  Object.assign(config.bootstrapAdmin, { username: 'admin', email: 'boss@example.com', password: 'another temp passphrase', reset: true });
+  const warn = console.warn; console.warn = () => {};
+  try { await bootstrapAdmin(); } finally { console.warn = warn; config.bootstrapAdmin.reset = false; }
+  assert.strictEqual((await db.one('SELECT count(*)::int AS n FROM users')).n, 1, 'no second account is created');
+  const agent = request.agent(createApp());
+  assert.strictEqual((await login(agent, 'oldadmin', 'another temp passphrase')).headers.location, '/account/password');
+  Object.assign(config.bootstrapAdmin, { username: null, email: null, password: undefined });
+});
