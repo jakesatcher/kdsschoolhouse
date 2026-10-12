@@ -33,7 +33,7 @@ const note = (...s) => ({ t: 'note', seg: segs(...s) });
 const line = (post = '', pre = '') => ({ t: 'line', pre, post });
 const space = (size = 'm') => ({ t: 'space', size });
 const svgBlock = (svg, caption, wide = false) => ({ t: 'svg', svg, caption, wide });
-const cell = (blocks, answer) => ({ blocks, answer });
+const cell = (blocks, answer, meta) => (meta ? { blocks, answer, meta } : { blocks, answer });
 
 const fmt = (n) => Number(n).toLocaleString('en-US');
 

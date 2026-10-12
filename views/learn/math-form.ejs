@@ -56,9 +56,9 @@
     <% } else if (type === 'spiral-review') { %>
       <% const opts = function (name, list, dflt) { return list.map(function (o) { return '<option value="' + o[0] + '"' + (String(q[name] || dflt) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join(''); }; %>
       <label>Grade level <select name="grade"><%- opts('grade', [['4', 'Grade 4'], ['5', 'Grade 5']], '5') %></select></label>
-      <label>Test number <small class="muted">(skills build from test to test, and each test reviews the ones before it)</small> <select name="test"><% for (let n = 1; n <= 30; n++) { %><option value="<%= n %>" <%= String(q.test || 1) === String(n) ? 'selected' : '' %>>Test <%= n %></option><% } %></select></label>
+      <label>Practice number <small class="muted">(skills build from practice to practice, and each one reviews the ones before it)</small> <select name="practice"><% for (let n = 1; n <= 30; n++) { %><option value="<%= n %>" <%= String(q.practice || q.test || 1) === String(n) ? 'selected' : '' %>>Practice <%= n %></option><% } %></select></label>
       <label>Copies <small class="muted">(each copy has different numbers)</small> <select name="pages"><%- opts('pages', [['1', '1 page'], ['2', '2 pages'], ['3', '3 pages'], ['4', '4 pages'], ['5', '5 pages']], '1') %></select></label>
-      <p class="muted small-text">Each page is a ten-box review like the classroom tests: place value and rounding, fractions and decimals, long division and multiplication, expressions, coordinate planes, line plots, volume and geometry. The answer key follows on a separate page.</p>
+      <p class="muted small-text">Each page is a ten-box practice sheet in the style of a classroom spiral review: place value and rounding, fractions and decimals, long division and multiplication, expressions, coordinate planes, line plots, volume and geometry. The answer key follows on a separate page.</p>
     <% } else if (type === 'fractions') { %>
       <% const opts = function (name, list, dflt) { return list.map(function (o) { return '<option value="' + o[0] + '"' + ((q[name] || dflt) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join(''); }; %>
       <label>Operation <select name="op"><%- opts('op', [['add', 'Addition'], ['sub', 'Subtraction'], ['mul', 'Multiplication'], ['div', 'Division']], 'add') %></select></label>

@@ -35,6 +35,11 @@ function wordsToNumber(str) {
   return total + cur;
 }
 const BAD = /undefined|NaN|\[object|null/;
+const NUMW = { 3: 'three', 4: 'four', 5: 'five' };
+const UNITW = { 2: 'half', 3: 'third', 4: 'fourth', 5: 'fifth', 6: 'sixth', 8: 'eighth' };
+const commas2 = (n) => Number(n).toLocaleString('en-US');
+const trimDecStr = (v, p = 2) => { const s = (v / 10 ** p).toFixed(p); return s.replace(/0+$/, '').replace(/\.$/, ''); };
+
 
 test('every grade 4 and 5 test builds 10 boxes, with answers and well-formed blocks, for many seeds', () => {
   const KNOWN = new Set(['text', 'center', 'note', 'line', 'space', 'svg', 'vmul', 'ldiv', 'table', 'circles', 'match', 'list', 'wholes', 'box', 'bullets', 'pointlist', 'side']);
@@ -185,32 +190,34 @@ test('fractions: operations, bonus hints, products, area models and word problem
   for (const c of many('fracTimesWholeCompare')) { const ex = centerOf(c); const fr = ex.find((s) => s.f).f; const W = Number(ex.find((s) => typeof s === 'string' && /^\d+$/.test(s))); assert.ok(c.answer.startsWith(F.show(F.mul(F.frac(...fr), F.frac(W, 1))))); }
 });
 
-test('fraction and measurement word problems: the answer follows from the numbers in the story', () => {
-  const nums = (c) => [...plainOf(c).matchAll(/\d+(?:,\d{3})*(?:\.\d+)?/g)].map((m) => num(m[0]));
-  for (const c of many('moneyDiff')) { const m = [...plainOf(c).matchAll(/\$(\d+\.\d\d)/g)].map((x) => Math.round(parseFloat(x[1]) * 100)); assert.strictEqual(`$${((Math.max(...m) - Math.min(...m)) / 100).toFixed(2)}`, c.answer); }
-  for (const c of many('moneyChange')) { const m = [...plainOf(c).matchAll(/\$(\d+\.\d\d)/g)].map((x) => Math.round(parseFloat(x[1]) * 100)); assert.strictEqual(`$${((m[0] - m[1] - m[2]) / 100).toFixed(2)}`, c.answer); assert.ok(m[0] > m[1] + m[2]); }
-  for (const c of many('moneyThree')) { const m = [...plainOf(c).matchAll(/\$(\d+\.\d\d)/g)].map((x) => Math.round(parseFloat(x[1]) * 100)); assert.strictEqual(`$${((m[0] + m[1] + m[2]) / 100).toFixed(2)}`, c.answer); }
-  for (const c of many('moneyBeforeTax', { total: true })) { const m = [...plainOf(c).matchAll(/\$(\d+\.\d\d)/g)].map((x) => Math.round(parseFloat(x[1]) * 100)); assert.strictEqual(`$${((m[0] + m[1]) / 100).toFixed(2)}`, c.answer); }
-  for (const c of many('cmToM')) { const n = nums(c).filter((x) => x !== 4); const total = n[0] + n[1] + 2 * n[2]; assert.strictEqual(`${total / 100} m`, c.answer); assert.strictEqual(total % 100, 0); }
-  for (const c of many('decWordTimes')) { const m = [...plainOf(c).matchAll(/(\d+(?:\.\d+)?) (?:times|pounds)/g)].map((x) => x[1]); assert.strictEqual(toScaled(m[0], 1) * toScaled(m[1], 1), toScaled(c.answer.replace(' pounds', ''), 2)); }
-  for (const c of many('decWordMulCompare')) { const t = plainOf(c); const m = /has (\d+(?:\.\d+)?) m of string.*uses (\d+\.\d+) m.*for (\w+) kite tails/.exec(t); const k = { three: 3, four: 4, five: 5 }[m[3]]; const need = toScaled(m[2], 2) * BigInt(k); const have = toScaled(m[1], 2); assert.strictEqual(c.answer.startsWith(need <= have ? 'Yes' : 'No'), true, c.answer); }
-  for (const c of many('fwAddLike')) { const f2 = c.blocks[0].seg.filter((s) => s.f).map((s) => s.f); assert.strictEqual(c.answer, F.show(F.frac(f2[0][0] + f2[1][0], f2[0][1]))); }
-  for (const c of many('fwSubTwo', { kind: 'book' })) { const f2 = c.blocks[0].seg.filter((s) => s.f).map((s) => s.f); assert.strictEqual(c.answer, F.show(F.frac(f2[0][0] - f2[1][0] - f2[2][0], f2[0][1]))); }
-  for (const c of many('fwSubTwo', { kind: 'fabric' })) { const f2 = c.blocks[0].seg.filter((s) => s.f).map((s) => s.f)[0]; assert.strictEqual(c.answer, F.show(F.sub(F.frac(1, 1), F.frac(2 * f2[0], f2[1])))); }
-  for (const c of many('fwAddUnlike')) { const f2 = c.blocks[0].seg.filter((s) => s.f).map((s) => F.frac(...s.f)); assert.strictEqual(c.answer, F.show(F.add(f2[0], f2[1]))); }
-  for (const c of many('mwAdd')) { const t = c.blocks[0].seg; const idx = t.findIndex((s) => s.f); const w1 = Number(t[idx - 1].match(/(\d+) $/)[1]); const f1 = t[idx].f; const j = t.findIndex((s, i) => i > idx && s.f); const w2 = Number(t[j - 1].match(/(\d+) $/)[1]); const f2 = t[j].f; assert.strictEqual(c.answer, F.show(F.add(F.frac(w1 * f1[1] + f1[0], f1[1]), F.frac(w2 * f2[1] + f2[0], f2[1])))); }
-  for (const kind of ['time', 'apples']) for (const c of many('mwSub', { kind })) { const t = c.blocks[0].seg; const idx = t.findIndex((s) => s.f); const w1 = Number(t[idx - 1].match(/(\d+) $/)[1]); const j = t.findIndex((s, i) => i > idx && s.f); const w2 = Number(t[j - 1].match(/(\d+) $/)[1]); const a = F.frac(w1 * t[idx].f[1] + t[idx].f[0], t[idx].f[1]); const bb = F.frac(w2 * t[j].f[1] + t[j].f[0], t[j].f[1]); const want = kind === 'time' ? F.sub(bb, a) : F.sub(a, bb); assert.strictEqual(c.answer, F.show(want)); assert.ok(want.n > 0); }
-  for (const kind of ['cake', 'candy']) for (const c of many('fracOfFracWord', { kind })) { const fr = c.blocks[0].seg.filter((s) => s.f).map((s) => F.frac(...s.f)); assert.strictEqual(c.answer, F.show(F.mul(fr[0], fr[1]))); }
-  for (const c of many('fracOfWholeWord')) { const t = plainOf(c); const W = Number(/originally (\d+) feet/.exec(t)[1]); const fr = c.blocks[0].seg.find((s) => s.f).f; assert.strictEqual(c.answer, F.show(F.mul(F.frac(W, 1), F.frac(...fr)))); assert.ok(!c.answer.match(/^\d+$/)); }
-  for (const c of many('fracDivWordMixed')) { const n = nums(c); const T = n.find((x) => x > 19); const k = n[0] === T ? n[1] : n[0]; const [a, b] = [T, k]; const kk = /(\d+) people|into (\d+) different/.exec(plainOf(c)); const people = Number(kk[1] || kk[2]); const total = nums(c).find((x) => x !== people); assert.strictEqual(c.answer, F.show(F.frac(total, people))); void a; void b; assert.ok(total % people !== 0); }
-  for (const c of many('divBetween')) { const t = plainOf(c); const n = nums(c); const k = /(\d+) (piles|picture frames|friends|batches|people)|himself and (\d+) friends|among (\d+) friends|(\d+) batches/.exec(t); void k; const T = n[0]; let people; if (/himself|herself/.test(t)) people = n[1] + 1; else people = n[1]; const q = Math.floor(T / people); assert.ok(c.answer.endsWith(`between ${q} and ${q + 1}`), `${t} -> ${c.answer}`); assert.strictEqual(c.answer.split(',')[0], F.show(F.frac(T, people))); }
-  for (const c of many('servingsWord')) { const m = /How many one-(\w+) cup servings are in (\d+) cups/.exec(plainOf(c)); const d = { half: 2, third: 3, fourth: 4, eighth: 8 }[m[1]]; assert.strictEqual(Number(c.answer), Number(m[2]) * d); }
-  for (const c of many('servingsDaysWord')) { const m = /uses one-(\w+) of a .* every day. How many days would (\d+) whole/.exec(plainOf(c)); const d = { third: 3, fourth: 4, sixth: 6, eighth: 8 }[m[1]]; assert.strictEqual(Number(c.answer), Number(m[2]) * d); }
-  for (const kind of ['cereal', 'bag', 'dip']) for (const c of many('unitFracDivWord', { kind })) { const m = /one-(\w+) of/.exec(plainOf(c)); const d = { third: 3, fourth: 4, fifth: 5, sixth: 6 }[m[1]]; const k = nums(c)[0]; assert.strictEqual(c.answer, `1/${d * k}`); }
-  for (const c of many('unitFracDivWord', { kind: 'cups' })) { const n = nums(c); assert.strictEqual(c.answer, F.show(F.frac(n[0], n[1]))); }
-  for (const kind of ['boxes', 'turtles', 'bucket', 'packages', 'candy', 'rocks']) for (const c of many('mixedFracWordMul', { kind })) assert.ok(c.answer.length && !BAD.test(c.answer));
-  for (const c of many('mixedFracWordMul', { kind: 'turtles' })) { const t = c.blocks[0].seg; const idx = t.findIndex((s) => s.f); const w = Number(t[idx - 1].match(/(\d+) $/)[1]); const k = Number(/weigh\? ?$|(\d+) adult turtles/.exec(plainOf(c))[1]); assert.strictEqual(c.answer, F.show(F.mul(F.frac(w * t[idx].f[1] + t[idx].f[0], t[idx].f[1]), F.frac(k, 1)))); }
-  for (const c of many('convertWord')) { const t = plainOf(c); const n = nums(c)[0]; const f2 = /milliliters/.test(t) || /grams/.test(t) || /meters did/.test(t) ? 1000 : null; if (/centimeters/.test(t)) assert.strictEqual(c.answer, `${n / 100} meters`); else if (/ounces of orange/.test(t)) assert.strictEqual(c.answer, `${n / 8} cups`); else assert.strictEqual(num(c.answer.split(' ')[0]), n * (f2 || 1)); }
+test('word problems: the answer follows from the quantities, and every quantity is printed in the story', () => {
+  const dollars = (cents) => `$${(cents / 100).toFixed(2)}`;
+  const has = (c, ...vals) => { const t = plainOf(c); vals.forEach((v) => assert.ok(new RegExp(`(^|[^\\d.])${String(v).replace(/[.$]/g, '\\$&')}(?![\\d])`).test(t), `${v} should appear in: ${t}`)); };
+  const hasFrac = (c, ...pairs) => pairs.forEach(([n, d]) => assert.ok(plainOf(c).includes(`${n}/${d}`), `${n}/${d} should appear in: ${plainOf(c)}`));
+  for (const c of many('moneyDiff', {}, 60)) { has(c, dollars(c.meta.hi), dollars(c.meta.lo)); assert.strictEqual(c.answer, dollars(c.meta.hi - c.meta.lo)); assert.ok(c.meta.hi > c.meta.lo); }
+  for (const c of many('moneyChange', {}, 60)) { const { have, spend } = c.meta; has(c, ...spend.map(dollars)); if (have % 100 === 0 && /bill/.test(plainOf(c))) has(c, `$${have / 100}`); else has(c, dollars(have)); assert.ok(have > spend.reduce((x, y) => x + y, 0), 'must be affordable'); assert.strictEqual(c.answer, dollars(have - spend.reduce((x, y) => x + y, 0))); }
+  for (const c of many('moneyThree', {}, 60)) { has(c, ...c.meta.nums.map(dollars)); assert.strictEqual(c.answer, dollars(c.meta.nums.reduce((x, y) => x + y, 0))); }
+  for (const total of [true, false]) for (const c of many('moneyBeforeTax', { total }, 30)) { has(c, dollars(c.meta.price), dollars(c.meta.tax)); assert.ok(c.answer.startsWith(dollars(total ? c.meta.price + c.meta.tax : c.meta.price))); }
+  for (const c of many('decWordMulCompare', {}, 60)) { const { have, per, tails, enough } = c.meta; assert.strictEqual(enough, have >= tails * per); assert.ok(c.answer.startsWith(enough ? 'Yes' : 'No')); has(c, trimDecStr(have, 2), (per / 100).toFixed(2)); assert.ok(plainOf(c).includes(NUMW[tails])); }
+  for (const c of many('decWordTimes', {}, 60)) { const { times, base } = c.meta; has(c, trimDecStr(times, 1), trimDecStr(base, 1)); assert.strictEqual(toScaled(c.answer.split(' ')[0], 2), BigInt(times * base)); }
+  for (const c of many('cmToM', {}, 40)) { const { first, second, x, total } = c.meta; assert.strictEqual(first + second + 2 * x, total); assert.strictEqual(total % 100, 0); has(c, first, second, x); assert.strictEqual(c.answer, `${total / 100} m`); }
+  for (const c of many('convertWord', {}, 80)) { const { n, mult } = c.meta; has(c, commas2(n)); assert.strictEqual(num(c.answer.split(' ')[0]), n * mult); }
+  for (const c of many('fwAddLike', {}, 40)) { const { n1, n2, d } = c.meta; hasFrac(c, [n1, d], [n2, d]); assert.strictEqual(c.answer, F.show(F.frac(n1 + n2, d))); assert.ok(n1 + n2 < d); }
+  for (const kind of ['book', 'fabric']) for (const c of many('fwSubTwo', { kind }, 40)) {
+    if (kind === 'book') { const { total, n1, n2, d } = c.meta; hasFrac(c, [total, d], [n1, d], [n2, d]); assert.strictEqual(c.answer, F.show(F.frac(total - n1 - n2, d))); assert.ok(total > n1 + n2); } else { const { n, d } = c.meta; hasFrac(c, [n, d]); assert.strictEqual(c.answer, F.show(F.sub(F.frac(1, 1), F.frac(2 * n, d)))); }
+  }
+  for (const c of many('fwAddUnlike', {}, 40)) { const { n1, d1, n2, d2 } = c.meta; hasFrac(c, [n1, d1], [n2, d2]); assert.strictEqual(c.answer, F.show(F.add(F.frac(n1, d1), F.frac(n2, d2)))); assert.notStrictEqual(d1, d2); }
+  for (const c of many('mwAdd', {}, 40)) { const { w1, n1, d, w2, n2, d2 } = c.meta; hasFrac(c, [n1, d], [n2, d2]); has(c, w1, w2); assert.strictEqual(c.answer, F.show(F.add(F.frac(w1 * d + n1, d), F.frac(w2 * d2 + n2, d2)))); }
+  for (const kind of ['time', 'apples']) for (const c of many('mwSub', { kind }, 40)) { const { w1, n1, w2, n2, d } = c.meta; hasFrac(c, [n1, d], [n2, d]); has(c, w1, w2); const a = F.frac(w1 * d + n1, d); const b = F.frac(w2 * d + n2, d); const want = kind === 'time' ? F.sub(b, a) : F.sub(a, b); assert.ok(want.n > 0); assert.strictEqual(c.answer, F.show(want)); }
+  for (const kind of ['cake', 'candy']) for (const c of many('fracOfFracWord', { kind }, 40)) { const { n1, d1, d2 } = c.meta; hasFrac(c, [n1, d1], [1, d2]); assert.strictEqual(c.answer, F.show(F.mul(F.frac(n1, d1), F.frac(1, d2)))); }
+  for (const c of many('fracOfWholeWord', {}, 40)) { const { W, n, d } = c.meta; has(c, W); hasFrac(c, [n, d]); assert.strictEqual(c.answer, F.show(F.mul(F.frac(W, 1), F.frac(n, d)))); assert.ok(!/^\d+$/.test(c.answer)); }
+  for (const kind of ['boxes', 'turtles', 'bucket', 'packages', 'candy', 'rocks', 'garden', 'paint']) for (const c of many('mixedFracWordMul', { kind }, 40)) { assert.strictEqual(c.answer, F.show(F.mul(c.meta.a, c.meta.b))); assert.ok(c.blocks[0].seg.some((x) => x.f), 'a fraction is printed'); }
+  for (const c of many('fracDivWordMixed', {}, 60)) { const { T, k } = c.meta; has(c, T, k === 0 ? 0 : (/and \d+ friends/.test(plainOf(c)) ? k - 1 : k)); assert.strictEqual(c.answer, F.show(F.frac(T, k))); assert.ok(T % k !== 0); }
+  for (const c of many('divBetween', {}, 80)) { const { T, k } = c.meta; has(c, T); const q = Math.floor(T / k); assert.ok(c.answer.endsWith(`between ${q} and ${q + 1}`), c.answer); assert.strictEqual(c.answer.split(',')[0], F.show(F.frac(T, k))); const t = plainOf(c); assert.ok(new RegExp(`\\b${/himself|herself/.test(t) ? k - 1 : k}\\b`).test(t), `${k} people/groups in: ${t}`); }
+  for (const kind of ['cereal', 'bag', 'dip']) for (const c of many('unitFracDivWord', { kind }, 60)) { const { d, k } = c.meta; assert.strictEqual(c.answer, `1/${d * k}`); assert.ok(plainOf(c).includes(`one-${UNITW[d]}`)); assert.ok(new RegExp(`\\b(${k}|${k - 1})\\b`).test(plainOf(c))); }
+  for (const c of many('unitFracDivWord', { kind: 'cups' }, 40)) { const { T, k } = c.meta; has(c, T, k); assert.strictEqual(c.answer, F.show(F.frac(T, k))); }
+  for (const c of many('servingsWord', {}, 60)) { const { d, cups } = c.meta; has(c, cups); assert.ok(plainOf(c).includes(`one-${UNITW[d]} cup`)); assert.strictEqual(Number(c.answer), cups * d); }
+  for (const c of many('servingsDaysWord', {}, 60)) { const { d, k } = c.meta; has(c, k); assert.ok(plainOf(c).includes(`one-${UNITW[d]} of`)); assert.strictEqual(Number(c.answer), k * d); }
 });
 
 test('expressions: evaluating and writing', () => {
@@ -272,17 +279,32 @@ test('grade 4 skills: arithmetic, equations, conversions and geometry facts', ()
   for (const c of many('g4Expanded', { digits: [4, 6] })) { const n = num(/Write ([\d,]+) in expanded form/.exec(plainOf(c))[1]); assert.strictEqual(c.answer.split(' + ').reduce((s, x) => s + num(x), 0), n); }
   for (const c of many('g4Expanded', { digits: [4, 6], reverse: true })) { const terms = /Write (.+) in standard form/.exec(plainOf(c))[1].split(' + '); assert.strictEqual(terms.reduce((s, x) => s + num(x), 0), num(c.answer)); }
   for (const c of many('g4Equation')) { const [eq] = c.answer.split('; '); const m = /^(\d+) ([×÷−]) (\w+|\d+) = (\w+|\d+)$/.exec(eq); const t = plainOf(c); const nums = [...t.matchAll(/\d+/g)].map((x) => Number(x[0])); const spelled = { 2: 'twice', 3: 'three times', 4: 'four times' }; [m[1], /^\d+$/.test(m[3]) ? m[3] : null, /^\d+$/.test(m[4]) ? m[4] : null].filter(Boolean).forEach((x) => assert.ok(nums.includes(Number(x)) || t.includes(spelled[Number(x)] || '@@') || t.includes(`${x} times`), `${x} should be in the story: ${t}`)); const val = Number(c.answer.split('= ').pop().replace('°', '')); const a = Number(m[1]); const bb = /^\d+$/.test(m[3]) ? Number(m[3]) : null; if (m[2] === '×') assert.strictEqual(a * bb, val); else if (m[2] === '÷') assert.strictEqual(a / bb, val); else assert.strictEqual(a - val, Number(m[4])); }
-  for (const c of many('g4MultiStep', { kind: 'sub3' })) { const n = [...plainOf(c).matchAll(/\d+/g)].map((m) => Number(m[0])); assert.strictEqual(num(c.answer), n[0] - n[1] - n[2]); }
-  for (const c of many('g4MultiStep', { kind: 'mulAdd' })) { const n = [...plainOf(c).matchAll(/\d+/g)].map((m) => Number(m[0])); assert.strictEqual(parseInt(c.answer, 10), n[0] * n[1] + n[2]); }
-  for (const c of many('g4MultiStep', { kind: 'addSub' })) { const n = [...plainOf(c).matchAll(/\d+/g)].map((m) => Number(m[0])); assert.strictEqual(num(c.answer), n[0] + n[1] - n[2]); }
-  for (const c of many('g4Convert')) { const t = plainOf(c); const n = [...t.matchAll(/\d+/g)].map((m) => Number(m[0]))[0]; const mult = /cups of flour/.test(t) ? 0.5 : /yards/.test(t) ? 3 : /hours/.test(t) ? 60 : /feet long/.test(t) ? 12 : /kilograms/.test(t) ? 1000 : /liters/.test(t) ? 1000 : /pounds/.test(t) ? 16 : 4; assert.strictEqual(num(c.answer.split(' ')[0]), n * mult, t); }
   for (const kind of ['m-mm', 'km-m', 'kg-g', 'L-mL', 'hr-min', 'ft-in', 'yd-ft', 'gal-qt', 'lb-oz']) for (const c of many('g4UnitTable', { kind })) { const f = { 'm-mm': 1000, 'km-m': 1000, 'kg-g': 1000, 'L-mL': 1000, 'hr-min': 60, 'ft-in': 12, 'yd-ft': 3, 'gal-qt': 4, 'lb-oz': 16 }[kind]; c.answer.split('; ').forEach((x) => { const [a, bb] = x.split(' → ').map(num); assert.strictEqual(a * f, bb); }); }
-  for (const c of many('g4Time')) { const m = /at (\d+):(\d\d) and ended at (\d+):(\d\d)/.exec(plainOf(c)); const el = (Number(m[3]) * 60 + Number(m[4])) - (Number(m[1]) * 60 + Number(m[2])); const hh = Math.floor(el / 60); const mm = el % 60; assert.strictEqual(c.answer, `${hh ? `${hh} hour${hh > 1 ? 's' : ''} ` : ''}${mm ? `${mm} minutes` : ''}`.trim()); assert.ok(el > 0); }
-  for (const c of many('g4Remainder')) { const n = [...plainOf(c).matchAll(/\d+/g)].map((m) => Number(m[0])); const q = Math.floor(n[0] / n[1]); const r = n[0] % n[1]; assert.ok(r > 0); assert.ok(c.answer.startsWith(/boxes/.test(plainOf(c)) ? `${q + 1} boxes` : `${q} full pages, ${r} left over`), c.answer); }
+  for (const kind of ['sub3', 'mulAdd', 'addSub', 'groupsLeft']) for (const c of many('g4MultiStep', { kind }, 60)) { const n = c.meta.nums; n.forEach((x) => assert.ok(new RegExp(`\\b${x}\\b`).test(plainOf(c)), `${x} in ${plainOf(c)}`)); const want = kind === 'sub3' ? n[0] - n[1] - n[2] : kind === 'mulAdd' ? n[0] * n[1] + n[2] : kind === 'addSub' ? n[0] + n[1] - n[2] : n[0] * n[1] - n[2]; assert.strictEqual(num(c.answer), want); assert.ok(want > 0); }
+  for (const c of many('g4Convert', {}, 120)) { const { n, mult } = c.meta; assert.ok(new RegExp(`\\b${n}\\b`).test(plainOf(c)), plainOf(c)); assert.strictEqual(num(c.answer.split(' ')[0]), n * mult, plainOf(c)); }
+  for (const kind of ['full', 'need']) for (const c of many('g4Remainder', { kind }, 60)) { const { T, k } = c.meta; const q = Math.floor(T / k); const r2 = T % k; assert.ok(r2 > 0); [T, k].forEach((x) => assert.ok(new RegExp(`\\b${x}\\b`).test(plainOf(c)), plainOf(c))); assert.ok(c.answer.startsWith(kind === 'need' ? `${q + 1} ` : `${q} full`), c.answer); }
+  for (const op of ['add', 'sub']) for (const c of many('g4MixedWord', { op }, 60)) { const { w1, n1, w2, n2, d } = c.meta; assert.ok(plainOf(c).includes(`${n1}/${d}`) && plainOf(c).includes(`${n2}/${d}`)); const a = F.frac(w1 * d + n1, d); const bb = F.frac(w2 * d + n2, d); assert.strictEqual(c.answer, F.show(op === 'add' ? F.add(a, bb) : F.sub(a, bb))); assert.strictEqual(c.meta.op, op); }
+  for (const c of many('g4FracWordMul', {}, 60)) { const { n, d, k } = c.meta; assert.ok(plainOf(c).includes(`${n}/${d}`)); assert.ok(new RegExp(`\\b${k}\\b`).test(plainOf(c))); assert.strictEqual(c.answer, F.show(F.mul(F.frac(k, 1), F.frac(n, d)))); }
+  for (const c of many('g4Time', {}, 80)) {
+    const t = (x) => `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`;
+    if (c.meta && c.meta.kind === 'end') { const { start, el } = c.meta; assert.ok(plainOf(c).includes(t(start))); assert.strictEqual(c.answer, t(start + el)); const hh = Math.floor(el / 60); const mm = el % 60; if (hh) assert.ok(plainOf(c).includes(`${hh} hour`)); if (mm) assert.ok(plainOf(c).includes(`${mm} minutes`)); continue; }
+    const m = [...plainOf(c).matchAll(/(\d+):(\d\d)/g)].map((x) => Number(x[1]) * 60 + Number(x[2])); const el = m[1] - m[0]; const hh = Math.floor(el / 60); const mm = el % 60; assert.strictEqual(c.answer, `${hh ? `${hh} hour${hh > 1 ? 's' : ''} ` : ''}${mm ? `${mm} minutes` : ''}`.trim()); assert.ok(el > 0);
+  }
+  for (const c of many('g4AngleAdd', {}, 80)) {
+    const t = plainOf(c);
+    if (c.meta.kind === 'sum') { const { a, b } = c.meta; assert.ok(t.includes(`${a}°`) && t.includes(`${b}°`)); assert.strictEqual(parseInt(c.answer.split('x = ').pop(), 10), a + b); } else { const { total, a } = c.meta; assert.ok(t.includes(`measures ${a}°`)); assert.ok(a < total); assert.strictEqual(parseInt(c.answer.split('x = ').pop(), 10), total - a); }
+  }
+  for (const c of many('g4Patterns', {}, 80)) {
+    if (c.meta.kind === 'fromRule') { const { rule, step, start } = c.meta; const seq = c.answer.split(', ').map(Number); assert.strictEqual(seq.length, 5); assert.strictEqual(seq[0], start); seq.slice(1).forEach((x, i) => assert.strictEqual(x - seq[i], rule === 'add' ? step : -step)); assert.ok(seq.every((x) => x > 0)); assert.ok(plainOf(c).includes(`${rule} ${step}`)); continue; }
+    const seq = C.plain(centerOf(c)).split(', ').map((x) => num(x)).filter((x) => !Number.isNaN(x)); const [x4, x5] = c.answer.split(';')[0].split(', ').map(num); const d = seq[1] - seq[0]; if (c.answer.includes('multiply')) { assert.strictEqual(seq[1] / seq[0], x4 / seq[3]); assert.strictEqual(x5, x4 * (seq[1] / seq[0])); } else { assert.strictEqual(seq[3] + d, x4); assert.strictEqual(x4 + d, x5); }
+  }
+  for (const c of many('g4Factors', { kind: 'circlePrime' })) { const list = c.meta.list; const isP = (n) => { for (let i = 2; i * i <= n; i++) if (n % i === 0) return false; return n > 1; }; assert.deepStrictEqual(c.answer.split(', ').map(Number), list.filter(isP).sort((x, y) => x - y)); assert.ok(list.some((x) => !isP(x)) && list.some(isP)); }
+  for (const c of many('g4Factors', { kind: 'multipleOf' }, 60)) { const { n, d, yes } = c.meta; assert.strictEqual(n % d === 0, yes); assert.ok(c.answer.startsWith(yes ? 'Yes' : 'No')); assert.ok(plainOf(c).includes(`${n} a multiple of ${d}`)); }
+  for (const c of many('g4ClassifyTri', { kind: 'both' })) { const a = [...plainOf(c).matchAll(/(\d+) cm/g)].map((m) => Number(m[1])); const s = [...a].sort((x, y) => x - y); const same = new Set(a).size; const sides = same === 1 ? 'equilateral' : same === 2 ? 'isosceles' : 'scalene'; const angle = s[0] ** 2 + s[1] ** 2 === s[2] ** 2 ? 'right' : s[0] ** 2 + s[1] ** 2 > s[2] ** 2 ? 'acute' : 'obtuse'; assert.strictEqual(c.answer, `${sides} and ${angle}`); }
+  for (const c of many('g4FracDecimal', { kind: 'decToFracTenth' })) { const n = C.plain(c.blocks[0].seg).match(/0\.(\d)/)[1]; assert.strictEqual(c.answer, `${n}/10`); }
   for (const c of many('g4Perimeter', { kind: 'perimeter' })) { const t = [...c.blocks.find((b) => b.t === 'svg').svg.matchAll(/<text [^>]*>([^<]*)<\/text>/g)].map((m) => num(m[1])); assert.strictEqual(num(c.answer), 2 * (t[0] + t[2])); }
   for (const c of many('g4Perimeter', { kind: 'area' })) { const t = [...c.blocks.find((b) => b.t === 'svg').svg.matchAll(/<text [^>]*>([^<]*)<\/text>/g)].map((m) => num(m[1])); assert.strictEqual(num(c.answer), t[0] * t[2]); }
   for (const c of many('g4Perimeter', { kind: 'missing' })) { const m = /perimeter of a rectangle is (\d+) .*length is (\d+)/.exec(plainOf(c)); assert.strictEqual(num(c.answer.split(' ')[0]), Number(m[1]) / 2 - Number(m[2])); }
-  for (const c of many('g4AngleAdd')) { const m = [...plainOf(c).matchAll(/measures (\d+)°/g)].pop(); const total = /right angle/.test(plainOf(c)) ? 90 : /straight/.test(plainOf(c)) ? 180 : 120; assert.strictEqual(parseInt(c.answer.split('x = ').pop(), 10), total - Number(m[1])); }
   for (const c of many('g4ClassifyTri', { kind: 'angles' })) { const a = [...plainOf(c).matchAll(/(\d+)°/g)].map((m) => Number(m[1])); assert.strictEqual(a[0] + a[1] + a[2], 180); assert.strictEqual(c.answer, a.includes(90) ? 'right' : a.some((x) => x > 90) ? 'obtuse' : 'acute'); }
   for (const c of many('g4ClassifyTri', { kind: 'sides' })) { const a = [...plainOf(c).matchAll(/(\d+) cm/g)].map((m) => Number(m[1])); const same = new Set(a).size; assert.strictEqual(c.answer, same === 1 ? 'equilateral' : same === 2 ? 'isosceles' : 'scalene'); }
   for (const c of many('g4Angles')) { const svg = c.blocks.find((b) => b.t === 'svg').svg; const labels = [...svg.matchAll(/font-weight="bold" fill="#000">([abc])</g)].map((m) => m[1]); assert.deepStrictEqual(labels, ['a', 'b', 'c']); assert.strictEqual(new Set(c.answer.split('; ').slice(0, 3).map((x) => x.split(': ')[1])).size, 3); assert.strictEqual((svg.match(/<polyline /g) || []).length, 1, 'exactly one right angle drawn'); }
@@ -291,13 +313,10 @@ test('grade 4 skills: arithmetic, equations, conversions and geometry facts', ()
   for (const c of many('g4Equiv')) { const g = c.blocks[0].seg.find((s) => s.f).f; const base = F.frac(g[0], g[1]); c.answer.replace(/ \(.*$/, '').split(', ').forEach((x) => { const [a, bb] = x.split('/').map(Number); const fr = F.frac(a, bb); assert.deepStrictEqual(fr, base); assert.notStrictEqual(`${a}/${bb}`, `${g[0]}/${g[1]}`); }); }
   for (const c of many('g4EquivLine')) c.answer.split('; ').forEach((x) => { const [l, r] = x.split(' = ').map((y) => y.split('/').map(Number)); assert.strictEqual(l[0] * r[1], r[0] * l[1]); });
   for (const c of many('g4MulWhole')) { const ex = centerOf(c); const fr = ex.find((s) => s.f).f; assert.strictEqual(c.answer, F.show(F.mul(F.frac(Number(ex[0]), 1), F.frac(...fr)))); }
-  for (const c of many('g4FracWordMul')) { const fr = c.blocks[0].seg.find((s) => s.f).f; const k = Number(/in (\d+) days/.exec(plainOf(c))[1]); assert.strictEqual(c.answer, F.show(F.mul(F.frac(k, 1), F.frac(...fr)))); }
-  for (const op of ['add', 'sub']) for (const c of many('g4MixedWord', { op })) { const t = c.blocks[0].seg; const idx = t.findIndex((s) => s.f); const w1 = Number(t[idx - 1].match(/(\d+) $/)[1]); const j = t.findIndex((s, i) => i > idx && s.f); const w2 = Number(t[j - 1].match(/(\d+) $/)[1]); const a = F.frac(w1 * t[idx].f[1] + t[idx].f[0], t[idx].f[1]); const bb = F.frac(w2 * t[j].f[1] + t[j].f[0], t[j].f[1]); assert.strictEqual(c.answer, F.show(op === 'add' ? F.add(a, bb) : F.sub(a, bb))); }
   for (const c of many('g4MixedImproper')) { const t = c.blocks[0].seg; const fr = t.find((s) => s.f); if (fr) { const w = Math.floor(fr.f[0] / fr.f[1]); assert.strictEqual(c.answer, `${w} ${fr.f[0] - w * fr.f[1]}/${fr.f[1]}`); } else { const m = t.find((s) => s.m).m; assert.strictEqual(c.answer, `${m[0] * m[2] + m[1]}/${m[2]}`); } }
   for (const c of many('g4FracDecimal', { kind: 'tenth' })) { const n = C.plain(c.blocks[0].seg).match(/(\d+)\/10/)[1]; assert.strictEqual(c.answer, `0.${n}`); }
   for (const c of many('g4FracDecimal', { kind: 'hundredth' })) { const n = Number(C.plain(c.blocks[0].seg).match(/(\d+)\/100/)[1]); assert.strictEqual(Number(c.answer), n / 100); }
   for (const c of many('g4FracDecimal', { kind: 'decToFrac' })) { const n = C.plain(c.blocks[0].seg).match(/0\.(\d+)/)[1]; assert.strictEqual(c.answer, `${n}/100`); }
-  for (const c of many('g4Patterns')) { const seq = C.plain(centerOf(c)).split(', ').map((x) => num(x)).filter((x) => !Number.isNaN(x)); const [x4, x5] = c.answer.split(';')[0].split(', ').map(num); const d = seq[1] - seq[0]; if (c.answer.includes('multiply')) { assert.strictEqual(seq[1] / seq[0], x4 / seq[3]); assert.strictEqual(x5, x4 * (seq[1] / seq[0])); } else { assert.strictEqual(seq[3] + d, x4); assert.strictEqual(x4 + d, x5); } }
   for (const c of many('g4Factors', { kind: 'list' })) { const n = Number(/factors of (\d+)/.exec(plainOf(c))[1]); const fs = []; for (let i = 1; i <= n; i++) if (n % i === 0) fs.push(i); assert.strictEqual(c.answer, fs.join(', ')); }
   for (const c of many('g4Factors', { kind: 'prime' })) { const n = Number(/Is (\d+) a prime/.exec(plainOf(c))[1]); let prime = n > 1; for (let i = 2; i * i <= n; i++) if (n % i === 0) prime = false; assert.strictEqual(c.answer.startsWith('prime'), prime, `${n}`); }
   for (const c of many('g4Symmetry')) { const svg = c.blocks.find((b) => b.t === 'svg').svg; assert.ok(/^\d/.test(c.answer)); assert.ok(svg.includes('<polygon')); }
@@ -311,29 +330,29 @@ test('Spiral Review pages render through the app, are pinned to a seed, and carr
   await createUser({ username: 'teacher@example.com' });
   const agent = request.agent(createApp());
   await login(agent, 'teacher@example.com');
-  const form = await agent.get('/math/spiral-review?grade=5&test=7');
+  const form = await agent.get('/math/spiral-review?grade=5&practice=7');
   assert.strictEqual(form.status, 200);
-  assert.match(form.text, /name="grade"/); assert.match(form.text, /name="test"/); assert.match(form.text, /Test 30/);
+  assert.match(form.text, /name="grade"/); assert.match(form.text, /name="practice"/); assert.match(form.text, /Practice 30/);
   assert.match((await agent.get('/')).text, /Spiral Review/);
   assert.match((await agent.get('/')).text, /\/math\/spiral-review/);
-  const page = await agent.get('/math/spiral-review/worksheet?grade=5&test=7&seed=9&key=1');
+  const page = await agent.get('/math/spiral-review/worksheet?grade=5&practice=7&seed=9&key=1');
   assert.strictEqual(page.status, 200);
   assert.strictEqual((page.text.match(/class="sp-box"/g) || []).length, 10);
-  assert.match(page.text, /Test 7/); assert.match(page.text, /Answer Key/);
+  assert.match(page.text, /Practice 7/); assert.ok(!/>Test \d/.test(page.text)); assert.match(page.text, /Answer Key/);
   assert.ok(!/\sstyle=/.test(page.text.replace(/<svg[\s\S]*?<\/svg>/g, '')), 'CSP forbids inline styles');
   assert.ok(!/<script/i.test(page.text.replace(/<script src="\/static\/js\/app\.js[^"]*"[^>]*><\/script>/g, '')), 'no inline scripts');
   const sheetOf = (html) => html.match(/<article class="sheet spiral-sheet">[\s\S]*?<\/article>/)[0];
-  assert.strictEqual(sheetOf(page.text), sheetOf((await agent.get('/math/spiral-review/worksheet?grade=5&test=7&seed=9&key=1')).text), 'same seed, same sheet');
+  assert.strictEqual(sheetOf(page.text), sheetOf((await agent.get('/math/spiral-review/worksheet?grade=5&practice=7&seed=9&key=1')).text), 'same seed, same sheet');
   assert.strictEqual((await agent.get('/math/spiral-review/worksheet?grade=5&test=7&seed=9&key=0')).text.includes('Answer Key'), false);
-  const three = await agent.get('/math/spiral-review/worksheet?grade=4&test=12&seed=3&pages=3&key=0');
+  const three = await agent.get('/math/spiral-review/worksheet?grade=4&practice=12&seed=3&pages=3&key=0');
   assert.strictEqual((three.text.match(/class="sp-box"/g) || []).length, 30);
   assert.strictEqual((three.text.match(/<article class="sheet spiral-sheet">/g) || []).length, 3);
-  const redirect = await agent.get('/math/spiral-review/worksheet?grade=4&test=2');
+  const redirect = await agent.get('/math/spiral-review/worksheet?grade=4&practice=2');
   assert.strictEqual(redirect.status, 302); assert.match(redirect.headers.location, /seed=\d+/);
   // hostile or odd input falls back safely
-  const odd = await agent.get('/math/spiral-review/worksheet?grade=<script>&test=999&pages=-3&seed=5');
+  const odd = await agent.get('/math/spiral-review/worksheet?grade=<script>&practice=999&pages=-3&seed=5');
   assert.ok([200, 422].includes(odd.status)); assert.ok(!odd.text.includes('<script>alert'));
-  assert.strictEqual((await agent.get('/math/spiral-review/worksheet?grade=9&test=3&seed=5&key=0')).status, 200);
+  assert.strictEqual((await agent.get('/math/spiral-review/worksheet?grade=9&practice=3&seed=5&key=0')).status, 200);
 });
 
 test('Spiral Review sheets can be saved to the library and re-opened by URL', async () => {
@@ -342,4 +361,45 @@ test('Spiral Review sheets can be saved to the library and re-opened by URL', as
   assert.ok(sheets.fromUrl('/math/spiral-review/worksheet?grade=4&test=30&seed=42&pages=2'));
   assert.strictEqual(sheets.fromUrl('/math/spiral-review/worksheet?grade=5&test=3'), null, 'unpinned sheets are not saved');
   assert.strictEqual(sheets.fromUrl('/math/spiral-review/worksheet?grade=5&test=3&seed=1&x=' + 'a'.repeat(700)), null);
+});
+
+test('older saved links that use ?test= still open the same practice sheet', () => {
+  const sheets = require('../src/lib/sheets');
+  const a = sheets.build('/math/spiral-review/worksheet', { grade: '5', test: '9', seed: '77' });
+  const b = sheets.build('/math/spiral-review/worksheet', { grade: '5', practice: '9', seed: '77' });
+  assert.deepStrictEqual(a.locals.pages, b.locals.pages);
+  assert.strictEqual(a.subtitle, 'Spiral Review: Grade 5, Practice 9');
+});
+
+test('banks are wide: many different stories per skill, and one practice number is not always the same sheet', () => {
+  const names = 'Zach|AC|Screech|Kelly|Lisa|Jessie';
+  const norm = (t) => t.replace(new RegExp(`\\b(${names})\\b`, 'g'), 'N').replace(/\$?\d[\d,.]*(\/\d+)?/g, '#').replace(/\b(he|she|his|her|him|himself|herself)\b/gi, 'p');
+  const distinct = (id, params = {}) => { const set = new Set(); for (let i = 0; i < 400; i++) { try { set.add(norm(plainOf(run(id, params, i * 17 + 3)))); } catch (e) { /* skip */ } } return set.size; };
+  const MIN = { moneyDiff: 30, moneyChange: 12, moneyThree: 8, moneyBeforeTax: 4, decWordMulCompare: 6, decWordTimes: 6, cmToM: 5, convertWord: 9, fwAddLike: 8, fwSubTwo: 5, fwAddUnlike: 8, mwAdd: 3, mwSub: 4, fracOfFracWord: 6, fracOfWholeWord: 4, mixedFracWordMul: 8, fracDivWordMixed: 5, divBetween: 6, unitFracDivWord: 20, servingsWord: 30, servingsDaysWord: 15, g4Equation: 18, g4MultiStep: 14, g4Convert: 14, g4Remainder: 6, g4MixedWord: 4, g4FracWordMul: 4, g4Time: 3, g4Factors: 5, g4Patterns: 3, g4LinePoints: 10, shapeClues: 1 };
+  for (const [id, min] of Object.entries(MIN)) assert.ok(distinct(id) >= min, `${id}: only ${distinct(id)} different stories (want ${min}+)`);
+  const icons = new Set(); for (let i = 0; i < 300; i++) for (const m of run('gridPath', {}, i).blocks.find((b) => b.t === 'svg').svg.matchAll(/font-family="[^"]*" text-anchor="middle">([^<]+)<\/text>/g)) icons.add(m[1]);
+  assert.ok(icons.size >= 20, `${icons.size} pictures to place on a grid`);
+  const clues = new Set(); for (let i = 0; i < 400; i++) clues.add(run('shapeClues', {}, i).answer); assert.ok(clues.size >= 10, `${clues.size} shapes described by clues`);
+  // the same practice number gives different flavours of the same skill on different sheets
+  for (const [grade, practice, box, skillWord, want] of [[4, 6, 6, 'g4Equation', 6], [4, 6, 7, 'g4MultiStep', 6], [5, 21, 3, 'moreOrLess', 3], [5, 19, 6, 'mixedFracWordMul', 6]]) {
+    const seen = new Set();
+    for (let seed = 1; seed <= 200; seed++) { const t = sp.buildTest(makeRng(seed * 31), { grade, test: practice }); seen.add(norm(plainOf(t.boxes[box - 1].parts[0]))); }
+    assert.ok(seen.size >= want, `${skillWord} in G${grade} practice ${practice}: ${seen.size} variants`);
+  }
+  const fams = new Set(); for (let seed = 1; seed <= 200; seed++) { const t = sp.buildTest(makeRng(seed), { grade: 4, test: 6 }); fams.add(/times as many/.test(plainOf(t.boxes[5].parts[0])) ? 'times' : /twice|three times|four times/.test(plainOf(t.boxes[5].parts[0])) ? 'twice' : /each|into|packs|bags|pages/.test(plainOf(t.boxes[5].parts[0])) ? 'share/groups' : 'other'); }
+  assert.ok(fams.size >= 3, 'the equation box swaps flavours: ' + [...fams]);
+  // pinned flavours stay the most common one (the practice number still means something)
+  let times = 0; for (let seed = 1; seed <= 200; seed++) { const t = sp.buildTest(makeRng(seed * 13), { grade: 4, test: 6 }); if (/times as many/.test(plainOf(t.boxes[5].parts[0]))) times++; }
+  assert.ok(times >= 80, `the pinned flavour appears about half the time (${times}/200)`);
+});
+
+test('two boxes on one sheet rarely repeat the same flavour of a skill', () => {
+  let same = 0; const flavours = new Set();
+  for (let seed = 1; seed <= 200; seed++) {
+    const t = sp.buildTest(makeRng(seed * 101), { grade: 4, test: 6 });
+    const a = t.boxes[5].parts[0].flavour; const b = t.boxes[9].parts[0].flavour; flavours.add(a); flavours.add(b);
+    if (a === b) same++;
+  }
+  assert.strictEqual(same, 0, 'a flavour already on the sheet is never reused while others remain');
+  assert.ok(flavours.size >= 4, [...flavours].join(','));
 });

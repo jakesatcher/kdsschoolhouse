@@ -13,6 +13,8 @@ const ICONS = [
   { n: 'frog', e: '🐸' }, { n: 'ladybug', e: '🐞' }, { n: 'flower', e: '🌸' }, { n: 'owl', e: '🦉' }, { n: 'penguin', e: '🐧' },
   { n: 'chick', e: '🐥' }, { n: 'fire truck', e: '🚒' }, { n: 'police officer', e: '👮' }, { n: 'bus', e: '🚌' }, { n: 'circus tent', e: '🎪' },
   { n: 'dog', e: '🐶' }, { n: 'rabbit', e: '🐰' }, { n: 'bear', e: '🐻' }, { n: 'sun', e: '☀️' }, { n: 'star', e: '⭐' },
+  { n: 'duck', e: '🦆' }, { n: 'turtle', e: '🐢' }, { n: 'butterfly', e: '🦋' }, { n: 'fish', e: '🐟' }, { n: 'monkey', e: '🐵' },
+  { n: 'airplane', e: '✈️' }, { n: 'rocket', e: '🚀' }, { n: 'castle', e: '🏰' }, { n: 'sailboat', e: '⛵' }, { n: 'cactus', e: '🌵' },
 ];
 const pair = (x, y) => `(${x},${y})`;
 // distinct lattice points

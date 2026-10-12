@@ -70,6 +70,11 @@ const skills = {
       { lines: ['The shape has two pairs of parallel sides.', 'Opposite sides are congruent.', 'It has no right angles.', 'The sides are not all congruent.'], a: 'parallelogram' },
       { lines: ['The shape has exactly three sides.', 'It has one right angle.'], a: 'right triangle' },
       { lines: ['The shape has five sides.', 'The total of its angles is 540°.'], a: 'pentagon' },
+      { lines: ['The shape has six sides.', 'The total of its angles is 720°.'], a: 'hexagon' },
+      { lines: ['The shape has three congruent sides.', 'All of its angles are acute.'], a: 'equilateral triangle' },
+      { lines: ['The shape has exactly two congruent sides.', 'It has no right angles.', 'It has three sides.'], a: 'isosceles triangle' },
+      { lines: ['The shape has four sides.', 'It has exactly one pair of parallel sides.'], a: 'trapezoid' },
+      { lines: ['The shape has four congruent sides.', 'It has four right angles.'], a: 'square' },
     ];
     const s = pick(r, sets);
     return cell([text('Which shape is described by the clues below?'), { t: 'bullets', rows: s.lines }, line()], s.a);
@@ -81,6 +86,8 @@ const skills = {
       { q: 'Is a rectangle a square? Explain.', a: 'Not always. A rectangle has 4 right angles, but a square must also have 4 congruent sides.' },
       { q: 'Is a square a rhombus? Explain.', a: 'Yes. A square has 4 congruent sides, which is what makes a rhombus.' },
       { q: 'Is this shape a rhombus? Explain.', shape: 'rhombus', a: 'Yes. All 4 sides are congruent.' },
+      { q: 'Is every rectangle also a parallelogram? Explain.', a: 'Yes. A rectangle has two pairs of parallel sides, which is what makes a parallelogram.' },
+      { q: 'Is this shape a parallelogram? Explain.', shape: 'parallelogram', a: 'Yes. Both pairs of opposite sides are parallel (and congruent).' },
     ];
     const s = p.pick !== undefined ? qs[p.pick] : pick(r, qs);
     const blocks = [text(s.q)];
@@ -94,6 +101,8 @@ const skills = {
       { q: 'How do you know that a circle is not a polygon?', a: 'A polygon is made of straight sides. A circle has no straight sides.' },
       { q: 'How do you know the following figure is a quadrilateral and a trapezoid?', shape: 'trapezoid', a: 'It has 4 sides and at least one pair of parallel sides.' },
       { q: 'How do you know that a square is also a rhombus?', a: 'A rhombus has 4 congruent sides, and every square has 4 congruent sides.' },
+      { q: 'How do you know that a pentagon is a polygon but not a quadrilateral?', a: 'A pentagon is made of straight sides, but it has 5 sides, and a quadrilateral has exactly 4.' },
+      { q: 'How do you know the following shape is not a parallelogram?', shape: 'trapezoid', a: 'It has only one pair of parallel sides; a parallelogram needs two pairs.' },
     ];
     const s = p.pick !== undefined ? qs[p.pick] : pick(r, qs);
     const blocks = [text(s.q)];
@@ -133,6 +142,8 @@ const skills = {
         { title: 'Songs Downloaded Last Month', min: 0, max: 8, den: 1, total: 'How many total songs were downloaded last month?', big: 'What is the difference between the most and fewest songs downloaded?' },
         { title: 'Glasses of Water Per Student', min: 0, max: 8, den: 1, total: 'How many total glasses of water?', big: 'What is the difference between the most and fewest glasses of water?' },
         { title: 'Pages Read Each Night', min: 0, max: 8, den: 1, total: 'How many total pages were read?', big: 'What is the difference between the most and fewest pages read?' },
+        { title: 'Goals Scored This Season', min: 0, max: 8, den: 1, total: 'How many total goals were scored?', big: 'What is the difference between the most and fewest goals scored?' },
+        { title: 'Books Checked Out Per Student', min: 0, max: 8, den: 1, total: 'How many total books were checked out?', big: 'What is the difference between the most and fewest books checked out?' },
       ],
       half: [
         { title: 'Miles Run', min: 5, max: 9, den: 2, total: 'How many total miles were run?', big: 'What is the difference between the most and fewest miles run?' },
@@ -140,11 +151,18 @@ const skills = {
         { title: 'Length of Books in Inches', min: 5, max: 9, den: 2, total: 'What is the total length of all the books?', big: 'What is the difference between the longest and shortest book?' },
         { title: 'Length of Ribbon in Inches', min: 1, max: 5, den: 2, total: 'What is the total length of all the ribbons?', big: 'What is the difference between the largest and smallest ribbon?' },
         { title: 'Cups of Dog Food Served', min: 5, max: 9, den: 2, total: 'What is the total amount of dog food served (cups)?', big: 'What is the difference between the most and least dog food served?' },
+        { title: 'Pounds of Apples Picked', min: 5, max: 9, den: 2, total: 'How many total pounds of apples were picked?', big: 'What is the difference between the most and fewest pounds picked?' },
+        { title: 'Height of Sunflowers in Feet', min: 5, max: 9, den: 2, total: 'What is the total height of all the sunflowers?', big: 'What is the difference between the tallest and shortest sunflower?' },
       ],
-      quarter: [{ title: 'Boxes of Cereal in Pounds', min: 0, max: 1, den: 4, total: 'What is the total weight of the cereal in pounds?', big: 'What is the difference between the largest and smallest amount of cereal?' }],
+      quarter: [
+        { title: 'Boxes of Cereal in Pounds', min: 0, max: 1, den: 4, total: 'What is the total weight of the cereal in pounds?', big: 'What is the difference between the largest and smallest amount of cereal?' },
+        { title: 'Bags of Flour in Pounds', min: 0, max: 1, den: 4, total: 'What is the total weight of the flour in pounds?', big: 'What is the difference between the heaviest and lightest bag?' },
+        { title: 'Jars of Paint in Gallons', min: 0, max: 1, den: 4, total: 'How many total gallons of paint are there?', big: 'What is the difference between the fullest and emptiest jar?' },
+      ],
       eighth: [
         { title: 'Length of Leaves (inches)', min: 0, max: 1, den: 8, keepDen: true, total: 'What is the total length of all the leaves?', big: 'What is the difference between the longest and shortest leaf?', less: 'How many leaves were shorter than' },
         { title: 'Length of Insects (inches)', min: 0, max: 1, den: 8, keepDen: true, total: 'What is the total length of all the insects?', big: 'What is the difference between the longest and shortest insect?', less: 'How many insects were shorter than' },
+        { title: 'Length of Pencils (feet)', min: 0, max: 1, den: 8, keepDen: true, total: 'What is the total length of all the pencils?', big: 'What is the difference between the longest and shortest pencil?', less: 'How many pencils were shorter than' },
       ],
     };
     const q0 = p.question || 'total';

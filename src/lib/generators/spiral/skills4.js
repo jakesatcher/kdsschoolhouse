@@ -78,8 +78,16 @@ const skills = {
       if (T % k === 0) continue;
       const q = Math.floor(T / k); const rem = T % k;
       const kind = p.kind || pick(r, ['full', 'need']);
-      if (kind === 'full') return cell([text(`${A} has ${T} stickers to put ${k} on each page of an album. How many full pages can ${A.s} fill, and how many stickers are left over?`)], `${q} full pages, ${rem} left over (${T} ÷ ${k} = ${q} R ${rem})`);
-      return cell([text(`${A} has ${T} pencils. Each box holds ${k} pencils. How many boxes does ${A.s} need to hold all of the pencils?`)], `${q + 1} boxes (${T} ÷ ${k} = ${q} R ${rem}, so one more box is needed)`);
+      const meta = { T, k, kind };
+      if (kind === 'full') {
+        const [item, per, holder] = pick(r, [['stickers', 'on each page of an album', 'pages'], ['trading cards', 'in each row of a display', 'rows'], ['marbles', 'in each bag', 'bags'], ['pencils', 'in each box', 'boxes']]);
+        return cell([text(`${A} has ${T} ${item} to put ${k} ${per}. How many full ${holder} can ${A.s} fill, and how many ${item} are left over?`)], `${q} full ${holder}, ${rem} left over (${T} ÷ ${k} = ${q} R ${rem})`, meta);
+      }
+      const [item, holder] = pick(r, [['pencils', 'pencils'], ['students', 'students'], ['books', 'books']]);
+      const place = { pencils: `Each box holds ${k} pencils. How many boxes does ${A.s} need to hold all of the pencils?`, students: `Each van holds ${k} students. How many vans are needed to take all of the students on the trip?`, books: `Each shelf holds ${k} books. How many shelves are needed to hold all of the books?` }[item];
+      const lead = { pencils: `${A} has ${T} pencils.`, students: `${T} students are going on a field trip.`, books: `The library has ${T} new books.` }[item];
+      void holder;
+      return cell([text(`${lead} ${place}`)], `${q + 1} ${item === 'pencils' ? 'boxes' : item === 'students' ? 'vans' : 'shelves'} (${T} ÷ ${k} = ${q} R ${rem}, so one more is needed)`, meta);
     }
   },
 
@@ -88,44 +96,54 @@ const skills = {
     const { A, B } = ctx(r);
     const kind = p.kind || pick(r, ['times', 'twice', 'share', 'groups', 'unknownSub']);
     const letter = pick(r, ['m', 'n', 'p', 'b', 'c', 't']);
-    if (kind === 'times') { const k = int(r, 2, 6); const n = int(r, 3, 9); const what = pick(r, ['marbles', 'stickers', 'cards']);
+    if (kind === 'times') { const k = int(r, 2, 6); const n = int(r, 3, 9); const what = pick(r, ['marbles', 'stickers', 'cards', 'seashells', 'coins']);
+      if (r() < 0.4) return cell([text(`Write the equation.`), text(`${A} read ${k} times as many books this year as ${B}. ${B} read ${n} books. How many books did ${A} read?`)], `${k} × ${n} = ${letter}; ${letter} = ${k * n}`);
       return cell([text(`Write the equation.`), text(`${A} has ${k} times as many ${what} in ${A.p} collection than ${B}. ${B} has ${n} ${what} in ${B.p} collection. How many ${what} does ${A} have?`)], `${k} × ${n} = ${letter}; ${letter} = ${k * n}`); }
     if (kind === 'twice') { const k = pick(r, [2, 3, 4]); const n = int(r, 3, 9); const what = pick(r, ['ribbons', 'trophies', 'medals']);
       const word = { 2: 'twice', 3: 'three times', 4: 'four times' }[k];
+      if (r() < 0.4) return cell([text(`Write the equation.`), text(`${A} scored ${k * n} points in the game. That is ${word} as many points as ${B} scored. How many points did ${B} score?`)], `${k * n} ÷ ${k} = ${letter}; ${letter} = ${n}`);
       return cell([text(`Write the equation.`), text(`${A} won ${k * n} ${what} at last night's swim meet. That is ${word} as many as ${B}. How many ${what} did ${B} win?`)], `${k * n} ÷ ${k} = ${letter}; ${letter} = ${n}`); }
     if (kind === 'share') { const k = int(r, 3, 9); const n = int(r, 4, 9);
+      if (r() < 0.4) return cell([text(`${A} is arranging ${k * n} photos on ${k} pages of an album, with the same number on each page. How many photos are on each page? Write the equation.`)], `${k * n} ÷ ${k} = ${letter}; ${letter} = ${n}`);
       return cell([text(`${A} organized the books on ${A.p} bookshelf. ${A.S} made ${k} categories of books. ${A.S} split ${k * n} books into the ${k} categories. How many books were in each category? Write the equation.`)], `${k * n} ÷ ${k} = ${letter}; ${letter} = ${n}`); }
     if (kind === 'groups') { const k = int(r, 3, 9); const n = int(r, 4, 9);
+      if (r() < 0.4) return cell([text(`${A} bought ${k} packs of juice boxes. There are ${n} juice boxes in each pack. How many juice boxes did ${A.s} buy? Write the equation.`)], `${k} × ${n} = ${letter}; ${letter} = ${k * n}`);
       return cell([text(`${A} filled ${k} bags with ${n} apples in each bag. How many apples did ${A.s} pack in all? Write the equation.`)], `${k} × ${n} = ${letter}; ${letter} = ${k * n}`); }
     const total = int(r, 40, 90); const left = int(r, 15, total - 10);
+    if (r() < 0.4) return cell([text(`${A} had ${total} dollars. After buying a gift, ${A.s} had ${left} dollars left. Write an equation to show how many dollars the gift cost.`)], `${total} − ${letter} = ${left}; ${letter} = ${total - left}`);
     return cell([text(`${A} had ${total} stickers. After giving some to ${B}, ${A.s} had ${left} stickers left. Write an equation to show how many stickers ${A} gave away.`)], `${total} − ${letter} = ${left}; ${letter} = ${total - left}`);
   },
   g4MultiStep(r, p = {}) {
     const { A } = ctx(r);
-    const kind = p.kind || pick(r, ['sub3', 'mulAdd', 'addSub']);
+    const kind = p.kind || pick(r, ['sub3', 'mulAdd', 'addSub', 'groupsLeft']);
     if (kind === 'sub3') { const total = int(r, 70, 99); const a = int(r, 15, 30); const b = int(r, 15, 30);
-      const what = pick(r, ['sea shells', 'rocks', 'leaves']);
-      return cell([text(`While at the beach, ${A} searched for ${what}. ${A.S} found a total of ${total}. In the morning, ${A.s} found ${a}. After lunch ${A.s} found ${b}. ${A.S} found the rest right before going home. How many did ${A.s} find at the very end of the day?`)], String(total - a - b)); }
+      const what = pick(r, ['sea shells', 'rocks', 'leaves', 'acorns', 'feathers']);
+      if (r() < 0.4) return cell([text(`${A} wants to collect ${total} ${what} for a science project. ${A.S} found ${a} on Monday and ${b} on Tuesday. How many more ${what} does ${A.s} still need to find?`)], String(total - a - b), { kind, nums: [total, a, b] });
+      return cell([text(`While at the beach, ${A} searched for ${what}. ${A.S} found a total of ${total}. In the morning, ${A.s} found ${a}. After lunch ${A.s} found ${b}. ${A.S} found the rest right before going home. How many did ${A.s} find at the very end of the day?`)], String(total - a - b), { kind, nums: [total, a, b] }); }
     if (kind === 'mulAdd') { const k = int(r, 3, 6); const n = int(r, 4, 9); const extra = int(r, 3, 12);
-      return cell([text(`${A} bought ${k} packs of trading cards with ${n} cards in each pack. Then ${A.s} got ${extra} more cards as a gift. How many cards does ${A.s} have now?`)], String(k * n + extra)); }
+      const [pack, thing] = pick(r, [['packs of trading cards', 'cards'], ['boxes of crayons', 'crayons'], ['bags of marbles', 'marbles'], ['sheets of stickers', 'stickers']]);
+      return cell([text(`${A} bought ${k} ${pack} with ${n} ${thing} in each one. Then ${A.s} got ${extra} more ${thing} as a gift. How many ${thing} does ${A.s} have now?`)], String(k * n + extra), { kind, nums: [k, n, extra] }); }
+    if (kind === 'groupsLeft') { const k = int(r, 3, 7); const n = int(r, 4, 9); const give = int(r, 2, k * n - 5);
+      return cell([text(`${A} filled ${k} bags with ${n} marbles in each bag. Then ${A.s} gave ${give} marbles to a friend. How many marbles does ${A.s} have left?`)], String(k * n - give), { kind, nums: [k, n, give] }); }
     const a = int(r, 120, 260); const b = int(r, 30, 90); const c = int(r, 20, 60);
-    return cell([text(`${A} had ${a} baseball cards. ${A.S} bought ${b} more and then gave ${c} to a friend. How many cards does ${A.s} have now?`)], String(a + b - c));
+    if (r() < 0.4) return cell([text(`${A} had ${a} points in a video game. ${A.S} earned ${b} more points and then lost ${c} points. How many points does ${A.s} have now?`)], String(a + b - c), { kind, nums: [a, b, c] });
+    return cell([text(`${A} had ${a} baseball cards. ${A.S} bought ${b} more and then gave ${c} to a friend. How many cards does ${A.s} have now?`)], String(a + b - c), { kind, nums: [a, b, c] });
   },
   g4Convert(r, p = {}) {
     const { A } = ctx(r);
     const kind = p.kind || pick(r, ['cups-pt', 'yd-ft', 'hr-min', 'ft-in', 'kg-g', 'L-mL', 'lb-oz', 'gal-qt']);
     const n = int(r, 2, 9);
     const t = {
-      'cups-pt': () => { const c = 2 * int(r, 2, 6); return [`${A} baked several pies. ${A.S} used ${c} cups of flour for the dough. How many pints of flour did ${A.s} use?`, `${c / 2} pints`]; },
-      'yd-ft': () => [`${A} needs ${n} yards of fabric to sew a curtain. How many feet of fabric would that be?`, `${n * 3} feet`],
-      'hr-min': () => [`${A} practiced the piano for ${n} hours this week. How many minutes is that?`, `${n * 60} minutes`],
-      'ft-in': () => [`A rope is ${n} feet long. How many inches long is the rope?`, `${n * 12} inches`],
-      'kg-g': () => [`A bag of flour weighs ${n} kilograms. How many grams is that?`, `${commas(n * 1000)} grams`],
-      'L-mL': () => [`${A}'s water bottle holds ${n} liters. How many milliliters does it hold?`, `${commas(n * 1000)} milliliters`],
-      'lb-oz': () => [`A puppy weighs ${n} pounds. How many ounces does the puppy weigh?`, `${n * 16} ounces`],
-      'gal-qt': () => [`${A}'s family drank ${n} gallons of milk. How many quarts is that?`, `${n * 4} quarts`],
+      'cups-pt': () => { const c = 2 * int(r, 2, 6); return [pick(r, [`${A} baked several pies. ${A.S} used ${c} cups of flour for the dough. How many pints of flour did ${A.s} use?`, `A recipe uses ${c} cups of broth. How many pints of broth is that?`]), `${c / 2} pints`, { n: c, mult: 0.5 }]; },
+      'yd-ft': () => [pick(r, [`${A} needs ${n} yards of fabric to sew a curtain. How many feet of fabric would that be?`, `A football team gained ${n} yards on one play. How many feet did the team gain?`]), `${n * 3} feet`, { n, mult: 3 }],
+      'hr-min': () => [pick(r, [`${A} practiced the piano for ${n} hours this week. How many minutes is that?`, `A movie is ${n} hours long. How many minutes long is the movie?`]), `${n * 60} minutes`, { n, mult: 60 }],
+      'ft-in': () => [pick(r, [`A rope is ${n} feet long. How many inches long is the rope?`, `${A} is ${n} feet tall. How many inches tall is ${A.o}?`.replace(`${A} is ${n} feet tall`, `A tree in ${A}'s yard is ${n} feet tall`).replace(` How many inches tall is ${A.o}?`, ' How many inches tall is the tree?')]), `${n * 12} inches`, { n, mult: 12 }],
+      'kg-g': () => [pick(r, [`A bag of flour weighs ${n} kilograms. How many grams is that?`, `${A}'s dog weighs ${n} kilograms. How many grams does the dog weigh?`]), `${commas(n * 1000)} grams`, { n, mult: 1000 }],
+      'L-mL': () => [pick(r, [`${A}'s water bottle holds ${n} liters. How many milliliters does it hold?`, `A pitcher of lemonade holds ${n} liters. How many milliliters is that?`]), `${commas(n * 1000)} milliliters`, { n, mult: 1000 }],
+      'lb-oz': () => [pick(r, [`A puppy weighs ${n} pounds. How many ounces does the puppy weigh?`, `${A} bought ${n} pounds of cheese. How many ounces of cheese did ${A.s} buy?`]), `${n * 16} ounces`, { n, mult: 16 }],
+      'gal-qt': () => [pick(r, [`${A}'s family drank ${n} gallons of milk. How many quarts is that?`, `A tank holds ${n} gallons of water. How many quarts does it hold?`]), `${n * 4} quarts`, { n, mult: 4 }],
     }[kind]();
-    return cell([text(t[0])], t[1]);
+    return cell([text(t[0])], t[1], t[2]);
   },
   g4UnitTable(r, p = {}) {
     const kind = p.kind || pick(r, ['m-mm', 'km-m', 'kg-g', 'L-mL', 'hr-min', 'ft-in', 'yd-ft', 'gal-qt', 'lb-oz']);
@@ -149,7 +167,8 @@ const skills = {
     const start = h * 60 + m; const end = start + el;
     const t = (x) => `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`;
     const hh = Math.floor(el / 60); const mm = el % 60;
-    return cell([text(`${A}'s practice started at ${t(start)} and ended at ${t(end)}. How much time passed?`), line()], `${hh ? `${hh} hour${hh > 1 ? 's' : ''} ` : ''}${mm ? `${mm} minutes` : ''}`.trim());
+    if (r() < 0.3) return cell([text(`${A}'s soccer practice starts at ${t(start)} and lasts ${hh ? `${hh} hour${hh > 1 ? 's' : ''} ` : ''}${mm ? `${mm} minutes` : ''}. What time does practice end?`.replace(' .', '.')), line()], t(end), { kind: 'end', start, el });
+    return cell([text(pick(r, [`${A}'s practice started at ${t(start)} and ended at ${t(end)}. How much time passed?`, `${A} began reading at ${t(start)} and stopped at ${t(end)}. How long did ${A.s} read?`, `The class started a science experiment at ${t(start)} and finished at ${t(end)}. How much time did the experiment take?`])), line()], `${hh ? `${hh} hour${hh > 1 ? 's' : ''} ` : ''}${mm ? `${mm} minutes` : ''}`.trim());
   },
 
   // ----- measurement and geometry -----
@@ -176,6 +195,8 @@ const skills = {
       ['Draw a right angle. Label the vertex V.', 'An angle of exactly 90° (a square corner) with vertex V.'],
       ['Draw an obtuse angle.', 'An angle greater than 90° and less than 180°.'],
       ['Draw an acute angle.', 'An angle less than 90°.'],
+      ['Draw a line segment 5 centimeters long. Label it with its length.', 'A segment measuring 5 cm with the length written beside it.'],
+      ['Draw two lines that cross but are not perpendicular.', 'Two lines that cross to make angles that are not right angles.'],
     ];
     const it = p.pick !== undefined ? items[p.pick] : pick(r, items);
     return cell([text(it[0])], it[1]);
@@ -197,11 +218,13 @@ const skills = {
   g4ClassifyTri(r, p = {}) {
     const kind = p.kind || pick(r, ['angles', 'sides']);
     if (kind === 'angles') {
-      const sets = [[40, 60, 80, 'acute'], [90, 45, 45, 'right'], [30, 40, 110, 'obtuse'], [55, 65, 60, 'acute'], [90, 30, 60, 'right'], [20, 50, 110, 'obtuse']];
+      const sets = [[40, 60, 80, 'acute'], [90, 45, 45, 'right'], [30, 40, 110, 'obtuse'], [55, 65, 60, 'acute'], [90, 30, 60, 'right'], [20, 50, 110, 'obtuse'], [70, 50, 60, 'acute'], [35, 55, 90, 'right'], [25, 35, 120, 'obtuse'], [45, 75, 60, 'acute']];
       const s = pick(r, sets);
       return cell([text(`A triangle has angles that measure ${s[0]}°, ${s[1]}° and ${s[2]}°. Is it an acute, right or obtuse triangle?`), line()], s[3]);
     }
-    const sets = [[5, 5, 8, 'isosceles'], [6, 6, 6, 'equilateral'], [4, 5, 7, 'scalene'], [9, 9, 4, 'isosceles'], [3, 4, 5, 'scalene'], [7, 7, 7, 'equilateral']];
+    if (kind === 'both') { const sets = [[5, 5, 5, 'equilateral and acute'], [6, 6, 10, 'isosceles and obtuse'], [3, 4, 5, 'scalene and right'], [5, 5, 7, 'isosceles and acute']];
+      const s = pick(r, sets); return cell([text(`A triangle has sides that measure ${s[0]} cm, ${s[1]} cm and ${s[2]} cm. Name the triangle by its sides and by its angles.`), line()], s[3], { kind }); }
+    const sets = [[5, 5, 8, 'isosceles'], [6, 6, 6, 'equilateral'], [4, 5, 7, 'scalene'], [9, 9, 4, 'isosceles'], [3, 4, 5, 'scalene'], [7, 7, 7, 'equilateral'], [8, 8, 3, 'isosceles'], [6, 7, 9, 'scalene'], [10, 10, 10, 'equilateral'], [2, 6, 6, 'isosceles']];
     const s = pick(r, sets);
     return cell([text(`A triangle has sides that measure ${s[0]} cm, ${s[1]} cm and ${s[2]} cm. Is it equilateral, isosceles or scalene?`), line()], s[3]);
   },
@@ -210,10 +233,12 @@ const skills = {
     return cell([text('How many lines of symmetry does this shape have?'), svgBlock(S.shape(k[0], { marks: false, size: 0.7 }), k[0]), line()], `${k[1]}${k[0] === 'triangle' ? ' (as drawn, an isosceles triangle)' : ''}`);
   },
   g4AngleAdd(r) {
+    if (r() < 0.35) { const a = pick(r, [20, 25, 30, 35, 40, 45, 55, 60]); const b = pick(r, [15, 25, 30, 40, 50]);
+      return cell([text(`Two angles are placed side by side to make one larger angle. One angle measures ${a}° and the other measures ${b}°. What is the measure of the larger angle? Write an equation.`)], `${a} + ${b} = x; x = ${a + b}°`, { kind: 'sum', a, b }); }
     const total = pick(r, [90, 90, 180, 120]); const a = pick(r, [20, 25, 30, 35, 40, 45, 55, 60, 70]);
     if (a >= total) return skills.g4AngleAdd(r);
     const what = { 90: 'A right angle', 180: 'A straight angle', 120: 'An angle that measures 120°' }[total];
-    return cell([text(`${what} is split into two smaller angles. One of the angles measures ${a}°. What is the measure of the other angle? Write an equation.`)], `${a} + x = ${total}; x = ${total - a}°`);
+    return cell([text(`${what} is split into two smaller angles. One of the angles measures ${a}°. What is the measure of the other angle? Write an equation.`)], `${a} + x = ${total}; x = ${total - a}°`, { kind: 'split', total, a });
   },
 
   // ----- fractions and decimals -----
@@ -272,6 +297,7 @@ const skills = {
     if (kind === 'tenth') { const n = int(r, 1, 9); return cell([text('Write ', f(n, 10), ' as a decimal.'), line()], `0.${n}`); }
     if (kind === 'hundredth') { const n = int(r, 1, 99); return cell([text('Write ', f(n, 100), ' as a decimal.'), line()], `0.${String(n).padStart(2, '0')}`); }
     if (kind === 'decToFrac') { const n = int(r, 11, 99); return cell([text(`Write 0.${n} as a fraction.`), line()], `${n}/100`); }
+    if (kind === 'decToFracTenth') { const n = int(r, 1, 9); return cell([text(`Write 0.${n} as a fraction.`), line()], `${n}/10`); }
     const n = int(r, 1, 9); return cell([center(f(n, 10), ' = ', { sp: 'blank' }, ' / 100')], `${n * 10}/100`);
   },
   g4MixedImproper(r, p = {}) {
@@ -282,31 +308,55 @@ const skills = {
   g4MixedWord(r, p = {}) {
     const { A, B } = ctx(r);
     const d = pick(r, [4, 5, 6, 8, 10]); const w1 = int(r, 2, 6); const w2 = int(r, 1, 5); const n1 = int(r, 1, d - 1); const n2 = int(r, 1, d - 1);
-    if ((p.op || pick(r, ['add', 'sub'])) === 'add') return cell([text(`${A} walked ${w1} `, f(n1, d), ` miles on Saturday and ${w2} `, f(n2, d), ` miles on Sunday. How many miles did ${A.s} walk in all?`)], ans(F.add(F.frac(w1 * d + n1, d), F.frac(w2 * d + n2, d))));
+    if ((p.op || pick(r, ['add', 'sub'])) === 'add') {
+      if (r() < 0.5) return cell([text(`${A} walked ${w1} `, f(n1, d), ` miles on Saturday and ${w2} `, f(n2, d), ` miles on Sunday. How many miles did ${A.s} walk in all?`)], ans(F.add(F.frac(w1 * d + n1, d), F.frac(w2 * d + n2, d))), { op: 'add', w1, n1, w2, n2, d });
+      return cell([text(`${A} used ${w1} `, f(n1, d), ` cups of flour for a cake and ${w2} `, f(n2, d), ` cups of flour for cookies. How many cups of flour did ${A.s} use in all?`)], ans(F.add(F.frac(w1 * d + n1, d), F.frac(w2 * d + n2, d))), { op: 'add', w1, n1, w2, n2, d });
+    }
     const big = F.frac((w1 + w2 + 1) * d + n1, d); const small = F.frac(w2 * d + n2, d);
-    return cell([text(`${B} had ${w1 + w2 + 1} `, f(n1, d), ` yards of ribbon and used ${w2} `, f(n2, d), ` yards for a project. How much ribbon does ${B.s} have left?`)], ans(F.sub(big, small)));
+    if (r() < 0.5) return cell([text(`${B} had ${w1 + w2 + 1} `, f(n1, d), ` yards of ribbon and used ${w2} `, f(n2, d), ` yards for a project. How much ribbon does ${B.s} have left?`)], ans(F.sub(big, small)), { op: 'sub', w1: w1 + w2 + 1, n1, w2, n2, d });
+    return cell([text(`A board was ${w1 + w2 + 1} `, f(n1, d), ` feet long. ${B} cut off ${w2} `, f(n2, d), ` feet. How long is the board now?`)], ans(F.sub(big, small)), { op: 'sub', w1: w1 + w2 + 1, n1, w2, n2, d });
   },
   g4FracWordMul(r) {
     const { A } = ctx(r);
     const d = pick(r, [3, 4, 5, 6, 8]); const n = int(r, 1, d - 1); const k = int(r, 3, 8);
-    return cell([text(`${A} drinks `, f(n, d), ` of a liter of milk every day. How many liters of milk does ${A.s} drink in ${k} days?`)], ans(F.mul(F.frac(k, 1), F.frac(n, d))));
+    const t = pick(r, [
+      [`${A} drinks `, ` of a liter of milk every day. How many liters of milk does ${A.s} drink in ${k} days?`],
+      [`${A} runs `, ` of a mile every morning. How many miles does ${A.s} run in ${k} days?`],
+      [`Each glass holds `, ` of a pint of juice. How many pints of juice are in ${k} glasses?`],
+      [`${A} uses `, ` of a yard of ribbon for each bow. How many yards of ribbon are needed for ${k} bows?`],
+    ]);
+    return cell([text(t[0], f(n, d), t[1])], ans(F.mul(F.frac(k, 1), F.frac(n, d))), { n, d, k });
   },
   g4Patterns(r, p = {}) {
-    const kind = p.kind || pick(r, ['add', 'sub', 'mul']);
+    const kind = p.kind || pick(r, ['add', 'sub', 'mul', 'fromRule']);
+    if (kind === 'fromRule') {
+      const start = int(r, 2, 20); const step = int(r, 3, 12); const sign = pick(r, ['add', 'subtract']);
+      const s0 = sign === 'add' ? start : start + 5 * step;
+      const seq = [s0]; for (let i = 0; i < 4; i++) seq.push(sign === 'add' ? seq[i] + step : seq[i] - step);
+      return cell([text(`The rule is ${sign} ${step}. Start at ${s0} and write the first five numbers in the pattern.`), line()], seq.join(', '), { kind, rule: sign, step, start: s0 });
+    }
     const start = int(r, 2, 20); const step = kind === 'mul' ? int(r, 2, 3) : int(r, 3, 12);
     const seq = [start];
     for (let i = 0; i < 5; i++) seq.push(kind === 'add' ? seq[i] + step : kind === 'mul' ? seq[i] * step : seq[i] - step);
     if (kind === 'sub') { const s0 = int(r, 60, 99); seq.length = 0; seq.push(s0); for (let i = 0; i < 5; i++) seq.push(seq[i] - step); }
     const rule = kind === 'add' ? `add ${step}` : kind === 'sub' ? `subtract ${step}` : `multiply by ${step}`;
-    return cell([text('Find the missing numbers. What is the rule?'), center(`${seq.slice(0, 4).map(commas).join(', ')}, ____, ____`)], `${commas(seq[4])}, ${commas(seq[5])}; rule: ${rule}`);
+    return cell([text(pick(r, ['Find the missing numbers. What is the rule?', 'Continue the pattern. What is the rule?'])), center(`${seq.slice(0, 4).map(commas).join(', ')}, ____, ____`)], `${commas(seq[4])}, ${commas(seq[5])}; rule: ${rule}`, { kind });
   },
   g4Factors(r, p = {}) {
-    const kind = p.kind || pick(r, ['list', 'prime', 'multiples']);
-    if (kind === 'list') { const n = pick(r, [12, 16, 18, 20, 24, 28, 30, 36]); const fs = []; for (let i = 1; i <= n; i++) if (n % i === 0) fs.push(i);
+    const kind = p.kind || pick(r, ['list', 'prime', 'multiples', 'circlePrime', 'multipleOf']);
+    const isPrimeNum = (n) => { if (n < 2) return false; for (let i = 2; i * i <= n; i++) if (n % i === 0) return false; return true; };
+    if (kind === 'list') { const n = pick(r, [12, 15, 16, 18, 20, 21, 24, 28, 30, 32, 36, 40, 42, 48]); const fs = []; for (let i = 1; i <= n; i++) if (n % i === 0) fs.push(i);
       return cell([text(`List all of the factors of ${n}.`), line()], fs.join(', ')); }
     if (kind === 'multiples') { const n = int(r, 3, 9); return cell([text(`Write the first five multiples of ${n}.`), line()], [1, 2, 3, 4, 5].map((k) => k * n).join(', ')); }
-    const n = pick(r, [23, 27, 29, 31, 39, 41, 47, 49, 51, 53, 57, 61]); const isPrime = ![27, 39, 49, 51, 57].includes(n);
-    return cell([text(`Is ${n} a prime number or a composite number? Explain.`)], isPrime ? `prime: its only factors are 1 and ${n}` : `composite: it has more than two factors`);
+    if (kind === 'circlePrime') {
+      const pool = shuffle(r, [11, 13, 17, 19, 23, 29, 31, 37].slice(0, 8)); const primes = pool.slice(0, 2); const comps = shuffle(r, [15, 21, 25, 27, 33, 35, 39, 45, 49, 51]).slice(0, 2);
+      const list = shuffle(r, [...primes, ...comps]);
+      return cell([text('Circle the prime numbers.'), center(list.join('    '))], list.filter(isPrimeNum).sort((x, y) => x - y).join(', '), { kind, list });
+    }
+    if (kind === 'multipleOf') { const d = int(r, 3, 9); const m = d * int(r, 4, 12); const yes = r() < 0.5; const n = yes ? m : m + int(r, 1, d - 1);
+      return cell([text(`Is ${n} a multiple of ${d}? Explain.`)], `${yes ? 'Yes' : 'No'}: ${n} ÷ ${d} ${yes ? `= ${n / d}` : `leaves a remainder of ${n % d}`}`, { kind, n, d, yes }); }
+    const n = pick(r, [23, 27, 29, 31, 33, 37, 39, 41, 43, 47, 49, 51, 53, 57, 59, 61, 63, 67, 69, 71]); const isPrime = isPrimeNum(n);
+    return cell([text(`Is ${n} a prime number or a composite number? Explain.`)], isPrime ? `prime: its only factors are 1 and ${n}` : `composite: it has more than two factors`, { kind });
   },
 };
 

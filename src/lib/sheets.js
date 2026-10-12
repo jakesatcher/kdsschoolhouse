@@ -79,11 +79,12 @@ function build(pathname, q) {
     if (type === 'spiral-review') {
       const grade = oneOf(q.grade, ['4', '5'], '5');
       const numbers = spiral.testNumbers(Number(grade));
-      const test = intIn(q.test, numbers[0] || 1, numbers[numbers.length - 1] || 1, numbers[0] || 1);
+      // `practice` is the current name; older saved links used `test`
+      const test = intIn(q.practice !== undefined ? q.practice : q.test, numbers[0] || 1, numbers[numbers.length - 1] || 1, numbers[0] || 1);
       const copies = intIn(q.pages, 1, 5, 1);
-      if (!numbers.includes(test)) return { ...meta, error: `Grade ${grade} Test ${test} is not available yet.` };
+      if (!numbers.includes(test)) return { ...meta, error: `Grade ${grade} Practice ${test} is not available yet.` };
       const pages = Array.from({ length: copies }, () => spiral.buildTest(rng, { grade: Number(grade), test }));
-      const subtitle = `Spiral Review: Grade ${grade}, Test ${test}`;
+      const subtitle = `Spiral Review: Grade ${grade}, Practice ${test}`;
       return { ...meta, subtitle, partial: 'spiral', locals: { title: meta.title, subtitle, seed, pages, includeKey: base.includeKey } };
     }
     if (type === 'decimals') {
