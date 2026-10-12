@@ -8,15 +8,16 @@ const { makeRng } = require('./generators/rng');
 const math = require('./generators/math');
 const { decimals } = require('./generators/decimals');
 const { fractionProblems } = require('./generators/fractionProblems');
+const spiral = require('./generators/spiral');
 const wp = require('./generators/wordProblems');
 const { phonics } = require('./generators/phonics');
 const { sightWords } = require('./generators/sight');
 const { writing, TYPES: WRITING_TYPES } = require('./generators/writing');
 
-const MATH_TYPES = { addition: 'Addition', subtraction: 'Subtraction', multiplication: 'Multiplication', division: 'Division', decimals: 'Decimals', fractions: 'Fractions', 'word-problems': 'Word Problems' };
+const MATH_TYPES = { addition: 'Addition', subtraction: 'Subtraction', multiplication: 'Multiplication', division: 'Division', decimals: 'Decimals', fractions: 'Fractions', 'spiral-review': 'Spiral Review', 'word-problems': 'Word Problems' };
 
 const WORKSHEET_RE = [
-  /^\/math\/(addition|subtraction|multiplication|division|decimals|fractions|word-problems)\/worksheet$/,
+  /^\/math\/(addition|subtraction|multiplication|division|decimals|fractions|spiral-review|word-problems)\/worksheet$/,
   /^\/reading\/phonics\/worksheet$/,
   /^\/reading\/sight-words\/worksheet$/,
   /^\/writing\/worksheet$/,
@@ -74,6 +75,16 @@ function build(pathname, q) {
       const subtitle = (mode === 'multi' ? `Division: ${digitLabel(dividend, '2 to 4')} dividend ÷ ${digitLabel(vdigits, '1 to 2')} divisor, ${remText}`
         : mode === 'mixed' ? 'Mixed division (with remainders)' : divisor === 'all' ? 'Division facts 0-12 (mixed)' : `Division facts: divide by ${divisor}`) + (special ? '' : ' (no ÷1 or ÷10)');
       return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: mode === 'facts' ? 2 : 4, problems, perPage: PER_PAGE[base.layout] } };
+    }
+    if (type === 'spiral-review') {
+      const grade = oneOf(q.grade, ['4', '5'], '5');
+      const numbers = spiral.testNumbers(Number(grade));
+      const test = intIn(q.test, numbers[0] || 1, numbers[numbers.length - 1] || 1, numbers[0] || 1);
+      const copies = intIn(q.pages, 1, 5, 1);
+      if (!numbers.includes(test)) return { ...meta, error: `Grade ${grade} Test ${test} is not available yet.` };
+      const pages = Array.from({ length: copies }, () => spiral.buildTest(rng, { grade: Number(grade), test }));
+      const subtitle = `Spiral Review: Grade ${grade}, Test ${test}`;
+      return { ...meta, subtitle, partial: 'spiral', locals: { title: meta.title, subtitle, seed, pages, includeKey: base.includeKey } };
     }
     if (type === 'decimals') {
       const op = oneOf(q.op, ['add', 'sub', 'mul', 'div'], 'add');

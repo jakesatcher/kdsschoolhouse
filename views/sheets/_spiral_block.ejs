@@ -1,0 +1,18 @@
+<% if (b.t === 'text') { %><p class="sp-t"><%- include('_spiral_seg', { seg: b.seg }) %></p>
+<% } else if (b.t === 'center') { %><p class="sp-c"><%- include('_spiral_seg', { seg: b.seg }) %></p>
+<% } else if (b.t === 'note') { %><p class="sp-note"><%- include('_spiral_seg', { seg: b.seg }) %></p>
+<% } else if (b.t === 'line') { %><% if (b.multi) { %><div class="sp-lines"><% for (let i = 0; i < b.multi; i++) { %><i class="blank short"></i><% } %></div><% } else if (b.second) { %><div class="sp-line sp-and"><i class="blank short"></i> <span>and</span> <i class="blank short"></i></div><% } else { %><div class="sp-line"><% if (b.pre) { %><span><%= b.pre %></span><% } %><i class="blank short"></i><% if (b.post) { %> <span><%= b.post %></span><% } %></div><% } %>
+<% } else if (b.t === 'svg') { %><div class="sp-svg<%= b.wide ? ' wide' : '' %>"><%- b.svg %></div>
+<% } else if (b.t === 'vmul') { %><div class="vp sp-vp"><div class="row"><span class="opsym"></span><span class="n"><%= Number(b.a).toLocaleString('en-US') %></span></div><div class="row"><span class="opsym">×</span><span class="n"><%= Number(b.b).toLocaleString('en-US') %></span></div><div class="rule w0"></div></div>
+<% } else if (b.t === 'ldiv') { %><div class="div-bracket w0 sp-ld"><span class="divisor"><%= b.d %></span><span class="dividend"><%= b.n %></span></div>
+<% } else if (b.t === 'table') { %><table class="sp-table"><thead><tr><% b.head.forEach(function (h) { %><th><%= h %></th><% }) %></tr></thead><tbody><% b.rows.forEach(function (row) { %><tr><% row.forEach(function (c) { %><td><%= c === null ? '' : c %></td><% }) %></tr><% }) %></tbody></table>
+<% } else if (b.t === 'circles') { %><div class="sp-cmps"><% b.pairs.forEach(function (pr) { %><div class="sp-cmp"><span class="a"><%- include('_spiral_seg', { seg: [typeof pr[0] === 'object' ? { f: pr[0].f } : pr[0]] }) %></span><i class="circ"></i><span class="b"><%- include('_spiral_seg', { seg: [typeof pr[1] === 'object' ? { f: pr[1].f } : pr[1]] }) %></span></div><% }) %></div>
+<% } else if (b.t === 'match') { %><div class="sp-match"><ul><% b.left.forEach(function (x) { %><li><span><%= x %></span><b class="dot"></b></li><% }) %></ul><ul><% b.right.forEach(function (x) { %><li><b class="dot"></b><span><%= x %></span></li><% }) %></ul></div>
+<% } else if (b.t === 'list') { %><div class="sp-list"><% b.rows.forEach(function (row) { %><div class="sp-row"><%- include('_spiral_seg', { seg: row.seg }) %><% if (row.blank) { %> <i class="blank short"></i><% } %></div><% }) %></div>
+<% } else if (b.t === 'wholes') { %><table class="sp-wholes"><tr><% for (let i = 0; i < b.n; i++) { %><td class="w">1 whole</td><% } %></tr><tr><% for (let i = 0; i < b.n; i++) { %><td></td><% } %></tr></table>
+<% } else if (b.t === 'box') { %><div class="sp-boxdraw"></div>
+<% } else if (b.t === 'bullets') { %><ul class="sp-bul<%= b.plain ? ' plain' : '' %><%= b.inline ? ' inline' : '' %>"><% b.rows.forEach(function (x) { %><li><%= x %><% if (b.blank) { %> <i class="blank short"></i><% } %></li><% }) %></ul>
+<% } else if (b.t === 'pointlist') { %><div class="sp-points"><% b.rows.forEach(function (x) { %><div><%= x %></div><% }) %></div>
+<% } else if (b.t === 'side') { %><div class="sp-side"><div class="sl"><% b.left.forEach(function (x) { %><%- include('_spiral_block', { b: x }) %><% }) %></div><div class="sr"><% b.right.forEach(function (x) { %><%- include('_spiral_block', { b: x }) %><% }) %></div></div>
+<% } else if (b.t === 'space') { %><div class="sp-space <%= b.size %>"></div>
+<% } %>

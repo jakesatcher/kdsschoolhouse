@@ -1,0 +1,31 @@
+<% pages.forEach(function (t, pi) { %>
+<article class="sheet spiral-sheet">
+  <header class="sp-head">
+    <div class="sp-name">Name <i class="blank"></i></div>
+    <div class="sp-tag">Test <%= t.test %></div>
+  </header>
+  <p class="sp-sub">Spiral Review · Grade <%= t.grade %></p>
+  <div class="sp-grid">
+    <% t.boxes.forEach(function (box) { %>
+    <section class="sp-box">
+      <span class="sp-n"><%= box.n %>.</span>
+      <div class="sp-parts<%= box.stack ? ' stack' : '' %><%= box.parts.length > 1 ? ' multi' : '' %>">
+        <% box.parts.forEach(function (c) { const split = box.parts.length === 1 && c.blocks.some(function (b) { return (b.t === 'svg' && !b.wide) || b.t === 'box'; }); %>
+          <% if (split) { %><div class="sp-part sp-split"><div class="sp-sl"><% c.blocks.filter(function (b) { return !((b.t === 'svg' && !b.wide) || b.t === 'box'); }).forEach(function (b) { %><%- include('_spiral_block', { b }) %><% }) %></div><div class="sp-sr"><% c.blocks.filter(function (b) { return (b.t === 'svg' && !b.wide) || b.t === 'box'; }).forEach(function (b) { %><%- include('_spiral_block', { b }) %><% }) %></div></div>
+          <% } else { %><div class="sp-part"><% c.blocks.forEach(function (b) { %><%- include('_spiral_block', { b }) %><% }) %></div><% } %>
+        <% }) %>
+      </div>
+    </section>
+    <% }) %>
+  </div>
+</article>
+<% }) %>
+<% if (includeKey) { %>
+<article class="sheet key">
+  <h1>Answer Key</h1><p class="sheet-sub"><%= subtitle %></p>
+  <% pages.forEach(function (t, pi) { %>
+    <% if (pages.length > 1) { %><h2>Page <%= pi + 1 %></h2><% } %>
+    <ol class="keylist single sp-key"><% t.key.forEach(function (k) { %><li><% if (k.answers.length === 1) { %><%= k.answers[0] %><% } else { %><% k.answers.forEach(function (a, i) { %><span>(<%= 'abcdef'[i] %>) <%= a %></span> <% }) %><% } %></li><% }) %></ol>
+  <% }) %>
+</article>
+<% } %>
