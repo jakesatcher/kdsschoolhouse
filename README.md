@@ -42,6 +42,7 @@ Passages and questions are written by Claude through the Anthropic API.
 - Anyone can **request access** at `/register` with just a name, username and password (no email); the account is `pending` and cannot sign in.
 - An **admin** approves/rejects/disables users, promotes/demotes, and issues one-time temporary passwords (`/admin/users`). Roles: `admin`, `user`.
 - The first admin is created at boot from `ADMIN_USERNAME` (or the older `ADMIN_EMAIL`, used as the username) and `ADMIN_PASSWORD`. Existing accounts keep working: their old email became their username.
+- **Forgot the admin password?** `ADMIN_PASSWORD` only applies when the admin account is first created; changing it later does nothing. To recover: set `ADMIN_RESET_PASSWORD=true` and a temporary `ADMIN_PASSWORD` (12+ chars) on the service, redeploy, sign in with it (you will be asked to choose a new password), then **delete `ADMIN_RESET_PASSWORD`**. This also clears any lockout. Another admin can instead issue a temporary password from `/admin/users`.
 - Nothing is reachable without signing in except `/login`, `/register`, `/healthz`, and the CSS/JS/icon under `/static`.
 
 ## Run locally

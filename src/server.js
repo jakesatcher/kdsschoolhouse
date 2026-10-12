@@ -5,12 +5,26 @@ const db = require('./db');
 const pw = require('./lib/password');
 const { migrate } = require('./db/migrate');
 const { createApp } = require('./app');
+const { audit } = require('./lib/audit');
 
 async function bootstrapAdmin() {
-  const { username, email, password, name } = config.bootstrapAdmin;
+  const { username, email, password, name, reset } = config.bootstrapAdmin;
   if (!username) return;
   const existing = await db.one('SELECT id, role, status FROM users WHERE lower(username) = lower($1)', [username]);
   if (existing) {
+    if (reset) {
+      const bad = pw.passwordProblem(password || '', { username });
+      if (bad) console.warn(`ADMIN_RESET_PASSWORD is true but ADMIN_PASSWORD is unusable (${bad}); password not changed.`);
+      else {
+        await db.query(
+          `UPDATE users SET password_hash = $2, role = 'admin', status = 'approved', must_change_password = true, failed_attempts = 0, locked_until = NULL, updated_at = now() WHERE id = $1`,
+          [existing.id, await pw.hash(password)]
+        );
+        await audit({ ip: null }, 'admin_password_reset_by_env', 'user', existing.id);
+        console.warn(`Reset the password for admin ${username} from ADMIN_PASSWORD. Remove ADMIN_RESET_PASSWORD now.`);
+        return;
+      }
+    }
     if (existing.role !== 'admin' || existing.status !== 'approved') {
       await db.query(`UPDATE users SET role = 'admin', status = 'approved', updated_at = now() WHERE id = $1`, [existing.id]);
       console.log(`Promoted ${username} to approved admin`);

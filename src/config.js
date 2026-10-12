@@ -33,6 +33,8 @@ module.exports = {
     username: env.ADMIN_USERNAME || env.ADMIN_EMAIL,
     email: env.ADMIN_EMAIL || null,
     password: env.ADMIN_PASSWORD,
+    // Recovery switch: when 'true', the admin's password is reset to ADMIN_PASSWORD at boot (then they must choose a new one).
+    reset: env.ADMIN_RESET_PASSWORD === 'true',
     name: env.ADMIN_NAME || 'Admin',
   },
 };
