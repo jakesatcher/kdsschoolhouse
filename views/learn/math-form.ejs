@@ -56,7 +56,7 @@
     <% } else if (type === 'spiral-review') { %>
       <% const opts = function (name, list, dflt) { return list.map(function (o) { return '<option value="' + o[0] + '"' + (String(q[name] || dflt) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join(''); }; %>
       <label>Grade level <select name="grade"><%- opts('grade', [['3', 'Grade 3'], ['4', 'Grade 4'], ['5', 'Grade 5']], '5') %></select></label>
-      <label>Practice number <small class="muted">(skills build from practice to practice, and each one reviews the ones before it)</small> <select name="practice"><% for (let n = 1; n <= 36; n++) { %><option value="<%= n %>" <%= String(q.practice || q.test || 1) === String(n) ? 'selected' : '' %>>Practice <%= n %></option><% } %></select></label>
+      <label>Practice number <small class="muted">(skills build from practice to practice, and each one reviews the ones before it)</small> <select name="practice"><% for (let n = 1; n <= 36; n++) { %><option value="<%= n %>" <%= String(q.practice || q.test || 1) === String(n) ? 'selected' : '' %>>Practice <%= n %><%= n > 30 ? ' (grades 3 and 4)' : '' %></option><% } %></select></label>
       <label>Copies <small class="muted">(each copy has different numbers)</small> <select name="pages"><%- opts('pages', [['1', '1 page'], ['2', '2 pages'], ['3', '3 pages'], ['4', '4 pages'], ['5', '5 pages']], '1') %></select></label>
       <p class="muted small-text">Each page is a ten-box practice sheet in the style of a classroom spiral review: place value and rounding, fractions and decimals, long division and multiplication, expressions, coordinate planes, line plots, volume and geometry. The answer key follows on a separate page.</p>
     <% } else if (type === 'fractions') { %>

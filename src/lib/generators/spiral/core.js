@@ -60,6 +60,7 @@ function below1000(n) {
 function words(n) {
   if (n === 0) return 'zero';
   const parts = [];
+  if (n >= 1000000) { parts.push(`${below1000(Math.floor(n / 1000000))} million`); n %= 1000000; }
   if (n >= 1000) { parts.push(`${below1000(Math.floor(n / 1000))} thousand`); n %= 1000; }
   if (n > 0) parts.push(below1000(n));
   return parts.join(' ');

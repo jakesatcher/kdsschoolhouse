@@ -44,7 +44,7 @@ const trimDecStr = (v, p = 2) => { const s = (v / 10 ** p).toFixed(p); return s.
 test('every grade 4 and 5 test builds 10 boxes, with answers and well-formed blocks, for many seeds', () => {
   const KNOWN = new Set(['text', 'center', 'note', 'line', 'space', 'svg', 'vmul', 'ldiv', 'table', 'circles', 'match', 'list', 'wholes', 'box', 'bullets', 'pointlist', 'side']);
   for (const grade of [4, 5]) {
-    assert.deepStrictEqual(sp.testNumbers(grade), Array.from({ length: 30 }, (_, i) => i + 1));
+    assert.deepStrictEqual(sp.testNumbers(grade), Array.from({ length: grade === 4 ? 36 : 30 }, (_, i) => i + 1));
     for (const t of sp.testNumbers(grade)) {
       for (let seed = 1; seed <= 25; seed++) {
         const r = sp.buildTest(makeRng(seed * 7 + t), { grade, test: t });
