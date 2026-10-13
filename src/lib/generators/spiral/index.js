@@ -5,7 +5,7 @@
 const skills = require('./skills');
 const { plain } = require('./core');
 
-const SPECS = { 5: require('./specs5'), 4: require('./specs4') };
+const SPECS = { 5: require('./specs5'), 4: require('./specs4'), 3: require('./specs3') };
 
 // Randomizing: a practice number fixes which skills appear in which box, but when a box names one flavour of a skill
 // (say a "times as many" equation) the sheet may swap in another flavour of the same skill and difficulty. Only
@@ -54,7 +54,7 @@ function vary(rng, id, params, used) {
   return pick === params[key] ? params : { ...params, [key]: pick };
 }
 
-const GRADES = [4, 5];
+const GRADES = [3, 4, 5];
 
 const testNumbers = (grade) => Object.keys(SPECS[grade] || {}).map(Number).sort((a, b) => a - b);
 

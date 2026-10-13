@@ -8,4 +8,6 @@ module.exports = {
   ...require('./skillsGeo').skills,
   ...require('./skillsVol').skills,
   ...require('./skills4').skills,
+  ...require('./skills3a').skills,
+  ...require('./skills3b').skills,
 };

@@ -77,7 +77,7 @@ function build(pathname, q) {
       return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: mode === 'facts' ? 2 : 4, problems, perPage: PER_PAGE[base.layout] } };
     }
     if (type === 'spiral-review') {
-      const grade = oneOf(q.grade, ['4', '5'], '5');
+      const grade = oneOf(q.grade, ['3', '4', '5'], '5');
       const numbers = spiral.testNumbers(Number(grade));
       // `practice` is the current name; older saved links used `test`
       const test = intIn(q.practice !== undefined ? q.practice : q.test, numbers[0] || 1, numbers[numbers.length - 1] || 1, numbers[0] || 1);

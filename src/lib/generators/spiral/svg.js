@@ -55,9 +55,9 @@ function plane({ xmax = 5, ymax = 5, cell = 20, icons = [], dots = [], poly = nu
 
 // ---------- line plot ----------
 // counts: { unitsFromMin: count } keyed by tick index (0 = first tick). Ticks are every 1/den from min to max.
-function linePlot({ min = 0, max = 8, den = 1, counts = {}, title = '', keepDen = false, width = 272 }) {
+function linePlot({ min = 0, max = 8, den = 1, counts = {}, title = '', keepDen = false, width = 272, rows = 0 }) {
   const ticks = (max - min) * den;
-  const maxCount = Math.max(1, ...Object.values(counts));
+  const maxCount = Math.max(1, rows, ...Object.values(counts));
   const px = Math.min(34, (width - 50) / ticks);
   const W = 30 + ticks * px + 30;
   const top = title ? 22 : 8;
@@ -291,4 +291,4 @@ function angles(list) {
   return `${s}</svg>`;
 }
 
-module.exports = { rect, triangles, angles, TRI, esc, plane, linePlot, cubes, prism, composite, shape, areaGrid, fractionLine, angle, EMOJI_FONT, SHAPES };
+module.exports = { open, text, r1, fracLabel, rect, triangles, angles, TRI, esc, plane, linePlot, cubes, prism, composite, shape, areaGrid, fractionLine, angle, EMOJI_FONT, SHAPES };
