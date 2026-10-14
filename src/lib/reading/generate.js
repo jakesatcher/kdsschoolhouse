@@ -1,8 +1,8 @@
 'use strict';
 
 const ai = require('./ai');
-const { byId, LENGTHS, VOCAB_MAX_WORDS, GRADE_GUIDE, SKILL_BRIEF } = require('./skills');
-const { wordCount, containsWord, trimToWords } = require('./text');
+const { byId, LENGTHS, VOCAB_MAX_WORDS, GRADE_GUIDE, SKILL_BRIEF, CLUE_TYPES, CLUE_GRADE, VOCAB_WORDS } = require('./skills');
+const { wordCount, containsWord, trimToWords, WORD_RE } = require('./text');
 
 const SYSTEM = `You write classroom reading materials for elementary teachers in South Carolina (grades 1 to 5).
 
@@ -37,6 +37,12 @@ function buildPrompt(o, feedback) {
     if (o.skill === 'vocabulary') lines.push(`Vocabulary word: "${o.word}". Give a short kid-friendly definition (under 15 words) in "definition".`);
   }
 
+  if (o.skill === 'context-clues') {
+    const examples = [...VOCAB_WORDS[o.grade]].sort(() => Math.random() - 0.5).slice(0, 6).join(', ');
+    lines.push('', 'CONTEXT CLUES', `- ${CLUE_GRADE[o.grade]}`, `- Clue type to feature: ${CLUE_TYPES[o.clue] || CLUE_TYPES.any}.`, `- Target words should be about as hard as these grade ${o.grade} examples (do not just reuse them): ${examples}.`);
+    if (!o.wantPassage) lines.push('- Choose 2 or 3 words from the teacher\'s passage that have usable context clues, and list them in "words". Do not change the passage.');
+  }
+
   if (o.wantQuestions) {
     lines.push('', 'QUESTIONS', `- Write exactly ${o.count} questions at a grade ${o.grade} reading level.`, `- ${brief.questions}`, '- Each answer is what a good student would write: a complete sentence of at most 25 words.');
   }
@@ -44,6 +50,7 @@ function buildPrompt(o, feedback) {
   const shape = {};
   if (o.wantPassage) { shape.title = 'a short title (under 8 words)'; shape.passage = 'the passage text'; }
   if (o.skill === 'vocabulary') shape.definition = 'a kid-friendly definition';
+  if (o.skill === 'context-clues') shape.words = ['target word as written in the passage'];
   if (o.wantQuestions) shape.questions = [{ type: 'label', question: 'text', answer: 'text' }];
   lines.push('', `Return JSON with this shape: ${JSON.stringify(shape)}`);
   if (feedback) lines.push('', `Your previous reply had problems: ${feedback} Fix them and return the complete JSON again.`);
@@ -61,6 +68,7 @@ const clean = (v, max) => String(v == null ? '' : v).replace(/[\u0000-\u0008\u00
 
 function normalize(obj, o) {
   const out = { title: clean(obj.title, 120), definition: clean(obj.definition, 300) };
+  if (o.skill === 'context-clues') out.words = (Array.isArray(obj.words) ? obj.words : []).map((w) => clean(w, 30)).filter((w) => WORD_RE.test(w)).slice(0, 4);
   if (o.wantPassage) out.passage = clean(obj.passage, 3000).replace(/\r/g, '').replace(/\n{3,}/g, '\n\n');
   if (o.wantQuestions) {
     out.questions = (Array.isArray(obj.questions) ? obj.questions : [])
@@ -79,6 +87,12 @@ function problemsWith(v, o) {
     if (n > max) problems.push(`The passage had ${n} words but must be at most ${max}.`);
     if (n < Math.floor(max * 0.3)) problems.push(`The passage had only ${n} words; make it fuller (aim for about ${Math.round(max * 0.8)}).`);
     if (o.skill === 'vocabulary' && !containsWord(v.passage, o.word)) problems.push(`The passage must use the word "${o.word}".`);
+  }
+  if (o.skill === 'context-clues') {
+    const passage = o.wantPassage ? v.passage : o.passage;
+    const found = (v.words || []).filter((w) => containsWord(passage, w));
+    if (found.length < 2) problems.push('List 2 or 3 target words in "words", each appearing in the passage exactly as written.');
+    v.words = found;
   }
   if (o.wantQuestions && v.questions.length !== o.count) problems.push(`There must be exactly ${o.count} questions (you wrote ${v.questions.length}).`);
   return problems;

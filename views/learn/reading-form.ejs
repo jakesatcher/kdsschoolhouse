@@ -31,6 +31,12 @@
     </label>
     <% } %>
 
+    <% if (skill.id === 'context-clues') { %>
+    <label>Type of context clue
+      <select name="clue"><% [['any', 'A mix of clue types'], ['definition', 'Definition or restatement'], ['synonym', 'Synonym'], ['antonym', 'Antonym or contrast'], ['example', 'Example'], ['inference', 'General sense of the sentence']].forEach(function (c) { %><option value="<%= c[0] %>" <%= v.clue === c[0] ? 'selected' : '' %>><%= c[1] %></option><% }) %></select>
+    </label>
+    <% } %>
+
     <% if (skill.id === 'authors-purpose') { %>
     <label>Author's purpose to feature
       <select name="purpose"><% ['any', 'persuade', 'inform', 'entertain'].forEach(function (p) { %><option value="<%= p %>" <%= v.purpose === p ? 'selected' : '' %>><%= p === 'any' ? 'Any (let the writer choose)' : p.charAt(0).toUpperCase() + p.slice(1) %></option><% }) %></select>

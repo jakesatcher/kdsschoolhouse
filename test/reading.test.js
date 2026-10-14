@@ -84,7 +84,7 @@ test('sheets are pinned to a seed: same URL gives the same sheet', async () => {
 });
 
 test('reading skill menu pages render for every skill', async () => {
-  for (const id of ['comprehension', 'vocabulary', 'inferences', 'main-idea', 'cause-effect', 'problem-solution', 'authors-purpose']) {
+  for (const id of ['comprehension', 'vocabulary', 'context-clues', 'inferences', 'main-idea', 'cause-effect', 'problem-solution', 'authors-purpose']) {
     const res = await agent.get(`/reading/${id}`);
     assert.strictEqual(res.status, 200, id);
     assert.match(res.text, /Passage/);
@@ -137,6 +137,25 @@ test('vocabulary: word is bolded everywhere it appears (including -s/-ed forms);
   const passage = /<div class="passage">([\s\S]*?)<\/div>/.exec(page.text)[1];
   assert.strictEqual((passage.match(/<strong>gentle<\/strong>/g) || []).length, 2);
   assert.match(page.text, /<strong>gentle<\/strong>:<\/strong> soft and kind|gentle:<\/strong> soft and kind/);
+});
+
+test('context clues: target words are bolded, the clue type and grade guidance reach the prompt, bad word lists are retried', async () => {
+  const good = 'Mia was timid, or shy, around new people. Her brother was not timid at all; he was bold and talked to everyone. At the party he told jokes, such as riddles about frogs, and the guests were amused. They laughed and laughed.';
+  const calls = stub([
+    JSON.stringify({ title: 'The Party', passage: good, words: ['zebra'], questions: qa(4) }),
+    JSON.stringify({ title: 'The Party', passage: good, words: ['timid', 'amused', 'bold; <b>'], questions: qa(4) }),
+  ]);
+  const res = await post('/reading/context-clues/generate', { grade: '4', genre: 'fiction', length: 'medium', passage_mode: 'generate', questions_mode: 'generate', question_count: '4', clue: 'antonym', key: '1' });
+  assert.strictEqual(res.status, 302);
+  assert.strictEqual(calls.length, 2, 'a word list that is not in the passage is retried');
+  const prompt = calls[0].messages[0].content;
+  assert.match(prompt, /Grade 4 clue writing/); assert.match(prompt, /antonym or contrast clues/); assert.match(prompt, /"words"/);
+  const page = await agent.get(res.headers.location);
+  const passage = /<div class="passage">([\s\S]*?)<\/div>/.exec(page.text)[1];
+  assert.strictEqual((passage.match(/<strong>timid<\/strong>/g) || []).length, 2);
+  assert.match(passage, /<strong>amused<\/strong>/);
+  assert.ok(!/<b>/.test(page.text));
+  assert.match((await agent.get('/')).text, /\/reading\/context-clues/);
 });
 
 test('vocabulary picks a grade-appropriate word when the teacher does not choose one', async () => {

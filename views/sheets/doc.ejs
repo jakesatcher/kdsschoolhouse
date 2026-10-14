@@ -5,7 +5,7 @@
   <% if (skill === 'vocabulary' && word) { %><p class="vocab-box">Vocabulary word: <strong><%= word %></strong></p><% } %>
   <div class="passage">
     <% rtext.paragraphs(passage).forEach(function (par) { %>
-      <p><% rtext.segments(par, skill === 'vocabulary' ? word : '').forEach(function (s) { %><% if (s.bold) { %><strong><%= s.text %></strong><% } else { %><%= s.text %><% } %><% }) %></p>
+      <p><% rtext.segments(par, skill === 'vocabulary' ? word : skill === 'context-clues' ? (typeof words !== 'undefined' ? words : []) : '').forEach(function (s) { %><% if (s.bold) { %><strong><%= s.text %></strong><% } else { %><%= s.text %><% } %><% }) %></p>
     <% }) %>
   </div>
   <% if (questions.length) { %>

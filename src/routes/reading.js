@@ -5,7 +5,7 @@ const { rateLimit } = require('express-rate-limit');
 const config = require('../config');
 const ai = require('../lib/reading/ai');
 const { generateReading } = require('../lib/reading/generate');
-const { SKILLS, byId, LENGTHS, VOCAB_WORDS } = require('../lib/reading/skills');
+const { SKILLS, byId, LENGTHS, VOCAB_WORDS, CLUE_TYPES } = require('../lib/reading/skills');
 const { WORD_RE } = require('../lib/reading/text');
 const docs = require('../lib/docs');
 const library = require('../lib/library');
@@ -22,7 +22,7 @@ function renderForm(res, skill, values, errors = [], status = 200) {
 }
 
 function defaults(skill) {
-  return { grade: 3, genre: 'fiction', length: 'medium', topic: '', passageMode: 'generate', passageText: '', questionsMode: 'generate', count: skill.id === 'vocabulary' ? 4 : 5, questionsText: '', vocabMode: 'random', vocabWord: '', purpose: 'any', includeKey: true };
+  return { grade: 3, genre: 'fiction', length: 'medium', topic: '', passageMode: 'generate', passageText: '', questionsMode: 'generate', count: skill.id === 'vocabulary' ? 4 : 5, questionsText: '', vocabMode: 'random', vocabWord: '', purpose: 'any', clue: 'any', includeKey: true };
 }
 
 function parseForm(skill, b) {
@@ -40,6 +40,7 @@ function parseForm(skill, b) {
     vocabMode: oneOf(b.vocab_mode, ['random', 'custom'], 'random'),
     vocabWord: strip(b.vocab_word, 30),
     purpose: oneOf(b.purpose, ['any', 'persuade', 'inform', 'entertain'], 'any'),
+    clue: oneOf(b.clue, Object.keys(CLUE_TYPES), 'any'),
     includeKey: flag(b.key, true),
   };
 }
@@ -141,7 +142,7 @@ router.post('/reading/:skill/generate', (req, res, next) => {
     try {
       gen = await generateReading({
         skill: skill.id, grade: v.grade, genre: v.genre, length: v.length, topic: v.topic, word, purpose: v.purpose,
-        passage: v.passageText, count: v.count, wantPassage: v.passageMode === 'generate', wantQuestions: v.questionsMode === 'generate',
+        passage: v.passageText, clue: v.clue, count: v.count, wantPassage: v.passageMode === 'generate', wantQuestions: v.questionsMode === 'generate',
       });
     } catch (err) {
       if (!(err instanceof ai.AiError)) throw err;
@@ -157,6 +158,7 @@ router.post('/reading/:skill/generate', (req, res, next) => {
     title: (v.passageMode === 'generate' && gen.title) || (skill.id === 'vocabulary' ? `Vocabulary: ${word}` : skill.name),
     passage: v.passageMode === 'generate' ? gen.passage : v.passageText,
     word, definition: gen.definition || '',
+    words: skill.id === 'context-clues' ? (gen.words || []) : undefined,
     questions: v.questionsMode === 'generate' ? gen.questions : own,
     includeKey: v.includeKey,
     ai: needsAi(v),

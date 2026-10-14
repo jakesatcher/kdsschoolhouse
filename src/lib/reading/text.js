@@ -7,9 +7,10 @@ const WORD_RE = /^[A-Za-z][A-Za-z'-]{1,29}$/;
 // Splits text into {text, bold} runs so the vocabulary word (and simple endings like -s, -ed, -ing, -ly) can be bolded
 // without ever emitting user text as HTML: the template escapes every run.
 function segments(text, word) {
-  if (!word || !WORD_RE.test(word)) return [{ text, bold: false }];
-  const esc = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const re = new RegExp(`\\b${esc}(?:s|es|ed|d|ing|ly|er|est)?\\b`, 'gi');
+  const list = (Array.isArray(word) ? word : [word]).filter((w) => w && WORD_RE.test(w));
+  if (!list.length) return [{ text, bold: false }];
+  const esc = list.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+  const re = new RegExp(`\\b(?:${esc})(?:s|es|ed|d|ing|ly|er|est)?\\b`, 'gi');
   const out = [];
   let last = 0;
   for (const m of text.matchAll(re)) {

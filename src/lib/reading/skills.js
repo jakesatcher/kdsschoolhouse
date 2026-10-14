@@ -3,6 +3,7 @@
 const SKILLS = [
   { id: 'comprehension', name: 'Comprehension', blurb: 'Read a passage, then answer literal and inferential questions.' },
   { id: 'vocabulary', name: 'Vocabulary', blurb: 'A grade-level word in a short passage (the word is bolded), with questions.' },
+  { id: 'context-clues', name: 'Context Clues', blurb: 'Use the words around an unfamiliar word (a definition, synonym, opposite, example or other hint) to figure out what it means.' },
   { id: 'inferences', name: 'Inferences', blurb: 'Use clues from the text and what you know to figure out what is not stated.' },
   { id: 'main-idea', name: 'Main Idea', blurb: 'Find the main idea and the details that support it.' },
   { id: 'cause-effect', name: 'Cause & Effect', blurb: 'What happened, and why did it happen?' },
@@ -44,6 +45,10 @@ const SKILL_BRIEF = {
     passage: 'Write a short passage that uses the vocabulary word naturally in two or three places, with context clues that help a child work out its meaning. Use the exact word form (you may also use simple endings like -s, -ed, -ing).',
     questions: 'Write questions that include: the meaning of the word in context, a synonym or antonym or word-form question, completing or writing a sentence with the word, and at least one question about the passage itself. Label each "vocabulary" or "comprehension".',
   },
+  'context-clues': {
+    passage: 'Write a passage that includes 2 or 3 words a student at this grade is likely meeting for the first time (everyday school-appropriate words, not technical terms or names). Each target word must have a clear context clue in the same sentence or the sentence next to it. Do not define every word the same way; vary the clue types. The clue must really be in the passage, so a reader can work out the meaning without a dictionary. List the target words, exactly as they appear in the passage, in "words".',
+    questions: 'Name one target word in quotation marks in each question. Include: what the word means as used in the passage; which words or phrase in the passage are the clue; what kind of clue it is (definition or restatement, synonym, antonym or contrast, example, or general sense of the sentence); and, for grades 3 to 5, a question that gives three possible meanings to choose from (a, b, c) or asks the student to use the word in a new sentence. Each answer must quote the clue from the passage. Label each "meaning" or "clue".',
+  },
   inferences: {
     passage: 'Write a passage whose key facts (feelings, setting, reasons, what happens next) are NOT stated outright but are strongly hinted by clues.',
     questions: 'Every question must require an inference. Each answer must name the clue from the text plus the conclusion (for example "Clue: ... so ..."). Label each "inferential".',
@@ -66,4 +71,20 @@ const SKILL_BRIEF = {
   },
 };
 
-module.exports = { SKILLS, byId, LENGTHS, VOCAB_MAX_WORDS, GRADE_GUIDE, VOCAB_WORDS, SKILL_BRIEF };
+const CLUE_TYPES = {
+  any: 'any mix of clue types',
+  definition: 'definition or restatement clues (the passage tells or explains what the word means, often after a comma, "or", "is" or "which means")',
+  synonym: 'synonym clues (a word with nearly the same meaning appears nearby)',
+  antonym: 'antonym or contrast clues (an opposite appears nearby, with signals such as "but", "unlike" or "instead")',
+  example: 'example clues (examples or a list that show what the word means, with signals such as "such as" or "like")',
+  inference: 'general context clues (the whole sentence or the sentences around it show the meaning)',
+};
+const CLUE_GRADE = {
+  1: 'Grade 1 clue writing: only very simple clues in the same sentence, such as a short restatement ("a puppy, a baby dog") or a clear opposite. Target words must still be simple.',
+  2: 'Grade 2 clue writing: simple same-sentence clues (restatement, a nearby synonym, or a clear opposite).',
+  3: 'Grade 3 clue writing: definition, synonym, antonym and example clues, in the same or the next sentence.',
+  4: 'Grade 4 clue writing: all clue types, including clues that are spread across two sentences.',
+  5: 'Grade 5 clue writing: all clue types, including general-sense clues and words with more than one meaning used in a less common way.',
+};
+
+module.exports = { CLUE_TYPES, CLUE_GRADE, SKILLS, byId, LENGTHS, VOCAB_MAX_WORDS, GRADE_GUIDE, VOCAB_WORDS, SKILL_BRIEF };
