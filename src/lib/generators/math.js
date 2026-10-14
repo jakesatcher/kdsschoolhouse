@@ -85,6 +85,22 @@ function cycle(rng, values, count) {
 
 const FACTS = Array.from({ length: 13 }, (_, i) => i); // 0..12
 
+// Fact worksheets with a chosen range ('10' = facts 0-10, '12' = 0-12). Every item is drawn without repeats before any
+// item comes round again (so a sheet never gives a fact twice while others are unused), and facts that involve 11 or 12
+// count half as much as the rest, so they appear but do not take over a 0-12 sheet. `range` left out = the older mixing.
+const BIG = 11; // 11 and 12 are the "big" facts
+const weightOf = (r, nums) => (nums.some((n) => n >= BIG) && r > 10 ? 0.5 : 1);
+function drawFacts(rng, items, count, weight = () => 1) {
+  const out = [];
+  while (out.length < count) {
+    // Efraimidis-Spirakis: sort by u^(1/w) to get a weighted random order without replacement
+    const keyed = items.map((it) => ({ it, k: Math.pow(rng(), 1 / weight(it)) })).sort((a, b) => b.k - a.k);
+    out.push(...keyed.map((x) => x.it));
+  }
+  return out.slice(0, count);
+}
+const factValues = (range) => FACTS.filter((n) => n <= range);
+
 // Number with `d` digits for a multi-digit factor. One-digit numbers are 0-9; longer ones span the whole range (10-99, 100-999, ...).
 // `special` = the teacher's "include x0, x1, /1 and /10" option: when off, 1-digit numbers are 2-9.
 const digitsNumber = (rng, d, special = true) => (d === 1 ? (special ? int(rng, 0, 9) : int(rng, 2, 9)) : int(rng, ...digitsRange(d)));
@@ -92,11 +108,24 @@ const noZeroOne = (arr) => arr.filter((n) => n >= 2);
 const pickDigits = (rng, v, lo, hi) => (v === 'mixed' ? int(rng, lo, hi) : Number(v));
 
 // Multiplication: facts (0-12), multi (choose the digits of each number: 1-4 digits x 1-2 digits), or mixed.
-function multiplication(rng, { factor = 'all', mode = 'facts', count = 20, top = '2', bottom = '1', special = true }) {
+function multiplication(rng, { factor = 'all', mode = 'facts', count = 20, top = '2', bottom = '1', special = true, range = null }) {
   const out = [];
   // `work` = extra lines of workspace under the problem (a 2-digit multiplier needs partial products).
   const push = (a, b, work = 0) => out.push({ op: '×', operands: [a, b], answer: a * b, answerText: fmt(a * b), work });
-  if (mode === 'facts') {
+  if (mode === 'facts' && range) {
+    const R = Number(range); const base = factValues(R);
+    const flip = (a, b) => (rng() < 0.5 ? push(a, b) : push(b, a));
+    if (factor === 'all') {
+      const values = special ? base : noZeroOne(base);
+      const pairs = []; // each unordered pair once, so 3 x 7 and 7 x 3 do not both show up
+      values.forEach((a, i) => values.slice(i).forEach((b) => pairs.push([a, b])));
+      drawFacts(rng, pairs, count, (pr) => weightOf(R, pr)).forEach(([a, b]) => flip(a, b));
+    } else {
+      const f = Number(factor);
+      const others = special || f <= 1 ? base : noZeroOne(base);
+      drawFacts(rng, others, count, (b) => weightOf(R, [b])).forEach((b) => flip(f, b));
+    }
+  } else if (mode === 'facts') {
     if (factor === 'all') {
       const values = special ? FACTS : noZeroOne(FACTS);
       const pairs = [];
@@ -117,7 +146,7 @@ function multiplication(rng, { factor = 'all', mode = 'facts', count = 20, top =
     // mixed: facts plus multi-digit work
     for (let i = 0; i < count; i++) {
       const kind = int(rng, 0, 3);
-      if (kind === 0) { const v = special ? FACTS : noZeroOne(FACTS); push(v[int(rng, 0, v.length - 1)], v[int(rng, 0, v.length - 1)]); }
+      if (kind === 0) { const v = special ? (range ? factValues(Number(range)) : FACTS) : noZeroOne(range ? factValues(Number(range)) : FACTS); push(v[int(rng, 0, v.length - 1)], v[int(rng, 0, v.length - 1)]); }
       else if (kind === 1) push(int(rng, 10, 99), int(rng, 2, 9));
       else if (kind === 2) push(int(rng, 100, 999), int(rng, 2, 9));
       else push(int(rng, 11, 99), int(rng, 11, 99), 2);
@@ -148,11 +177,23 @@ function longDivision(rng, dd, vd, withRemainder, special = true) {
 }
 
 // Division: facts (0-12), multi (up to 4-digit dividends by 1-2 digit divisors, with/without remainders), or mixed.
-function division(rng, { divisor = 'all', mode = 'facts', count = 20, dividend: dvd = '3', vdigits = '1', remainders = 'mixed', special = true }) {
+function division(rng, { divisor = 'all', mode = 'facts', count = 20, dividend: dvd = '3', vdigits = '1', remainders = 'mixed', special = true, range = null }) {
   const out = [];
   const push = (dividend, d, q, r = 0, work = 0) =>
     out.push({ op: '÷', operands: [dividend, d], answer: q, remainder: r, answerText: r ? `${fmt(q)} R ${r}` : fmt(q), work });
-  if (mode === 'facts') {
+  if (mode === 'facts' && range) {
+    const R = Number(range); const qs = factValues(R);
+    const all = qs.filter((d) => d >= 1); // never divide by zero
+    const divisors = special ? all : all.filter((d) => d !== 1 && d !== 10);
+    if (divisor === 'all') {
+      const pairs = [];
+      for (const d of divisors) for (const q of qs) pairs.push([d, q]);
+      drawFacts(rng, pairs, count, (pr) => weightOf(R, pr)).forEach(([d, q]) => push(d * q, d, q));
+    } else {
+      const d = Number(divisor);
+      drawFacts(rng, qs, count, (q) => weightOf(R, [q])).forEach((q) => push(d * q, d, q));
+    }
+  } else if (mode === 'facts') {
     const all = Array.from({ length: 12 }, (_, i) => i + 1); // never divide by zero
     const divisors = special ? all : all.filter((d) => d !== 1 && d !== 10);
     if (divisor === 'all') {
@@ -179,9 +220,10 @@ function division(rng, { divisor = 'all', mode = 'facts', count = 20, dividend: 
     for (let i = 0; i < count; i++) {
       const kind = int(rng, 0, 3);
       if (kind === 0) {
-        const ds = special ? Array.from({ length: 12 }, (_, i) => i + 1) : [2, 3, 4, 5, 6, 7, 8, 9, 11, 12];
+        const top = range ? Number(range) : 12;
+        const ds = (special ? Array.from({ length: 12 }, (_, i) => i + 1) : [2, 3, 4, 5, 6, 7, 8, 9, 11, 12]).filter((x) => x <= top);
         const d = ds[int(rng, 0, ds.length - 1)];
-        const q = int(rng, 0, 12);
+        const q = int(rng, 0, top);
         push(d * q, d, q);
       } else if (kind === 1) {
         const d = int(rng, 2, 9);

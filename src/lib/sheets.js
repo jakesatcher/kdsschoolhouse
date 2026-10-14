@@ -58,9 +58,10 @@ function build(pathname, q) {
       const top = oneOf(q.top, ['1', '2', '3', '4', 'mixed'], '2');
       const bottom = oneOf(q.bottom, ['1', '2', 'mixed'], '1');
       const special = flag(q.special, true);
-      const problems = math.multiplication(rng, { mode, factor, top, bottom, special, count: intIn(q.count, 5, 60, 30) });
+      const range = q.range === undefined ? null : oneOf(q.range, ['10', '12'], '10'); // links saved before the range choice keep their old mix
+      const problems = math.multiplication(rng, { mode, factor, top, bottom, special, range, count: intIn(q.count, 5, 60, 30) });
       const subtitle = (mode === 'multi' ? `Multiplication: ${digitLabel(top, '1 to 4')} number × ${digitLabel(bottom, '1 to 2')} number`
-        : mode === 'mixed' ? 'Mixed multiplication' : factor === 'all' ? 'Multiplication facts 0-12 (mixed)' : `Multiplication facts: ${factor}s`) + (special ? '' : ' (no ×0 or ×1)');
+        : mode === 'mixed' ? 'Mixed multiplication' : factor === 'all' ? `Multiplication facts 0-${range || 12} (mixed)` : `Multiplication facts: ${factor}s${range ? ` (0-${range})` : ''}`) + (special ? '' : ' (no ×0 or ×1)');
       return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: mode === 'facts' ? 2 : 3, problems, perPage: PER_PAGE[base.layout] } };
     }
     if (type === 'division') {
@@ -70,10 +71,11 @@ function build(pathname, q) {
       const vdigits = oneOf(q.vdigits, ['1', '2', 'mixed'], '1');
       const remainders = oneOf(q.remainders, ['none', 'with', 'mixed'], 'mixed');
       const special = flag(q.special, true);
-      const problems = math.division(rng, { mode, divisor, dividend, vdigits, remainders, special, count: intIn(q.count, 5, 60, 30) });
+      const range = q.range === undefined ? null : oneOf(q.range, ['10', '12'], '10');
+      const problems = math.division(rng, { mode, divisor, dividend, vdigits, remainders, special, range, count: intIn(q.count, 5, 60, 30) });
       const remText = { none: 'no remainders', with: 'with remainders', mixed: 'with and without remainders' }[remainders];
       const subtitle = (mode === 'multi' ? `Division: ${digitLabel(dividend, '2 to 4')} dividend ÷ ${digitLabel(vdigits, '1 to 2')} divisor, ${remText}`
-        : mode === 'mixed' ? 'Mixed division (with remainders)' : divisor === 'all' ? 'Division facts 0-12 (mixed)' : `Division facts: divide by ${divisor}`) + (special ? '' : ' (no ÷1 or ÷10)');
+        : mode === 'mixed' ? 'Mixed division (with remainders)' : divisor === 'all' ? `Division facts 0-${range || 12} (mixed)` : `Division facts: divide by ${divisor}${range ? ` (0-${range})` : ''}`) + (special ? '' : ' (no ÷1 or ÷10)');
       return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: mode === 'facts' ? 2 : 4, problems, perPage: PER_PAGE[base.layout] } };
     }
     if (type === 'spiral-review') {

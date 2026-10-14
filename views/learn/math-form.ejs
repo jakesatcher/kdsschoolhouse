@@ -20,10 +20,13 @@
       <% const sel = function (name, dflt) { return q[name] || dflt; }; %>
       <label>Problem set
         <select name="mode">
-          <option value="facts" <%= sel('mode', 'facts') === 'facts' ? 'selected' : '' %>>Facts, 0 to 12</option>
+          <option value="facts" <%= sel('mode', 'facts') === 'facts' ? 'selected' : '' %>>Facts (0 to 10 or 0 to 12)</option>
           <option value="multi" <%= q.mode === 'multi' ? 'selected' : '' %>>Multi-digit (you choose the sizes)</option>
           <option value="mixed" <%= q.mode === 'mixed' ? 'selected' : '' %>>Mixed (facts plus multi-digit)</option>
         </select>
+      </label>
+      <label data-show-if="mode:facts">Fact range <small class="muted">(which facts can appear)</small>
+        <select name="range"><option value="10" <%= (q.range || '10') === '10' ? 'selected' : '' %>>Facts 0 to 10 only</option><option value="12" <%= q.range === '12' ? 'selected' : '' %>>Facts 0 to 12 (includes 11s and 12s)</option></select>
       </label>
       <% if (type === 'multiplication') { %>
         <label data-show-if="mode:facts">Factor <select name="factor"><option value="all">All facts (mixed problems)</option><% for (let f = 0; f <= 12; f++) { %><option value="<%= f %>" <%= q.factor === String(f) ? 'selected' : '' %>>Facts for <%= f %></option><% } %></select></label>

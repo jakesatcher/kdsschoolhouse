@@ -216,3 +216,30 @@ test('the include-x0/x1/÷1/÷10 option: on by default, off removes them, a fact
   assert.ok(math.division(makeRng(7), { mode: 'mixed', special: false, count: 300 }).every((p) => p.operands[1] !== 1 && p.operands[1] !== 10));
   for (const p of multi(true, 'mixed', 'mixed')) assert.strictEqual(p.operands[1] * p.answer + p.remainder, p.operands[0]);
 });
+
+test('fact range: 0-10 never shows 11 or 12; 0-12 can, without taking over; each fact is used before any repeats', () => {
+  const nums = (ps) => ps.flatMap((p) => p.operands);
+  for (const op of ['multiplication', 'division']) {
+    const ten = math[op](makeRng(11), { range: '10', count: 60 });
+    const tenNums = op === 'multiplication' ? nums(ten) : ten.flatMap((p) => [p.operands[1], p.answer]);
+    assert.ok(tenNums.every((n) => n <= 10), `${op} 0-10 stays within 10`);
+    assert.ok(ten.every((p) => (op === 'multiplication' ? p.answer === p.operands[0] * p.operands[1] : p.operands[0] === p.operands[1] * p.answer && p.operands[1] > 0)));
+    let big = 0; let total = 0;
+    for (let seed = 1; seed <= 40; seed++) {
+      const twelve = math[op](makeRng(seed), { range: '12', count: 30 });
+      assert.ok(twelve.every((p) => p.answer === (op === 'multiplication' ? p.operands[0] * p.operands[1] : p.operands[0] / p.operands[1])));
+      for (const p of twelve) { total++; if ((op === 'multiplication' ? p.operands : [p.operands[1], p.answer]).some((n) => n >= 11)) big++; }
+    }
+    assert.ok(big > 0, `${op}: 11s and 12s appear in 0-12`);
+    assert.ok(big / total < 0.22, `${op}: 11s and 12s are ${(big / total).toFixed(2)} of problems, not dominant`);
+  }
+  // multiplication: no fact and its flip on one sheet, and a 60-problem 0-10 sheet has no repeats
+  const sheet = math.multiplication(makeRng(5), { range: '10', count: 60 });
+  const keys = sheet.map((p) => [...p.operands].sort((a, b) => a - b).join('x'));
+  assert.strictEqual(new Set(keys).size, 60);
+  // a picked factor: other number covers its 0-range once before repeating
+  const seven = math.multiplication(makeRng(6), { range: '10', factor: '7', count: 11 });
+  assert.deepStrictEqual([...new Set(seven.map((p) => (p.operands[0] === 7 ? p.operands[1] : p.operands[0])))].sort((a, b) => a - b), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  // links saved before the range option keep their old behaviour
+  assert.deepStrictEqual(math.multiplication(makeRng(9), { count: 10 }), math.multiplication(makeRng(9), { count: 10, range: null }));
+});
