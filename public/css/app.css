@@ -240,3 +240,13 @@ ol.questions { padding-left: 24px; } ol.questions li { margin-bottom: 14px; brea
   .sp-svg.wide svg { max-height: .92in; } .sp-svg.wide.tall svg { max-height: 1.2in; }
   .sp-sub { margin: 2px 2px 3px; }
 }
+
+/* Place value and rounding sheets */
+.ns-heading { font-size: 1.15rem; margin: 6px 0 10px; font-weight: 600; }
+.ns-list { list-style: decimal; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 36px; padding-left: 38px; margin: 8px 0; }
+.ns-list li { break-inside: avoid; font-size: 1.1rem; min-height: 1.35in; }
+.ns-q { margin: 0 0 4px; } .ns-num { margin: 4px 0 6px; font-size: 1.55rem; letter-spacing: .03em; } .ns-ans { margin: 6px 0 0; }
+.ns-ans .blank { width: 150px; }
+.ns-s-list li { min-height: .55in; display: flex; align-items: baseline; gap: 12px; }
+.ns-s-list .ns-num { font-size: 1.3rem; margin: 0; min-width: 120px; }
+.ns-s-list .blank { width: 130px; }

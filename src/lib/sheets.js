@@ -7,6 +7,7 @@ const { oneOf, intIn, flag, str } = require('./params');
 const { makeRng } = require('./generators/rng');
 const math = require('./generators/math');
 const { decimals } = require('./generators/decimals');
+const numberSense = require('./generators/numberSense');
 const { fractionProblems } = require('./generators/fractionProblems');
 const spiral = require('./generators/spiral');
 const wp = require('./generators/wordProblems');
@@ -14,10 +15,10 @@ const { phonics } = require('./generators/phonics');
 const { sightWords } = require('./generators/sight');
 const { writing, TYPES: WRITING_TYPES } = require('./generators/writing');
 
-const MATH_TYPES = { addition: 'Addition', subtraction: 'Subtraction', multiplication: 'Multiplication', division: 'Division', decimals: 'Decimals', fractions: 'Fractions', 'spiral-review': 'Spiral Review', 'word-problems': 'Word Problems' };
+const MATH_TYPES = { addition: 'Addition', subtraction: 'Subtraction', multiplication: 'Multiplication', division: 'Division', decimals: 'Decimals', fractions: 'Fractions', 'place-value': 'Place Value', rounding: 'Rounding', 'spiral-review': 'Spiral Review', 'word-problems': 'Word Problems' };
 
 const WORKSHEET_RE = [
-  /^\/math\/(addition|subtraction|multiplication|division|decimals|fractions|spiral-review|word-problems)\/worksheet$/,
+  /^\/math\/(addition|subtraction|multiplication|division|decimals|fractions|place-value|rounding|spiral-review|word-problems)\/worksheet$/,
   /^\/reading\/phonics\/worksheet$/,
   /^\/reading\/sight-words\/worksheet$/,
   /^\/writing\/worksheet$/,
@@ -77,6 +78,27 @@ function build(pathname, q) {
       const subtitle = (mode === 'multi' ? `Division: ${digitLabel(dividend, '2 to 4')} dividend ÷ ${digitLabel(vdigits, '1 to 2')} divisor, ${remText}`
         : mode === 'mixed' ? 'Mixed division (with remainders)' : divisor === 'all' ? `Division facts 0-${range || 12} (mixed)` : `Division facts: divide by ${divisor}${range ? ` (0-${range})` : ''}`) + (special ? '' : ' (no ÷1 or ÷10)');
       return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: mode === 'facts' ? 2 : 4, problems, perPage: PER_PAGE[base.layout] } };
+    }
+    if (type === 'place-value' || type === 'rounding') {
+      const nsGrade = oneOf(q.grade, ['4', '5'], '4') === '5' ? 5 : 4;
+      const digits = Number(oneOf(q.digits, ['5', '6', '7'], '7'));
+      const numbers = nsGrade === 5 ? oneOf(q.numbers, ['whole', 'decimal', 'mixed'], 'mixed') : 'whole';
+      const decimalsOpt = oneOf(q.dec, ['1', '2', '3', 'mixed'], 'mixed');
+      const size = `up to the ${numberSense.WHOLE_PLACES[digits - 1]} place`;
+      const scopeText = nsGrade === 5 ? `${numbers === 'decimal' ? 'decimals' : numbers === 'whole' ? 'whole numbers' : 'whole numbers and decimals'}` : 'whole numbers';
+      if (type === 'place-value') {
+        const kind = oneOf(q.kind, ['mixed', 'place', 'value', 'digit'], 'mixed');
+        const problems = numberSense.placeValue(rng, { grade: nsGrade, digits, numbers, decimals: decimalsOpt, kind, count: intIn(q.count, 6, 30, 12) });
+        const subtitle = `Grade ${nsGrade} place value: ${scopeText}, ${size}${numbers !== 'whole' && nsGrade === 5 ? ' (decimals to the thousandths)' : ''}`;
+        return { ...meta, subtitle, partial: 'numsheet', locals: { ...base, subtitle, problems, style: 'ask', heading: '', perPage: 12 } };
+      }
+      const place = oneOf(q.place, ['mixed', ...numberSense.ROUND_ORDER.map(String)], 'mixed');
+      const bad = numberSense.validRoundPlace(nsGrade, digits, place);
+      if (bad) return { ...meta, error: bad };
+      const problems = numberSense.rounding(rng, { grade: nsGrade, digits, numbers, decimals: decimalsOpt, place, count: intIn(q.count, 6, 30, 12) });
+      const listStyle = place !== 'mixed';
+      const subtitle = `Grade ${nsGrade} rounding: ${listStyle ? `to the nearest ${numberSense.ROUND_NAMES[place]}` : 'mixed places'}, ${listStyle && Number(place) <= 0 ? 'decimals to the thousandths' : `${scopeText}, ${size}`}`;
+      return { ...meta, subtitle, partial: 'numsheet', locals: { ...base, subtitle, problems, style: listStyle ? 'list' : 'round', heading: listStyle ? `Round each number to the nearest ${numberSense.ROUND_NAMES[place]}.` : '', perPage: listStyle ? 20 : 12 } };
     }
     if (type === 'spiral-review') {
       const grade = oneOf(q.grade, ['3', '4', '5'], '5');

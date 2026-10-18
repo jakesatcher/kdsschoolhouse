@@ -56,6 +56,21 @@
       <label>Problems <select name="count"><% [10, 15, 20, 25, 30, 40, 50].forEach(function (n) { %><option <%= String(q.count || 20) === String(n) ? 'selected' : '' %>><%= n %></option><% }) %></select></label>
       <label>Layout <select name="layout"><%- opts('layout', [['vertical', 'Vertical (stacked, points lined up)'], ['horizontal', 'Horizontal']], 'vertical') %></select></label>
       <p class="muted small-text">Division problems always come out evenly (no repeating decimals). Using a decimal divisor means moving the point first.</p>
+    <% } else if (type === 'place-value' || type === 'rounding') { %>
+      <% const opts = function (name, list, dflt) { return list.map(function (o) { return '<option value="' + o[0] + '"' + (String(q[name] || dflt) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join(''); }; %>
+      <label>Grade level <small class="muted">(grade 4: whole numbers; grade 5: whole numbers and decimals)</small> <select name="grade"><%- opts('grade', [['4', 'Grade 4'], ['5', 'Grade 5']], '4') %></select></label>
+      <label>Largest whole-number place <select name="digits"><%- opts('digits', [['5', 'Ten thousands (5 digits)'], ['6', 'Hundred thousands (6 digits)'], ['7', 'Millions (7 digits)']], '7') %></select></label>
+      <div data-show-if="grade:5">
+        <label>Grade 5 numbers <select name="numbers"><%- opts('numbers', [['mixed', 'Whole numbers and decimals'], ['whole', 'Whole numbers only'], ['decimal', 'Decimals only']], 'mixed') %></select></label>
+        <label>Decimal places <select name="dec"><%- opts('dec', [['mixed', 'Mixed: tenths to thousandths'], ['1', 'Tenths'], ['2', 'Hundredths'], ['3', 'Thousandths']], 'mixed') %></select></label>
+      </div>
+      <% if (type === 'place-value') { %>
+        <label>Questions <select name="kind"><%- opts('kind', [['mixed', 'A mix: name the place, give the value, find the digit'], ['place', 'Name the place of the underlined digit'], ['value', 'Give the value of the underlined digit'], ['digit', 'Which digit is in the ___ place?']], 'mixed') %></select></label>
+      <% } else { %>
+        <label>Round to the nearest <small class="muted">(one place gives a compact list; a mix names the place in each problem)</small> <select name="place"><%- opts('place', [['mixed', 'A mix of places'], ['1', 'Ten'], ['2', 'Hundred'], ['3', 'Thousand'], ['4', 'Ten thousand'], ['5', 'Hundred thousand'], ['6', 'Million'], ['0', 'Whole number (grade 5 decimals)'], ['-1', 'Tenth (grade 5 decimals)'], ['-2', 'Hundredth (grade 5 decimals)']], 'mixed') %></select></label>
+      <% } %>
+      <label>Problems <select name="count"><% [6, 8, 12, 16, 20, 24, 30].forEach(function (n) { %><option <%= String(q.count || 12) === String(n) ? 'selected' : '' %>><%= n %></option><% }) %></select></label>
+      <p class="muted small-text">Place value covers whole numbers through the millions<%= '' %> and, in grade 5, decimals through the thousandths. Rounding uses the same number ranges, and a halfway digit (5) rounds up.</p>
     <% } else if (type === 'spiral-review') { %>
       <% const opts = function (name, list, dflt) { return list.map(function (o) { return '<option value="' + o[0] + '"' + (String(q[name] || dflt) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join(''); }; %>
       <label>Grade level <select name="grade"><%- opts('grade', [['3', 'Grade 3'], ['4', 'Grade 4'], ['5', 'Grade 5']], '5') %></select></label>

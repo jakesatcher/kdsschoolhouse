@@ -1,0 +1,33 @@
+<% const pages = []; for (let i = 0; i < problems.length; i += perPage) pages.push(problems.slice(i, i + perPage)); %>
+<% pages.forEach(function (page, pi) { %>
+<article class="sheet">
+  <%- include('_head') %>
+  <% if (heading) { %><p class="ns-heading"><%= heading %></p><% } %>
+  <ol class="ns-list ns-s-<%= style %>" start="<%= pi * perPage + 1 %>">
+    <% page.forEach(function (p) { %>
+    <li>
+      <% if (style === 'list') { %>
+        <span class="ns-num"><%= p.plain %></span><i class="blank"></i>
+      <% } else if (style === 'round') { %>
+        <p class="ns-q">Round to the nearest <strong><%= p.placeName %></strong>.</p>
+        <p class="ns-num"><%= p.plain %></p><p class="ns-ans">Answer: <i class="blank"></i></p>
+      <% } else { %>
+        <p class="ns-q"><%= p.q %></p>
+        <% if (p.kind === 'digit') { %><p class="ns-num"><%= p.plain %></p><% } else { %><p class="ns-num"><%= p.num[0] %><u><%= p.num[1] %></u><%= p.num[2] %></p><% } %>
+        <p class="ns-ans">Answer: <i class="blank"></i></p>
+      <% } %>
+    </li>
+    <% }) %>
+  </ol>
+</article>
+<% }) %>
+<% if (includeKey) { %>
+<article class="sheet key">
+  <h1>Answer Key</h1><p class="sheet-sub"><%= subtitle %></p>
+  <ol class="keylist"><% problems.forEach(function (p) { %>
+    <li><% if (p.kind === 'round') { %><%= p.plain %> → <strong><%= p.answerText %></strong> <small class="muted">(nearest <%= p.placeName %>)</small>
+    <% } else if (p.kind === 'digit') { %><%= p.plain %>, <%= p.q.replace('Which digit is in the ', '').replace(' place?', '') %> → <strong><%= p.answerText %></strong>
+    <% } else { %><%= p.plain %>, digit <u><%= p.target.digit %></u> → <strong><%= p.answerText %></strong><% } %></li>
+  <% }) %></ol>
+</article>
+<% } %>
