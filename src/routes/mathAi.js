@@ -38,7 +38,7 @@ function sheetOf(c) {
       explain: /explain|reasonable|correct\?|why/i.test(p.text) || undefined,
     };
   });
-  return { title: c.title, subtitle: `Grade ${c.grade} · AI-written word problems`, problems, includeKey: c.includeKey, seed: undefined };
+  return { title: c.title, subtitle: `Grade ${c.grade} word problems`, problems, includeKey: c.includeKey, seed: undefined };
 }
 
 router.post('/math/word-problems/ai', aiLimiter, async (req, res) => {
