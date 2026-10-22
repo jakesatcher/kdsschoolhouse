@@ -31,6 +31,9 @@ const newSeed = () => Math.floor(Math.random() * 2147483646) + 1;
 // Print layout: vertical sheets are 5 columns x 5 rows (25 problems per page), horizontal sheets 3 columns x 5 rows
 // (15 per page). Longer sheets continue on more pages. These must match the grid rules in public/css/app.css.
 const PER_PAGE = { vertical: 25, horizontal: 15 };
+// Multiplication and division facts print larger: vertical sheets are 4 columns x 5 rows (20 per page), horizontal 3 x 5 (15).
+// Longer sheets continue on the back (two sides of one sheet of paper).
+const FACTS_PER_PAGE = { vertical: 20, horizontal: 15 };
 const digitLabel = (v, mixedText) => (v === 'mixed' ? `${mixedText}-digit` : `${v}-digit`);
 
 function build(pathname, q) {
@@ -63,7 +66,7 @@ function build(pathname, q) {
       const problems = math.multiplication(rng, { mode, factor, top, bottom, special, range, count: intIn(q.count, 5, 60, 30) });
       const subtitle = (mode === 'multi' ? `Multiplication: ${digitLabel(top, '1 to 4')} number × ${digitLabel(bottom, '1 to 2')} number`
         : mode === 'mixed' ? 'Mixed multiplication' : factor === 'all' ? `Multiplication facts 0-${range || 12} (mixed)` : `Multiplication facts: ${factor}s${range ? ` (0-${range})` : ''}`) + (special ? '' : ' (no ×0 or ×1)');
-      return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: mode === 'facts' ? 2 : 3, problems, perPage: PER_PAGE[base.layout] } };
+      return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: mode === 'facts' ? 2 : 3, problems, facts: mode === 'facts', perPage: mode === 'facts' ? FACTS_PER_PAGE[base.layout] : PER_PAGE[base.layout] } };
     }
     if (type === 'division') {
       const mode = oneOf(q.mode, ['facts', 'multi', 'mixed'], 'facts');
@@ -77,7 +80,7 @@ function build(pathname, q) {
       const remText = { none: 'no remainders', with: 'with remainders', mixed: 'with and without remainders' }[remainders];
       const subtitle = (mode === 'multi' ? `Division: ${digitLabel(dividend, '2 to 4')} dividend ÷ ${digitLabel(vdigits, '1 to 2')} divisor, ${remText}`
         : mode === 'mixed' ? 'Mixed division (with remainders)' : divisor === 'all' ? `Division facts 0-${range || 12} (mixed)` : `Division facts: divide by ${divisor}${range ? ` (0-${range})` : ''}`) + (special ? '' : ' (no ÷1 or ÷10)');
-      return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: mode === 'facts' ? 2 : 4, problems, perPage: PER_PAGE[base.layout] } };
+      return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: mode === 'facts' ? 2 : 4, problems, facts: mode === 'facts', perPage: mode === 'facts' ? FACTS_PER_PAGE[base.layout] : PER_PAGE[base.layout] } };
     }
     if (type === 'place-value' || type === 'rounding') {
       const nsGrade = oneOf(q.grade, ['4', '5'], '4') === '5' ? 5 : 4;
@@ -182,4 +185,4 @@ function fromUrl(url) {
   return { built, url: `${pathname}?${search}` };
 }
 
-module.exports = { PER_PAGE, build, fromUrl, isSheetPath, validSeed, newSeed, MATH_TYPES, WRITING_TYPES };
+module.exports = { PER_PAGE, FACTS_PER_PAGE, build, fromUrl, isSheetPath, validSeed, newSeed, MATH_TYPES, WRITING_TYPES };

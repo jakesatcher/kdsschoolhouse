@@ -102,6 +102,7 @@ ul.items { list-style: none; margin: 0; padding: 0; } ul.items li { display: fle
 .legend { font-style: italic; margin: 0 0 12px; }
 ol.problems { list-style: none; margin: 0; padding: 0; display: grid; gap: 22px 12px; grid-template-columns: repeat(5, 1fr); }
 ol.problems.horizontal { grid-template-columns: repeat(3, 1fr); }
+ol.problems.facts:not(.horizontal) { grid-template-columns: repeat(4, 1fr); }
 ol.problems li { position: relative; padding-left: 26px; min-height: 90px; }
 ol.problems .pn { position: absolute; left: 0; top: 0; font-size: .85rem; }
 .vp { display: inline-block; font-variant-numeric: tabular-nums; font-size: 1.25rem; }
@@ -177,6 +178,10 @@ ol.questions { padding-left: 24px; } ol.questions li { margin-bottom: 14px; brea
   ol.problems.d6, ol.problems.d7, ol.problems.d8 { --fs: 16px; --lh: 24px; } /* 6-7 digit numbers: keep five columns readable */
   ol.problems li { min-height: 0; padding-left: 23px; }
   ol.problems .pn { font-size: .7rem; }
+  /* facts: larger type, four columns across; extra problems go on the back */
+  ol.problems.facts:not(.horizontal) { grid-template-columns: repeat(4, 1fr); --fs: 25px; --lh: 38px; --space: 24px; gap: 0 14px; }
+  ol.problems.facts.horizontal { --fs: 23px; --lh: 34px; }
+  ol.problems.facts .pn { font-size: .8rem; }
   ol.problems .vp { font-size: var(--fs); }
   ol.problems .vp .row { line-height: var(--lh); }
   ol.problems .hp { font-size: var(--fs); line-height: var(--lh); padding-top: 0; }
@@ -250,3 +255,11 @@ ol.questions { padding-left: 24px; } ol.questions li { margin-bottom: 14px; brea
 .ns-s-list li { min-height: .55in; display: flex; align-items: baseline; gap: 12px; }
 .ns-s-list .ns-num { font-size: 1.3rem; margin: 0; min-width: 120px; }
 .ns-s-list .blank { width: 130px; }
+
+/* Word problems: tables, lettered parts, choices and notes */
+.wp-note { margin: 2px 0 4px; font-size: .85rem; font-style: italic; color: #333; }
+.wp-table { border-collapse: collapse; margin: 6px 0; font-size: .95rem; } .wp-table caption { font-weight: 700; text-align: left; padding-bottom: 3px; }
+.wp-table th, .wp-table td { border: 1.5px solid #000; padding: 3px 14px; text-align: left; background: none; color: #000; font-weight: 400; text-transform: none; font-style: normal; } .wp-table thead th { font-weight: 700; } .wp-table tbody th { font-weight: 400; }
+.wp-choices { list-style: none; margin: 4px 0 4px 8px; padding: 0; } .wp-choices li { margin: 2px 0; }
+.wp-parts { margin: 4px 0 0 4px; padding-left: 22px; } .wp-parts li { margin-bottom: 4px; break-inside: avoid; }
+.workspace.small { height: 52px; } .workspace.tall { height: 130px; }

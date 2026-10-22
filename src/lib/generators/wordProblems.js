@@ -47,14 +47,26 @@ const KINDS = ['whole', 'decimal', 'fraction', 'mixed'];
 const STEPS = ['single', 'multi', 'mixed'];
 const LEVELS = ['mixed', 'standard', 'challenge'];
 
+const { makeRng } = require('./rng');
+const makeRngFor = (g) => makeRng(g * 7919 + 11);
 const H = { int, pick, shuffle, F, fmt, cents, dec, cap, ORD, EXTRA_NAMES };
 require('./wpWhole')(t, H);
 require('./wpMoney')(t, H);
 require('./wpFractions')(t, H);
+require('./wpSituations')(t, H);
 
-function pool({ grade, op, kind, steps, level = 'mixed' }) {
+// Older scenes that are told in a classroom (school, class, teacher, cafeteria ...) are flagged so the sheets lean on real-life
+// scenarios; they are only used when nothing else fits the teacher's choices.
+const SCHOOL = /\b(school|classroom|class|classes|teacher|recess|cafeteria|principal|homework|students?|library|playground|bake sale|lunch|field trip|science fair|field day|spelling|book fair|pep rally|recess)\b/i;
+for (const x of T) {
+  if (x.id.startsWith('sit-')) continue;
+  for (let g = x.grades[0]; g <= x.grades[1] && !x.school; g++) { try { const r = makeRngFor(g); if (SCHOOL.test(x.make(r, ctx(r), g).text)) x.school = true; } catch { /* ignore */ } }
+}
+
+function pool({ grade, op, kind, steps, level = 'mixed' }, withSchool = false) {
   return T.filter(
     (x) =>
+      (withSchool || !x.school) &&
       grade >= x.grades[0] && grade <= x.grades[1] &&
       (level === 'mixed' || x.level === (level === 'challenge' ? 2 : 1)) &&
       (kind === 'mixed' || x.kind === kind) &&
@@ -64,20 +76,24 @@ function pool({ grade, op, kind, steps, level = 'mixed' }) {
 }
 
 function wordProblems(rng, { grade = 3, op = 'mixed', kind = 'whole', steps = 'mixed', level = 'mixed', count = 10 }) {
-  const available = pool({ grade, op, kind, steps, level });
+  let available = pool({ grade, op, kind, steps, level });
+  if (available.length < 6) available = pool({ grade, op, kind, steps, level }, true); // too few real-life scenes for these choices: bring the classroom ones back
   if (!available.length) return { problems: [], error: 'No word problems match those choices for this grade. Try a different grade, number type or step setting.' };
+  H.sit.used.clear();
   const out = [];
   const seen = new Set();
   let deck = [];
   let guard = 0;
   while (out.length < count && guard++ < count * 40) {
     // Walk a shuffled deck of scenes so a sheet uses as many different stories as possible before repeating one.
-    if (deck.length === 0) deck = shuffle(rng, available);
+    // the situation-based scenes (real-life contexts, many formats) are dealt twice as often as the older ones
+    if (deck.length === 0) deck = shuffle(rng, available.flatMap((x) => (x.id.startsWith('sit-') ? [x, x] : [x])));
     const tpl = deck.pop();
-    const p = tpl.make(rng, ctx(rng), grade);
+    let p;
+    try { p = tpl.make(rng, ctx(rng), grade); } catch { continue; } // a scene that cannot be built from these numbers is skipped
     if (seen.has(p.text)) continue;
     seen.add(p.text);
-    out.push({ text: p.text, answerText: p.answerText, steps: tpl.steps, kind: tpl.kind, level: tpl.level });
+    out.push({ text: p.text, answerText: p.answerText, steps: tpl.steps, kind: tpl.kind, level: tpl.level, id: tpl.id, ...(p.table ? { table: p.table } : {}), ...(p.parts ? { parts: p.parts } : {}), ...(p.choices ? { choices: p.choices } : {}), ...(p.note ? { note: p.note } : {}), ...(p.explain ? { explain: true } : {}), ...(p.meta ? { meta: p.meta } : {}) });
   }
   return { problems: out, error: null };
 }

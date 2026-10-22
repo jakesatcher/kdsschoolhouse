@@ -1,7 +1,17 @@
 <article class="sheet">
   <%- include('_head') %>
   <ol class="words-problems">
-    <% problems.forEach(function (p) { %><li><p><%= p.text %></p><div class="workspace"></div><p class="answerline">Answer: <i class="blank"></i></p></li><% }) %>
+    <% problems.forEach(function (p) { %><li>
+      <p><%= p.text %></p>
+      <% if (p.note) { %><p class="wp-note"><%= p.note %></p><% } %>
+      <% if (p.table) { %><table class="wp-table"><% if (p.table.title) { %><caption><%= p.table.title %></caption><% } %><thead><tr><% p.table.head.forEach(function (h) { %><th><%= h %></th><% }) %></tr></thead><tbody><% p.table.rows.forEach(function (row) { %><tr><% row.forEach(function (c, i) { %><% if (i === 0) { %><th scope="row"><%= c %></th><% } else { %><td><%= c %></td><% } %><% }) %></tr><% }) %></tbody></table><% } %>
+      <% if (p.choices) { %><ul class="wp-choices"><% p.choices.forEach(function (c) { %><li><%= c %></li><% }) %></ul><% } %>
+      <% if (p.parts) { %>
+        <ol class="wp-parts" type="a"><% p.parts.forEach(function (q) { %><li><p><%= q.q %></p><div class="workspace small"></div><p class="answerline">Answer: <i class="blank"></i></p></li><% }) %></ol>
+      <% } else { %>
+        <div class="workspace<%= p.explain ? ' tall' : '' %>"></div><p class="answerline">Answer: <i class="blank"></i></p>
+      <% } %>
+    </li><% }) %>
   </ol>
 </article>
 <% if (includeKey) { %>

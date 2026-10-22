@@ -28,10 +28,11 @@ test('every scene, every grade it claims: well-formed text, sane answers, correc
     const texts = new Set();
     for (const p of problems) {
       const label = `${tpl.id} g${g}: ${p.text}`;
-      assert.ok(/[?]$/.test(p.text), `ends with a question: ${label}`);
+      // older scenes end with their question; the situation-based ones may add a format instruction after it, or ask in lettered parts
+      assert.ok(tpl.id.startsWith('sit-') ? (p.parts ? p.parts.every((q) => /[?]$/.test(q.q) || /\.\)?$/.test(q.q)) : /[?]/.test(p.text)) : /[?]$/.test(p.text), `has a question: ${label}`);
       assert.ok(!/NaN|undefined|Infinity|null|\[object|\$\{/.test(p.text + p.answerText), label);
       assert.ok(!/(^|[^\d.])-\d/.test(p.text + ' ' + p.answerText), `no negative numbers: ${label}`);
-      assert.ok(p.answerText && p.answerText.length < 80, label);
+      assert.ok(p.answerText && p.answerText.length < (tpl.id.startsWith('sit-') ? 220 : 80), label);
       assert.ok(!/(^|[\s$])1 (miles|cups|feet|pizzas|gallons)\b|(^|[\s$])0 (mile|cup|foot|pizza|gallon)\b/.test(p.answerText), `unit agreement: ${p.answerText}`);
       assert.ok(!extras.test(p.text), `only the six main character names: ${label}`);
       assert.ok(!/\$\d+\.\d($|[^\d])/.test(p.text + p.answerText), `money shows cents: ${label}`);
@@ -55,7 +56,7 @@ test('realism: nothing absurd (bus loads, container sizes, number size for the g
   eachScene((tpl, g, problems) => {
     for (const p of problems) {
       const label = `${tpl.id} g${g}: ${p.text}`;
-      for (const m of p.text.matchAll(/(?:each|every|in each|on each|per) (bus|van|bag|box|carton|tub|case|page|team|classroom|table|row|plate|tray)\b[^.]*?(\d[\d,]*)/gi)) {
+      for (const m of p.text.matchAll(/(?:each|every|in each|on each|per) (bus|van|bag|box|carton|tub|case|page|team|classroom|table|row|plate|tray)\b[^.?]*?(\d[\d,]*)/gi)) {
         // "each bus holds 48" style: the number after the container word
         assert.ok(num(m[2]) <= CAP[m[1].toLowerCase()] * 1.0 || /seats|desks|miles|dollar|\$/.test(m[0]), `container size: ${m[0]} | ${label}`);
       }

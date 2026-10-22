@@ -2,7 +2,7 @@
 <% pages.forEach(function (page, pi) { %>
 <article class="sheet">
   <%- include('_head') %>
-  <ol class="problems <%= layout %> d<%= digits %>">
+  <ol class="problems <%= layout %> d<%= digits %><%= typeof facts !== 'undefined' && facts ? ' facts' : '' %>">
     <% page.forEach(function (p, i) { %><li><span class="pn"><%= pi * perPage + i + 1 %>.</span><%- include('../learn/_vproblem', { p, layout }) %></li><% }) %>
   </ol>
 </article>
