@@ -76,6 +76,7 @@ function createApp() {
   app.use(noStore);
   app.use((req, res, next) => {
     res.locals.appName = config.appName;
+    res.locals.buildId = config.buildId;
     res.locals.path = req.path;
     res.locals.title = null;
     res.locals.currentUser = null;

@@ -19,6 +19,8 @@ module.exports = {
   isProd,
   port: Number(env.PORT) || 3000,
   appName: env.APP_NAME || 'KDS Schoolhouse',
+  // Which commit is running (Railway sets RAILWAY_GIT_COMMIT_SHA); shown in the page footer so a stale deploy is easy to spot.
+  buildId: String(env.RAILWAY_GIT_COMMIT_SHA || env.SOURCE_COMMIT || env.GIT_COMMIT || '').slice(0, 7) || 'unknown',
   databaseUrl: env.DATABASE_URL || 'postgres://localhost/kdsschoolhouse',
   databaseSsl: bool(env.DATABASE_SSL, false),
   sessionSecret,
