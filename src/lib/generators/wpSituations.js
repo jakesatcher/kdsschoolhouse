@@ -200,7 +200,7 @@ module.exports = function register(t, H) {
     const days = pick(r, [['Friday', 'Saturday', 'Sunday'], ['Monday', 'Tuesday', 'Wednesday'], ['week 1', 'week 2', 'week 3']]);
     const tell = pick(r, [
       () => `${c.A.name} keeps track of ${x.item[1]} over three days. ${n.map((v, i) => `On ${days[i]} the count is ${fmt(v)}.`).join(' ')}`,
-      () => `A log book lists ${x.item[1]} for three days: ${n.map((v, i) => `${fmt(v)} on ${days[i]}`).join(', ')}.`.replace(/, ([^,]*)\.$/, ', and $1.'),
+      () => `A log book lists ${x.item[1]} for three days. ${n.map((v, i) => `${cap(days[i])}: ${fmt(v)}.`).join(' ')}`,
       () => `${c.A.name} writes down how many ${x.item[1]} there were: ${fmt(n[0])} first, then ${fmt(n[1])}, then ${fmt(n[2])}.`,
     ]);
     const story = tell();
