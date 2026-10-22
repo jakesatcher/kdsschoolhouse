@@ -93,9 +93,19 @@
       <label>Difficulty <select name="level"><% [['mixed', 'Mixed: standard and challenge problems'], ['standard', 'Standard'], ['challenge', 'Challenge (harder, more steps)']].forEach(function (o) { %><option value="<%= o[0] %>" <%= (q.level || 'mixed') === o[0] ? 'selected' : '' %>><%= o[1] %></option><% }) %></select></label>
       <label>Steps <select name="steps"><% steps.forEach(function (s) { %><option value="<%= s %>" <%= (q.steps || 'mixed') === s ? 'selected' : '' %>><%= { single: 'One step', multi: 'Multi-step only', mixed: 'Mix of one-step and multi-step' }[s] %></option><% }) %></select></label>
       <label>Problems <select name="count"><% [5, 8, 10, 12, 15].forEach(function (n) { %><option <%= String(q.count || 10) === String(n) ? 'selected' : '' %>><%= n %></option><% }) %></select></label>
+      <fieldset>
+        <legend>Want more complex, more varied problems?</legend>
+        <p class="muted small-text">The button at the bottom, "Write with AI", uses the grade, numbers, operations, steps and difficulty above. It writes up to 10 problems in many formats (multi-step, work backwards, lettered parts, tables, estimation, find the mistake ...), and every answer is checked before it is shown. You can edit the result.</p>
+        <label>Topic or setting <small class="muted">(optional, AI only)</small> <input name="topic" value="<%= q.topic || '' %>" maxlength="150" placeholder="e.g. a camping trip, a pet store, baseball season"></label>
+        <label>Format to feature <small class="muted">(AI only)</small>
+          <select name="format"><option value="any">A wide mix</option><% aiFormats.forEach(function (f) { %><option value="<%= f[0] %>" <%= q.format === f[0] ? 'selected' : '' %>><%= f[0].replace(/-/g, ' ') %></option><% }) %></select>
+        </label>
+        <% if (!aiReady) { %><p class="muted small-text">AI-written problems are not set up on this server yet.</p><% } %>
+      </fieldset>
     <% } %>
     <label class="check"><input type="hidden" name="key" value="0"><input type="checkbox" name="key" value="1" checked> Include answer key on a separate page</label>
     <button type="submit">Create worksheet</button>
+    <% if (type === 'word-problems') { %><button type="submit" class="secondary" data-ai-post="/math/word-problems/ai" data-csrf="<%= csrfToken %>" <%= aiReady ? '' : 'disabled' %>>✨ Write with AI (more complex and varied)</button><% } %>
   </form>
 </div>
 <p class="muted small-text"><%= (guide[q.grade] || '') %></p>

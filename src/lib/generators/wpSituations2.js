@@ -217,4 +217,5 @@ module.exports = function register(t, H) {
     return { text: `${A.name} cuts a board that is ${D(tot)} meters long into ${k} equal pieces. How long is each piece?`, answer: `${D(q)} meters`, eq: `${D(tot)} ÷ ${k} = ?`, meta: { op: 'dec-div', total: tot, k, q, places } };
   });
   void finish;
+  require('./wpSituations3')(t, H);
 };

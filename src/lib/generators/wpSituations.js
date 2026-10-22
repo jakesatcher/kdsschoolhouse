@@ -47,6 +47,7 @@ module.exports = function register(t, H) {
     for (const x of fresh(r)) {
       if (!ok(x)) continue;
       const hi = Math.min(x.max, capN);
+      if (x.min > capN * 2) continue; // a stadium crowd is not a first-grade number
       if (x.max < Math.max(6, capN * 0.01)) continue; // grade 4-5 totals should be big, so small-count contexts sit out
       let lo = Math.max(2, Math.min(x.min, Math.floor(capN / 3)));
       if (g >= 4 && hi >= 300) lo = Math.max(lo, Math.min(Math.floor(hi / 4), g === 4 ? 100 : 1000));

@@ -5,7 +5,7 @@
   <% if (typeof newUrl !== 'undefined' && newUrl) { %><a class="btn secondary" href="<%= newUrl %>">🎲 New sheet</a><% } %>
   <% if (typeof editUrl !== 'undefined' && editUrl) { %><a class="btn secondary" href="<%= editUrl %>">✏️ Edit</a><% } %>
   <% const target = typeof ref !== 'undefined' && ref ? { name: 'ref', value: ref } : { name: 'url', value: sheetUrl }; %>
-  <% const back = typeof ref !== 'undefined' && ref ? '/reading/doc/' + ref : sheetUrl; %>
+  <% const back = typeof ref !== 'undefined' && ref ? (typeof partial !== 'undefined' && partial === 'words' ? '/math/doc/' : '/reading/doc/') + ref : sheetUrl; %>
   <form method="post" action="/library/toggle" class="inline">
     <input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="flag" value="favorite">
     <input type="hidden" name="<%= target.name %>" value="<%= target.value %>"><input type="hidden" name="back" value="<%= back %>">

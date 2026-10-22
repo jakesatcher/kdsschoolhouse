@@ -65,7 +65,7 @@ router.get('/reading', (req, res) => res.redirect('/reading/comprehension'));
 
 router.get('/reading/doc/:ref', async (req, res, next) => {
   const doc = await docs.loadDoc(req, req.params.ref);
-  if (!doc) return next();
+  if (!doc || doc.content.kind === 'wp-ai') return next();
   const c = doc.content;
   res.render('learn/sheet', {
     title: c.title, partial: 'doc', sheet: { ...c, ref: doc.ref }, ref: doc.ref, saved: doc.saved ? await library.findDoc(req.user.id, doc.ref) : null,

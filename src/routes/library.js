@@ -12,7 +12,7 @@ const router = express.Router();
 
 const SUBJECTS = [['math', 'Math'], ['reading', 'Reading'], ['writing', 'Writing']];
 const group = (items) => SUBJECTS.map(([id, name]) => ({ id, name, items: items.filter((i) => i.subject === id) })).filter((g) => g.items.length);
-const href = (i) => (i.is_doc ? `/reading/doc/s-${i.id}` : i.url);
+const href = (i) => (i.is_doc ? `/${i.subject === 'math' ? 'math' : 'reading'}/doc/s-${i.id}` : i.url);
 
 router.get('/favorites', async (req, res) => {
   res.render('library/favorites', { title: 'Favorites', groups: group(await library.list(req.user.id, 'favorite')), href });
@@ -29,7 +29,8 @@ router.get('/print-later/all', async (req, res) => {
   for (const item of items) {
     if (item.is_doc) {
       const doc = await docs.loadDoc(req, `s-${item.id}`);
-      if (doc) rendered.push({ partial: 'doc', locals: { ...doc.content, ref: doc.ref } });
+      if (doc && doc.content.kind === 'wp-ai') rendered.push({ partial: 'words', locals: require('./mathAi').sheetOf(doc.content) });
+      else if (doc) rendered.push({ partial: 'doc', locals: { ...doc.content, ref: doc.ref } });
     } else {
       const parsed = sheets.fromUrl(item.url);
       if (parsed) rendered.push({ partial: parsed.built.partial, locals: parsed.built.locals });
@@ -67,7 +68,7 @@ router.post('/library/toggle', async (req, res) => {
   req.flash('ok', result.on ? `Added to ${label}.` : `Removed from ${label}.`);
   if (result.newRef) {
     docs.markDraftSaved(req, str(req.body.ref), result.id);
-    return res.redirect(`/reading/doc/${result.newRef}`);
+    return res.redirect(`/${target.doc && target.doc.content.subject === 'math' ? 'math' : 'reading'}/doc/${result.newRef}`);
   }
   res.redirect(back);
 });

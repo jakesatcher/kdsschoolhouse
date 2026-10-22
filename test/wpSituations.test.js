@@ -66,6 +66,24 @@ test('equal groups, arrays, comparisons, remainders and multi-step stories', () 
   each('sit-divide-then', (p, m) => { assert.strictEqual(answerNum(p), m.total - m.gone * m.k); assert.ok(m.gone < m.n); });
 });
 
+test('demanding situations: pouring fractions together, digit puzzles, working backwards, receipts, plans, fractions of what is left', () => {
+  const F = require('../src/lib/generators/fractions');
+  each('sit-pour-together', (p, m) => {
+    const total = m.op === 'pour' ? F.mul(F.frac(m.n, 1), F.frac(m.a, m.d)) : F.add(F.mul(F.frac(m.n1, 1), F.frac(m.a1, m.d1)), F.mul(F.frac(m.n2, 1), F.frac(m.a2, m.d2)));
+    const whole = Math.floor(total.n / total.d); assert.ok(whole >= 1); assert.strictEqual(Number(/^(\d+)/.exec(p.answerText)[1]), whole);
+    const rem = F.sub(total, F.frac(whole, 1)); if (rem.n) assert.ok(p.answerText.includes(F.show(rem))); else assert.ok(!/left over/.test(p.answerText));
+  });
+  each('sit-digits-puzzle', (p, m) => {
+    const ds = String(m.num).split(''); const desc = Number([...ds].sort().reverse().join('')); const asc = [...ds].sort(); const i = asc.findIndex((d) => d !== '0'); const low = Number([asc[i], ...asc.filter((_, k) => k !== i)].join(''));
+    if (m.op === 'digits-high') assert.strictEqual(m.ans, desc); if (m.op === 'digits-low') assert.strictEqual(m.ans, low); if (m.op === 'digits-diff') assert.strictEqual(m.ans, desc - low);
+    assert.strictEqual(answerNum(p), m.ans); assert.ok(p.text.includes(m.num.toLocaleString('en-US')));
+  });
+  each('sit-backwards', (p, m) => { assert.strictEqual(m.start / 2 - m.spent, m.left); assert.strictEqual(num(ansStr(p)), m.start); });
+  each('sit-receipt', (p, m) => { assert.strictEqual(m.total, m.rows.reduce((s, x) => s + x.p * x.q, 0)); assert.strictEqual(p.table.rows.length, 3); assert.strictEqual(cents(ansStr(p)), m.op === 'receipt-total' ? m.total : m.bill - m.total); if (m.op === 'receipt-change') assert.ok(m.bill > m.total); });
+  each('sit-plan-compare', (p, m) => { assert.strictEqual(m.costA, m.fee + m.a * m.v); assert.strictEqual(m.costB, m.b * m.v); assert.notStrictEqual(m.costA, m.costB); assert.ok(p.answerText.startsWith(m.costA < m.costB ? 'Plan A' : 'Plan B')); assert.ok(p.answerText.includes(`by $${Math.abs(m.costA - m.costB)}`)); });
+  each('sit-fraction-of-left', (p, m) => { const r1 = m.total - m.total / m.d1; assert.ok(Number.isInteger(m.total / m.d1) && Number.isInteger(r1 / m.d2)); assert.strictEqual(m.left, r1 - r1 / m.d2); assert.strictEqual(num(p.answerText), m.left); });
+});
+
 test('lettered parts: each part has its own question and answer', () => {
   each('sit-parts-total-left', (p, m) => { assert.strictEqual(p.parts.length, 2); assert.strictEqual(num(p.parts[0].a), m.a + m.b); assert.strictEqual(num(p.parts[1].a), m.a + m.b - m.d); assert.ok(m.a + m.b - m.d > 0); });
   each('sit-parts-compare', (p, m) => { assert.strictEqual(num(p.parts[0].a), m.hi + m.lo); assert.strictEqual(num(p.parts[1].a), m.hi - m.lo); });

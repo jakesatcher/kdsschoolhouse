@@ -27,7 +27,7 @@ router.get('/', (req, res) => {
 
 // ---------- settings forms ----------
 const mathForm = (res, type, q, error) =>
-  res.status(error ? 422 : 200).render('learn/math-form', { title: MATH_TYPES[type], type, types: MATH_TYPES, guide: scope.mathGuide, grades: GRADES, ops: wp.OPS, kinds: wp.KINDS, steps: wp.STEPS, q, error });
+  res.status(error ? 422 : 200).render('learn/math-form', { title: MATH_TYPES[type], type, types: MATH_TYPES, guide: scope.mathGuide, grades: GRADES, ops: wp.OPS, kinds: wp.KINDS, steps: wp.STEPS, q, error, aiReady: require('../lib/reading/ai').configured(), aiFormats: require('../lib/wpAi').FORMATS });
 const phonicsForm = (res, q, error) => {
   // Works for both the new category/subtype fields and older type=category/subtype links.
   const legacy = String(q.type || '').split('/');

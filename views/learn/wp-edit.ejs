@@ -1,0 +1,22 @@
+<%- include('../partials/head') %>
+<h1>Edit word problems</h1>
+<p class="muted">Change the wording or the answers. Clear a problem's text to remove it.</p>
+<div class="card">
+  <form method="post" action="/math/doc/<%= ref %>/edit" class="settings">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label>Title <input name="title" value="<%= c.title %>" maxlength="120"></label>
+    <% c.problems.forEach(function (p, i) { %>
+      <div class="qrow">
+        <label>Problem <%= i + 1 %> <textarea name="text_<%= i %>" rows="4" maxlength="900"><%= p.text %></textarea></label>
+        <% p.parts.forEach(function (q, j) { %>
+          <% if (p.parts.length > 1) { %><label>Question <%= 'abcd'[j] %> <input name="q_<%= i %>_<%= j %>" value="<%= q.q %>" maxlength="300"></label><% } %>
+          <label>Answer<%= p.parts.length > 1 ? ' ' + 'abcd'[j] : '' %> <input name="a_<%= i %>_<%= j %>" value="<%= q.a %>" maxlength="300"></label>
+        <% }) %>
+      </div>
+    <% }) %>
+    <label class="check"><input type="hidden" name="key" value="0"><input type="checkbox" name="key" value="1" <%= c.includeKey ? 'checked' : '' %>> Include answer key on a separate page</label>
+    <button type="submit">Save changes</button>
+    <a class="btn secondary" href="/math/doc/<%= ref %>">Cancel</a>
+  </form>
+</div>
+<%- include('../partials/foot') %>

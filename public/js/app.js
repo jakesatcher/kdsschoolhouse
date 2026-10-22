@@ -56,3 +56,12 @@ document.querySelectorAll('[data-reveal-toggle]').forEach((t) => t.addEventListe
   count.addEventListener('change', () => { touched = true; });
   mode.addEventListener('change', () => { if (!touched) count.value = mode.value === 'multi' ? '12' : '30'; });
 })();
+
+// Math word problems: the "Write with AI" button sends the same settings by POST (with the CSRF token) instead of the usual GET.
+document.querySelectorAll('button[data-ai-post]').forEach((b) => b.addEventListener('click', () => {
+  const f = b.form;
+  f.method = 'post'; f.action = b.dataset.aiPost;
+  if (!f.querySelector('input[name=_csrf]')) { const i = document.createElement('input'); i.type = 'hidden'; i.name = '_csrf'; i.value = b.dataset.csrf; f.appendChild(i); }
+  f.dataset.busy = 'Writing your problems… this can take up to a minute.';
+  const hold = f.querySelector('button[type=submit]:not([data-ai-post])'); if (hold) hold.disabled = true;
+}));

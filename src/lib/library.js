@@ -36,8 +36,8 @@ async function toggle(userId, flag, target) {
     else {
       if ((await db.one('SELECT count(*)::int AS n FROM saved_items WHERE user_id = $1', [userId])).n >= MAX_ITEMS) return { ok: false, message: `You can keep up to ${MAX_ITEMS} saved sheets. Remove some first.` };
       row = await db.one(
-        `INSERT INTO saved_items (user_id, subject, kind, title, subtitle, content) VALUES ($1,'reading',$2,$3,$4,$5) RETURNING id, favorite, print_later`,
-        [userId, d.content.skill, d.content.title, docs.subtitleOf(d.content), JSON.stringify(d.content)]
+        `INSERT INTO saved_items (user_id, subject, kind, title, subtitle, content) VALUES ($1,$6,$2,$3,$4,$5) RETURNING id, favorite, print_later`,
+        [userId, d.content.skill, d.content.title, docs.subtitleOf(d.content), JSON.stringify(d.content), d.content.subject || 'reading']
       );
     }
   }
