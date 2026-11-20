@@ -7,11 +7,11 @@ const { int, pick, shuffle } = require('./rng');
 const F = require('./fractions');
 const { fmt } = require('./math');
 
-// The six main characters, with the genders they were given, so narration can use he/she correctly.
-// Names outside this set are only for stories that need more than six people (none do today) and are randomized.
-const NAMES = ['Zach', 'AC', 'Screech', 'Kelly', 'Lisa', 'Jessie'];
-const EXTRA_NAMES = ['Mia', 'Leo', 'Ava', 'Sam', 'Zoe', 'Max', 'Ella', 'Ben', 'Lily', 'Noah', 'Ruby', 'Eli'];
-const GENDER = { Zach: 'm', AC: 'm', Screech: 'm', Kelly: 'f', Lisa: 'f', Jessie: 'f' };
+// Characters come from the name banks (100 boy names and 100 girl names, from many cultures; see names.js), which know
+// each name's gender so narration can use he/she correctly.
+const names = require('../names');
+const NAMES = names.ALL;
+const GENDER = names.GENDER;
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 class Person {
@@ -34,8 +34,8 @@ const cents = (c) => `$${(c / 100).toFixed(2)}`;
 const dec = (v, places) => (v / 10 ** places).toFixed(places);
 
 function ctx(rng) {
-  const [a, b, c] = shuffle(rng, NAMES);
-  return { A: new Person(a), B: new Person(b), C: new Person(c), extraName: () => pick(rng, EXTRA_NAMES) };
+  const [a, b, c] = names.pickNames(rng, 3);
+  return { A: new Person(a), B: new Person(b), C: new Person(c), extraName: () => names.pickNames(rng, 1)[0] };
 }
 
 // Scene: { id, ops, kind:'whole'|'decimal'|'fraction', steps (calculations), level:1|2, grades:[min,max], make(r, c, g) -> { text, answerText } }
@@ -49,7 +49,7 @@ const LEVELS = ['mixed', 'standard', 'challenge'];
 
 const { makeRng } = require('./rng');
 const makeRngFor = (g) => makeRng(g * 7919 + 11);
-const H = { int, pick, shuffle, F, fmt, cents, dec, cap, ORD, EXTRA_NAMES };
+const H = { int, pick, shuffle, F, fmt, cents, dec, cap, ORD };
 require('./wpWhole')(t, H);
 require('./wpMoney')(t, H);
 require('./wpFractions')(t, H);
@@ -80,6 +80,7 @@ function wordProblems(rng, { grade = 3, op = 'mixed', kind = 'whole', steps = 'm
   if (available.length < 6) available = pool({ grade, op, kind, steps, level }, true); // too few real-life scenes for these choices: bring the classroom ones back
   if (!available.length) return { problems: [], error: 'No word problems match those choices for this grade. Try a different grade, number type or step setting.' };
   H.sit.used.clear();
+  names.resetSheet();
   const out = [];
   const seen = new Set();
   let deck = [];
@@ -98,4 +99,4 @@ function wordProblems(rng, { grade = 3, op = 'mixed', kind = 'whole', steps = 'm
   return { problems: out, error: null };
 }
 
-module.exports = { wordProblems, pool, ctx, OPS, KINDS, STEPS, LEVELS, TEMPLATES: T, NAMES, EXTRA_NAMES, GENDER };
+module.exports = { wordProblems, pool, ctx, OPS, KINDS, STEPS, LEVELS, TEMPLATES: T, NAMES, GENDER };

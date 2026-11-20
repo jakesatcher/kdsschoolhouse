@@ -9,8 +9,7 @@ const F = require('../src/lib/generators/fractions');
 const num = (s) => Number(String(s).replace(/,/g, ''));
 const sentences = (text) => text.split(/(?<=[.?!])\s+/).filter(Boolean);
 const words = (s) => (s.match(/[A-Za-z0-9$]+(?:[',.][A-Za-z0-9]+)*/g) || []).length;
-const FEMALE = ['Kelly', 'Lisa', 'Jessie'];
-const MALE = ['Zach', 'AC', 'Screech'];
+const { BOYS: MALE, GIRLS: FEMALE } = require('../src/lib/names');
 
 function sample(tpl, grade, n = 60) {
   const out = [];
@@ -23,7 +22,6 @@ function sample(tpl, grade, n = 60) {
 const eachScene = (fn) => { for (const tpl of wp.TEMPLATES) for (let g = tpl.grades[0]; g <= tpl.grades[1]; g++) fn(tpl, g, sample(tpl, g)); };
 
 test('every scene, every grade it claims: well-formed text, sane answers, correct names and pronouns', () => {
-  const extras = new RegExp(`\\b(${wp.EXTRA_NAMES.join('|')})\\b`);
   eachScene((tpl, g, problems) => {
     const texts = new Set();
     for (const p of problems) {
@@ -34,7 +32,6 @@ test('every scene, every grade it claims: well-formed text, sane answers, correc
       assert.ok(!/(^|[^\d.])-\d/.test(p.text + ' ' + p.answerText), `no negative numbers: ${label}`);
       assert.ok(p.answerText && p.answerText.length < (tpl.id.startsWith('sit-') ? 220 : 80), label);
       assert.ok(!/(^|[\s$])1 (miles|cups|feet|pizzas|gallons)\b|(^|[\s$])0 (mile|cup|foot|pizza|gallon)\b/.test(p.answerText), `unit agreement: ${p.answerText}`);
-      assert.ok(!extras.test(p.text), `only the six main character names: ${label}`);
       assert.ok(!/\$\d+\.\d($|[^\d])/.test(p.text + p.answerText), `money shows cents: ${label}`);
       assert.ok(!/ {2}|\s[.,?]|\.\./.test(p.text), `tidy spacing: ${label}`);
       // pronouns agree with the characters in the story (only checked when everyone in it has the same gender)

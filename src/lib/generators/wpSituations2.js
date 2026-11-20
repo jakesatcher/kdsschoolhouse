@@ -66,9 +66,10 @@ module.exports = function register(t, H) {
   });
   // whole-dollar prices for grades 2 and 3
   reg('sit-price-whole', { ops: ['mul', 'add', 'sub'], grades: [2, 3] }, (r, c, g) => {
-    const it = item(r, g, true); const d = it.c / 100; const kind = int(r, 0, 2);
+    const cheap = () => { let x = item(r, g, true); for (let i = 0; i < 80 && x.c > (g === 2 ? 1000 : 3000); i++) x = item(r, g, true); return x; };
+    const it = cheap(); const d = it.c / 100; const kind = int(r, 0, 2);
     if (kind === 0) { const k = int(r, 2, 5); return { story: `${verbBuy(c)} ${k} ${it.p} ${it.shop}. Each one costs $${d}.`, question: `How much does ${c.A.s} spend in all?`, answer: `$${d * k}`, eq: `${k} × $${d} = ?`, meta: { op: 'price-whole-mul', d, k } }; }
-    if (kind === 1) { const it2 = item(r, g, true); return { story: `${verbBuy(c)} a ${it.s} for $${d} and a ${it2.s} for $${it2.c / 100}.`, question: `How much does ${c.A.s} spend in all?`, answer: `$${d + it2.c / 100}`, eq: `$${d} + $${it2.c / 100} = ?`, meta: { op: 'price-whole-add', a: d, b: it2.c / 100 } }; }
+    if (kind === 1) { const it2 = cheap(); return { story: `${verbBuy(c)} a ${it.s} for $${d} and a ${it2.s} for $${it2.c / 100}.`, question: `How much does ${c.A.s} spend in all?`, answer: `$${d + it2.c / 100}`, eq: `$${d} + $${it2.c / 100} = ?`, meta: { op: 'price-whole-add', a: d, b: it2.c / 100 } }; }
     const bill = Math.ceil((d + 1) / 5) * 5; return { story: `${verbBuy(c)} a ${it.s} for $${d} and pays with a $${bill} bill.`, question: 'How much change does he get?'.replace('he', c.A.s), answer: `$${bill - d}`, eq: `$${bill} − $${d} = ?`, meta: { op: 'price-whole-change', d, bill } };
   });
 

@@ -43,18 +43,6 @@ async function post(path, body, who = agent) {
   return who.post(path).type('form').send({ _csrf: csrfFrom(page.text), ...body });
 }
 
-test('every word problem uses only Zach, AC, Screech, Kelly, Lisa or Jessie', () => {
-  const allowed = new Set(wp.NAMES);
-  const extras = new RegExp(`\\b(${wp.EXTRA_NAMES.join('|')})\\b`);
-  for (let grade = 1; grade <= 5; grade++) for (const kind of ['whole', 'decimal', 'fraction']) {
-    const r = wp.wordProblems(makeRng(grade * 3), { grade, kind, count: 20 });
-    for (const p of r.problems) {
-      assert.ok(!extras.test(p.text), p.text);
-    }
-  }
-  assert.strictEqual(allowed.size, 6);
-});
-
 test('the answer-key / mark checkboxes are honoured (unchecked = no key)', async () => {
   const get = (u) => agent.get(u).redirects(1);
   assert.match((await get('/math/addition/worksheet?digits=2&key=1')).text, /Answer Key/);
@@ -98,7 +86,7 @@ test('comprehension: AI passage + questions become an editable worksheet; prompt
   assert.strictEqual(res.status, 302);
   assert.match(res.headers.location, /^\/reading\/doc\/d-/);
   const prompt = calls[0].system + calls[0].messages[0].content;
-  for (const n of ['Zach', 'AC', 'Screech', 'Kelly', 'Lisa', 'Jessie']) assert.match(prompt, new RegExp(n));
+  assert.match(prompt, /Names to use for characters: boys [A-Za-z, ]+; girls [A-Za-z, ]+\./);
   assert.match(prompt, /NEVER exceed 75 words/);
   assert.match(prompt, /exactly 4 questions/);
   assert.match(prompt, /Grade 2/);

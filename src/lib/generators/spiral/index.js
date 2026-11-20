@@ -71,6 +71,7 @@ function runSkill(rng, id, params) {
 function buildTest(rng, { grade, test }) {
   const spec = SPECS[grade] && SPECS[grade][test];
   if (!spec) return null;
+  require('../../names').resetSheet(); // each practice sheet starts with a fresh set of names
   const used = new Map();
   const boxes = spec.map((box, i) => ({
     n: i + 1,

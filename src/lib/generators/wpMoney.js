@@ -25,7 +25,7 @@ module.exports = function register(t, H) {
   // ---------- money, standard ----------
   t({ id: 'money-three-items', ops: ['add'], kind: 'decimal', steps: 1, grades: [3, 5], make: (r, { A }) => {
     const shop = pick(r, SHOPS); const [x, y, z] = shuffle(r, shop.items).slice(0, 3); const a = price(r, x); const b = price(r, y); const d = price(r, z);
-    return { text: `${A} is shopping at ${shop.place}. ${A.S} picks out ${x.one} for ${cents(a)}, ${y.one} for ${cents(b)}, and ${z.one} for ${cents(d)}. How much will ${A.s} spend in all?`, answerText: cents(a + b + d) };
+    return { text: `${A} is shopping at ${shop.place}. ${A.S} picks ${x.one} for ${cents(a)}, ${y.one} for ${cents(b)}, and ${z.one} for ${cents(d)}. What is the total?`, answerText: cents(a + b + d) };
   } });
   t({ id: 'money-change', ops: ['add', 'sub'], kind: 'decimal', steps: 2, grades: [3, 5], make: (r, { A }) => {
     const shop = pick(r, SHOPS); const [x, y] = shuffle(r, shop.items).slice(0, 2); const a = price(r, x); const b = price(r, y); const bill = billFor(a + b);
