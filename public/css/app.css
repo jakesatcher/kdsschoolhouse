@@ -297,3 +297,7 @@ ol.problems.fast li { min-height: 70px; }
   ol.problems.fast li { padding-left: 20px; } ol.problems.fast .pn { font-size: .62rem; }
   ol.problems.fast .hp { white-space: nowrap; } ol.problems.fast .hp .blank { width: 32px; }
 }
+
+/* sentences and passages from the phonics / sight word lists */
+.wt-list { padding-left: 34px; margin: 10px 0; } .wt-list li { font-size: 1.7rem; line-height: 1.5; margin: 0 0 20px; break-inside: avoid; }
+.wt-passage p { font-size: 1.7rem; line-height: 1.85; margin: 0 0 14px; }

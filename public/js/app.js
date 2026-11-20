@@ -65,3 +65,12 @@ document.querySelectorAll('button[data-ai-post]').forEach((b) => b.addEventListe
   f.dataset.busy = 'Writing your problems… this can take up to a minute.';
   const hold = f.querySelector('button[type=submit]:not([data-ai-post])'); if (hold) hold.disabled = true;
 }));
+
+// Phonics and sight words: choosing sentences or a passage sends the same settings by POST (with the CSRF token) to the writer.
+document.querySelectorAll('form[data-extra-post]').forEach((f) => f.addEventListener('submit', () => {
+  const sel = f.querySelector('select[name=extra]');
+  if (!sel || sel.value === 'none') return;
+  f.method = 'post'; f.action = f.dataset.extraPost;
+  if (!f.querySelector('input[name=_csrf]')) { const i = document.createElement('input'); i.type = 'hidden'; i.name = '_csrf'; i.value = f.dataset.csrf; f.appendChild(i); }
+  const b = f.querySelector('button[type=submit]'); if (b) { b.disabled = true; b.textContent = 'Writing your practice… this can take a moment.'; }
+}));

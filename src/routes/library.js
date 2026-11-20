@@ -30,6 +30,7 @@ router.get('/print-later/all', async (req, res) => {
     if (item.is_doc) {
       const doc = await docs.loadDoc(req, `s-${item.id}`);
       if (doc && doc.content.kind === 'wp-ai') rendered.push({ partial: 'words', locals: require('./mathAi').sheetOf(doc.content) });
+      else if (doc && doc.content.kind === 'wordtext') rendered.push({ partial: 'wordtext', locals: { ...doc.content, ref: doc.ref } });
       else if (doc) rendered.push({ partial: 'doc', locals: { ...doc.content, ref: doc.ref } });
     } else {
       const parsed = sheets.fromUrl(item.url);

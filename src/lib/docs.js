@@ -42,7 +42,7 @@ async function updateDoc(req, doc, content) {
   }
 }
 
-const subtitleOf = (c) => `Grade ${c.grade} · ${c.skillName}`;
+const subtitleOf = (c) => c.subtitleText || `Grade ${c.grade} · ${c.skillName}`;
 
 function markDraftSaved(req, ref, id) {
   const d = DRAFT_RE.test(ref) && (req.session.drafts || {})[ref.slice(2)];

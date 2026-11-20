@@ -1,0 +1,25 @@
+<%# Phonics / sight-word sheet followed by a page of sentences or a short passage using the same words %>
+<% const tw = (typeof targets !== 'undefined' && targets) || []; %>
+<% const sub = typeof subtitleText !== 'undefined' ? subtitleText : ''; %>
+<%- include(sheetKind === 'phonics' ? 'phonics' : 'sight', { title, subtitle: sub, result: { words: wordList }, format: sheetFormat, markNonsense, includeKey: false }) %>
+<article class="sheet">
+  <div class="sheet-head">
+    <h1><%= practiceMode === 'passage' ? (passageTitle || 'Read the story') : 'Read the sentences' %></h1>
+    <p class="sheet-sub"><%= sub %></p>
+    <p class="namedate"><span>Name: <i class="blank"></i></span><span>Date: <i class="blank short"></i></span></p>
+  </div>
+  <p class="legend">Read aloud. The <strong>bold</strong> words are from your word list.</p>
+  <% if (practiceMode === 'passage') { %>
+    <div class="wt-passage"><% rtext.paragraphs(passage).forEach(function (par) { %><p><% rtext.segments(par, tw).forEach(function (s) { %><% if (s.bold) { %><strong><%= s.text %></strong><% } else { %><%= s.text %><% } %><% }) %></p><% }) %></div>
+  <% } else { %>
+    <ol class="wt-list"><% sentences.forEach(function (line) { %><li><% rtext.segments(line, tw).forEach(function (s) { %><% if (s.bold) { %><strong><%= s.text %></strong><% } else { %><%= s.text %><% } %><% }) %></li><% }) %></ol>
+  <% } %>
+</article>
+<% if (includeKey && sheetKind === 'phonics') { %>
+<article class="sheet key">
+  <h1>Teacher Key</h1><p class="sheet-sub"><%= sub %></p>
+  <p><strong>Real words:</strong> <%= wordList.filter(function (w) { return !w.nonsense; }).map(function (w) { return w.word; }).join(', ') || 'none' %></p>
+  <p><strong>Nonsense words:</strong> <%= wordList.filter(function (w) { return w.nonsense; }).map(function (w) { return w.word; }).join(', ') || 'none' %></p>
+  <p><strong>Words used in the <%= practiceMode === 'passage' ? 'passage' : 'sentences' %>:</strong> <%= tw.join(', ') || 'none' %></p>
+</article>
+<% } %>

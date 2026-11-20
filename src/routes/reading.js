@@ -68,21 +68,31 @@ router.get('/reading/doc/:ref', async (req, res, next) => {
   if (!doc || doc.content.kind === 'wp-ai') return next();
   const c = doc.content;
   res.render('learn/sheet', {
-    title: c.title, partial: 'doc', sheet: { ...c, ref: doc.ref }, ref: doc.ref, saved: doc.saved ? await library.findDoc(req.user.id, doc.ref) : null,
+    title: c.title, partial: c.kind === 'wordtext' ? 'wordtext' : 'doc', sheet: { ...c, ref: doc.ref }, ref: doc.ref, saved: doc.saved ? await library.findDoc(req.user.id, doc.ref) : null,
     settingsUrl: `/reading/${c.skill}`, editUrl: `/reading/doc/${req.params.ref}/edit`, seed: null,
   });
 });
 
 router.get('/reading/doc/:ref/edit', async (req, res, next) => {
   const doc = await docs.loadDoc(req, req.params.ref);
-  if (!doc) return next();
+  if (!doc || doc.content.kind === 'wp-ai') return next();
+  if (doc.content.kind === 'wordtext') return res.render('learn/wordtext-edit', { title: 'Edit reading practice', c: doc.content, ref: req.params.ref, errors: [] });
   res.render('learn/doc-edit', { title: 'Edit worksheet', c: doc.content, ref: req.params.ref, errors: [] });
 });
 
 router.post('/reading/doc/:ref/edit', async (req, res, next) => {
   const doc = await docs.loadDoc(req, req.params.ref);
-  if (!doc) return next();
+  if (!doc || doc.content.kind === 'wp-ai') return next();
   const b = req.body;
+  if (doc.content.kind === 'wordtext') {
+    const c = doc.content;
+    const sentences = c.practiceMode === 'sentences' ? str(b.sentences).split('\n').map((l) => strip(l, 200)).filter(Boolean).slice(0, 16) : [];
+    const passage = c.practiceMode === 'passage' ? strip(b.passage, 800) : '';
+    if (c.practiceMode === 'sentences' ? !sentences.length : !passage) { req.flash('error', 'Keep some text on the page.'); return res.redirect(`/reading/doc/${req.params.ref}/edit`); }
+    await docs.updateDoc(req, doc, { ...c, sentences, passage, passageTitle: strip(b.passage_title, 80), includeKey: flag(b.key, true) });
+    req.flash('ok', 'Changes saved.');
+    return res.redirect(`/reading/doc/${doc.ref}`);
+  }
   const questions = [];
   for (let i = 0; i < 12; i++) {
     const q = strip(b[`q_${i}`], 400);

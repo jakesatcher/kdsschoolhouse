@@ -1,7 +1,7 @@
 <%- include('../partials/head') %>
 <h1>Phonics</h1>
 <div class="card">
-  <form method="get" action="/reading/phonics/worksheet" class="settings">
+  <form method="get" action="/reading/phonics/worksheet" class="settings" data-extra-post="/reading/phonics/with-text" data-csrf="<%= csrfToken %>">
     <%- include('../partials/errors', { errors: [] }) %>
     <% const subsByCat = {}; categories.forEach(function (c) { subsByCat[c.id] = [['all', 'All ' + c.name.split(' (')[0]]].concat(c.subtypes.map(function (x) { return [x.id, x.name]; })); }); %>
     <div data-phonics-pick data-subs="<%= JSON.stringify(subsByCat) %>">
@@ -21,6 +21,9 @@
     <label>Format <select name="format"><option value="list">Word list (read aloud)</option><option value="write" <%= q.format === 'write' ? 'selected' : '' %>>Read and write (copy each word)</option></select></label>
     <label class="check"><input type="hidden" name="mark" value="0"><input type="checkbox" name="mark" value="1" checked> Mark nonsense words with a ◇ for students</label>
     <label class="check"><input type="hidden" name="key" value="0"><input type="checkbox" name="key" value="1" checked> Include teacher key (shows which words are nonsense)</label>
+    <label>Reading practice <small class="muted">(written from the words on this sheet)</small>
+      <select name="extra"><option value="none">Just the words</option><option value="sentences" <%= q.extra === 'sentences' ? 'selected' : '' %>>Add sentences that use the words</option><option value="passage" <%= q.extra === 'passage' ? 'selected' : '' %>>Add a short passage (3-5 sentences) that uses the words</option></select>
+    </label>
     <button type="submit">Create worksheet</button>
   </form>
 </div>

@@ -97,6 +97,7 @@ function createApp() {
   app.use(require('./routes/learn'));
   app.use(require('./routes/reading'));
   app.use(require('./routes/mathAi'));
+  app.use(require('./routes/wordText'));
   app.use(require('./routes/library'));
 
   app.use((req, res) => {

@@ -1,0 +1,19 @@
+<%- include('../partials/head') %>
+<h1>Edit reading practice</h1>
+<p class="muted">Change any of the <%= c.practiceMode === 'passage' ? 'passage' : 'sentences' %>. The word list page stays as it is.</p>
+<%- include('../partials/errors', { error: undefined, errors }) %>
+<div class="card">
+  <form method="post" action="/reading/doc/<%= ref %>/edit" class="settings">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <% if (c.practiceMode === 'passage') { %>
+      <label>Title <input name="passage_title" value="<%= c.passageTitle %>" maxlength="80"></label>
+      <label>Passage <textarea name="passage" rows="8" maxlength="800"><%= c.passage %></textarea></label>
+    <% } else { %>
+      <label>Sentences <small class="muted">(one per line)</small> <textarea name="sentences" rows="12" maxlength="3000"><%= c.sentences.join('\n') %></textarea></label>
+    <% } %>
+    <% if (c.sheetKind === 'phonics') { %><label class="check"><input type="hidden" name="key" value="0"><input type="checkbox" name="key" value="1" <%= c.includeKey ? 'checked' : '' %>> Include teacher key</label><% } %>
+    <button type="submit">Save changes</button>
+    <a class="btn secondary" href="/reading/doc/<%= ref %>">Cancel</a>
+  </form>
+</div>
+<%- include('../partials/foot') %>
