@@ -16,6 +16,20 @@
       <% if (type === 'addition') { %><label>Addends <select name="addends"><option value="2">2 numbers</option><option value="3" <%= q.addends === '3' ? 'selected' : '' %>>3 numbers</option></select></label><% } %>
       <label>Problems <select name="count"><% [10, 20, 30, 40, 50].forEach(function (n) { %><option <%= String(q.count || 20) === String(n) ? 'selected' : '' %>><%= n %></option><% }) %></select></label>
       <label>Layout <select name="layout"><option value="vertical">Vertical (stacked)</option><option value="horizontal" <%= q.layout === 'horizontal' ? 'selected' : '' %>>Horizontal</option></select></label>
+    <% } else if (type === 'fast-facts-multiplication' || type === 'fast-facts-division') { %>
+      <% const isMult = type === 'fast-facts-multiplication'; %>
+      <label>Fact range <small class="muted">(which facts can appear)</small>
+        <select name="range"><option value="10" <%= (q.range || '10') === '10' ? 'selected' : '' %>>Facts 0 to 10 only</option><option value="12" <%= q.range === '12' ? 'selected' : '' %>>Facts 0 to 12 (includes 11s and 12s)</option></select>
+      </label>
+      <label><%= isMult ? 'Factor' : 'Divisor' %> <small class="muted"><%= isMult ? '' : '(no division by 0)' %></small>
+        <select name="factor"><option value="all"><%= isMult ? 'All facts (mixed problems)' : 'All facts (mixed problems)' %></option><% for (let f = isMult ? 0 : 1; f <= 12; f++) { %><option value="<%= f %>" <%= String(q.factor) === String(f) ? 'selected' : '' %>><%= isMult ? 'Facts for ' + f : 'Divide by ' + f %></option><% } %></select>
+      </label>
+      <label>Pages <small class="muted">(each page has 50 problems)</small>
+        <select name="pages"><% [1, 2, 3].forEach(function (n) { %><option value="<%= n %>" <%= String(q.pages || 1) === String(n) ? 'selected' : '' %>><%= n %> page<%= n > 1 ? 's' : '' %> (<%= n * 50 %> problems)</option><% }) %></select>
+      </label>
+      <label class="check"><input type="hidden" name="special" value="0"><input type="checkbox" name="special" value="1" <%= q.special === undefined || q.special === '1' || (Array.isArray(q.special) && q.special[q.special.length - 1] === '1') ? 'checked' : '' %>> <%= isMult ? 'Include multiplying by 0 and 1' : 'Include dividing by 1 and 10' %></label>
+      <label>Layout <select name="layout"><option value="horizontal" <%= (q.layout || 'horizontal') === 'horizontal' ? 'selected' : '' %>><%= isMult ? 'Across (7 × 8 = )' : 'Across (56 ÷ 7 = )' %></option><option value="vertical" <%= q.layout === 'vertical' ? 'selected' : '' %>><%= isMult ? 'Vertical (stacked)' : 'Long-division bracket' %></option></select></label>
+      <p class="muted small-text">Fast Facts pages always hold 50 problems (5 across, 10 down), so each page is a quick timed drill. Every fact is used before any repeats.</p>
     <% } else if (type === 'multiplication' || type === 'division') { %>
       <% const sel = function (name, dflt) { return q[name] || dflt; }; %>
       <label>Problem set
@@ -102,6 +116,11 @@
         </label>
         <% if (!aiReady) { %><p class="muted small-text">AI-written problems are not set up on this server yet.</p><% } %>
       </fieldset>
+    <% } %>
+    <% if (type !== 'spiral-review' && !/^fast-facts/.test(type)) { %>
+      <label>Font size <small class="muted">(larger type means fewer problems on each page)</small>
+        <select name="size"><% [['regular', 'Regular'], ['larger', 'Larger'], ['largest', 'Largest']].forEach(function (o) { %><option value="<%= o[0] %>" <%= (q.size || 'regular') === o[0] ? 'selected' : '' %>><%= o[1] %></option><% }) %></select>
+      </label>
     <% } %>
     <label class="check"><input type="hidden" name="key" value="0"><input type="checkbox" name="key" value="1" checked> Include answer key on a separate page</label>
     <button type="submit">Create worksheet</button>

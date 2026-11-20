@@ -1,6 +1,6 @@
 <article class="sheet">
   <%- include('_head') %>
-  <ol class="words-problems">
+  <ol class="words-problems wp-<%= typeof size !== 'undefined' ? size : 'regular' %>">
     <% problems.forEach(function (p) { %><li>
       <p><%= p.text %></p>
       <% if (p.note) { %><p class="wp-note"><%= p.note %></p><% } %>

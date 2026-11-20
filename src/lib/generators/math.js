@@ -89,7 +89,8 @@ const FACTS = Array.from({ length: 13 }, (_, i) => i); // 0..12
 // item comes round again (so a sheet never gives a fact twice while others are unused), and facts that involve 11 or 12
 // count half as much as the rest, so they appear but do not take over a 0-12 sheet. `range` left out = the older mixing.
 const BIG = 11; // 11 and 12 are the "big" facts
-const weightOf = (r, nums) => (nums.some((n) => n >= BIG) && r > 10 ? 0.5 : 1);
+// facts with 0 or 1 are easy, so they count half as much too
+const weightOf = (r, nums) => (nums.some((n) => n >= BIG) && r > 10 ? 0.4 : 1) * (nums.some((n) => n <= 1) ? 0.5 : 1);
 function drawFacts(rng, items, count, weight = () => 1) {
   const out = [];
   while (out.length < count) {

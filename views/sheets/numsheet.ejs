@@ -3,7 +3,7 @@
 <article class="sheet">
   <%- include('_head') %>
   <% if (heading) { %><p class="ns-heading"><%= heading %></p><% } %>
-  <ol class="ns-list ns-s-<%= style %>" start="<%= pi * perPage + 1 %>">
+  <ol class="ns-list ns-s-<%= style %> nsz-<%= typeof size !== 'undefined' ? size : 'regular' %>" start="<%= pi * perPage + 1 %>">
     <% page.forEach(function (p) { %>
     <li>
       <% if (style === 'list') { %>

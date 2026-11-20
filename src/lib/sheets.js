@@ -15,10 +15,10 @@ const { phonics } = require('./generators/phonics');
 const { sightWords } = require('./generators/sight');
 const { writing, TYPES: WRITING_TYPES } = require('./generators/writing');
 
-const MATH_TYPES = { addition: 'Addition', subtraction: 'Subtraction', multiplication: 'Multiplication', division: 'Division', decimals: 'Decimals', fractions: 'Fractions', 'place-value': 'Place Value', rounding: 'Rounding', 'spiral-review': 'Spiral Review', 'word-problems': 'Word Problems' };
+const MATH_TYPES = { addition: 'Addition', subtraction: 'Subtraction', multiplication: 'Multiplication', division: 'Division', 'fast-facts-multiplication': 'Fast Facts: Multiplication', 'fast-facts-division': 'Fast Facts: Division', decimals: 'Decimals', fractions: 'Fractions', 'place-value': 'Place Value', rounding: 'Rounding', 'spiral-review': 'Spiral Review', 'word-problems': 'Word Problems' };
 
 const WORKSHEET_RE = [
-  /^\/math\/(addition|subtraction|multiplication|division|decimals|fractions|place-value|rounding|spiral-review|word-problems)\/worksheet$/,
+  /^\/math\/(addition|subtraction|multiplication|division|fast-facts-multiplication|fast-facts-division|decimals|fractions|place-value|rounding|spiral-review|word-problems)\/worksheet$/,
   /^\/reading\/phonics\/worksheet$/,
   /^\/reading\/sight-words\/worksheet$/,
   /^\/writing\/worksheet$/,
@@ -34,6 +34,21 @@ const PER_PAGE = { vertical: 25, horizontal: 15 };
 // Multiplication and division facts print larger: vertical sheets are 4 columns x 5 rows (20 per page), horizontal 3 x 5 (15).
 // Longer sheets continue on the back (two sides of one sheet of paper).
 const FACTS_PER_PAGE = { vertical: 20, horizontal: 15 };
+// Font size (Regular, Larger, Largest): bigger type means fewer problems per page, so every page stays evenly filled.
+// `per` = problems per page; `cls` = grid classes in public/css/app.css (columns, rows, type size).
+const SIZES = ['regular', 'larger', 'largest'];
+const GRID = {
+  vertical: { regular: { per: 25 }, larger: { per: 16, cls: 'cols-4 rows-4 fs-24' }, largest: { per: 9, cls: 'cols-3 rows-3 fs-30' } },
+  horizontal: { regular: { per: 15 }, larger: { per: 10, cls: 'cols-2 rows-5 fs-24' }, largest: { per: 6, cls: 'cols-2 rows-3 fs-30' } },
+};
+const FACTS_GRID = {
+  vertical: { regular: { per: 20 }, larger: { per: 12, cls: 'cols-3 rows-4 fs-30' }, largest: { per: 8, cls: 'cols-2 rows-4 fs-38' } },
+  horizontal: { regular: { per: 15 }, larger: { per: 10, cls: 'cols-2 rows-5 fs-30' }, largest: { per: 8, cls: 'cols-2 rows-4 fs-38' } },
+};
+const gridOf = (layout, size, facts = false) => { const g = (facts ? FACTS_GRID : GRID)[layout][size] || (facts ? FACTS_GRID : GRID)[layout].regular; return { perPage: g.per, gridClass: g.cls || '' }; };
+// numbered-question sheets (place value, rounding): problems per page by size
+const NUM_PER = { ask: { regular: 12, larger: 8, largest: 6 }, round: { regular: 12, larger: 8, largest: 6 }, list: { regular: 20, larger: 12, largest: 8 } };
+const FAST_PER_PAGE = 50; // Fast Facts sheets: 5 columns x 10 rows
 const digitLabel = (v, mixedText) => (v === 'mixed' ? `${mixedText}-digit` : `${v}-digit`);
 
 function build(pathname, q) {
@@ -44,8 +59,8 @@ function build(pathname, q) {
   if ((m = /^\/math\/([a-z-]+)\/worksheet$/.exec(pathname)) && MATH_TYPES[m[1]]) {
     const type = m[1];
     const grade = intIn(q.grade, 1, 5, 3);
-    const meta = { subject: 'math', kind: type, title: `${MATH_TYPES[type]} Worksheet`, formPath: `/math/${type}`, seed };
-    const base = { title: meta.title, seed, includeKey: flag(q.key, true), layout: oneOf(q.layout, ['vertical', 'horizontal'], 'vertical') };
+    const meta = { subject: 'math', kind: type, title: /^fast-facts/.test(type) ? 'Fast Facts Worksheet' : `${MATH_TYPES[type]} Worksheet`, formPath: `/math/${type}`, seed };
+    const base = { title: meta.title, seed, includeKey: flag(q.key, true), layout: oneOf(q.layout, ['vertical', 'horizontal'], 'vertical'), size: oneOf(q.size, SIZES, 'regular') };
     if (type === 'addition' || type === 'subtraction') {
       const digits = intIn(q.digits, 2, 7, 2);
       const count = intIn(q.count, 5, 50, 20);
@@ -54,7 +69,27 @@ function build(pathname, q) {
         ? math.addition(rng, { digits, count, addends: intIn(q.addends, 2, 3, 2), regroup })
         : math.subtraction(rng, { digits, count, regroup });
       const subtitle = `${digits}-digit ${type}${regroup === 'any' ? '' : ' with regrouping'}`;
-      return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits, problems, perPage: PER_PAGE[base.layout] } };
+      return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits, problems, ...gridOf(base.layout, base.size) } };
+    }
+    if (type === 'fast-facts-multiplication' || type === 'fast-facts-division') {
+      // Fast Facts: 50 timed-drill problems per page, 0-10 or 0-12 facts, one or more pages
+      const mult = type === 'fast-facts-multiplication';
+      const range = oneOf(q.range, ['10', '12'], '10');
+      const other = oneOf(q.factor, ['all', ...Array.from({ length: 13 }, (_, i) => String(i))], 'all');
+      const special = flag(q.special, true);
+      const pages = intIn(q.pages, 1, 3, 1);
+      const count = FAST_PER_PAGE * pages;
+      const layout = q.layout === undefined ? 'horizontal' : base.layout; // across is the usual drill layout
+      let problems; let subtitle;
+      if (mult) {
+        problems = math.multiplication(rng, { mode: 'facts', factor: other, range, special, count });
+        subtitle = `Multiplication fast facts 0-${range}${other === 'all' ? '' : `: ${other}s`}${special ? '' : ' (no ×0 or ×1)'}`;
+      } else {
+        const divisor = other === '0' ? 'all' : other; // never divide by zero
+        problems = math.division(rng, { mode: 'facts', divisor, range, special, count });
+        subtitle = `Division fast facts 0-${range}${divisor === 'all' ? '' : `: divide by ${divisor}`}${special ? '' : ' (no ÷1 or ÷10)'}`;
+      }
+      return { ...meta, subtitle, partial: 'math', locals: { ...base, layout, subtitle, digits: 2, problems, facts: true, perPage: FAST_PER_PAGE, gridClass: 'fast' } };
     }
     if (type === 'multiplication') {
       const mode = oneOf(q.mode, ['facts', 'multi', 'mixed'], 'facts');
@@ -66,7 +101,7 @@ function build(pathname, q) {
       const problems = math.multiplication(rng, { mode, factor, top, bottom, special, range, count: intIn(q.count, 5, 60, 30) });
       const subtitle = (mode === 'multi' ? `Multiplication: ${digitLabel(top, '1 to 4')} number × ${digitLabel(bottom, '1 to 2')} number`
         : mode === 'mixed' ? 'Mixed multiplication' : factor === 'all' ? `Multiplication facts 0-${range || 12} (mixed)` : `Multiplication facts: ${factor}s${range ? ` (0-${range})` : ''}`) + (special ? '' : ' (no ×0 or ×1)');
-      return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: mode === 'facts' ? 2 : 3, problems, facts: mode === 'facts', perPage: mode === 'facts' ? FACTS_PER_PAGE[base.layout] : PER_PAGE[base.layout] } };
+      return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: mode === 'facts' ? 2 : 3, problems, facts: mode === 'facts', ...gridOf(base.layout, base.size, mode === 'facts') } };
     }
     if (type === 'division') {
       const mode = oneOf(q.mode, ['facts', 'multi', 'mixed'], 'facts');
@@ -80,7 +115,7 @@ function build(pathname, q) {
       const remText = { none: 'no remainders', with: 'with remainders', mixed: 'with and without remainders' }[remainders];
       const subtitle = (mode === 'multi' ? `Division: ${digitLabel(dividend, '2 to 4')} dividend ÷ ${digitLabel(vdigits, '1 to 2')} divisor, ${remText}`
         : mode === 'mixed' ? 'Mixed division (with remainders)' : divisor === 'all' ? `Division facts 0-${range || 12} (mixed)` : `Division facts: divide by ${divisor}${range ? ` (0-${range})` : ''}`) + (special ? '' : ' (no ÷1 or ÷10)');
-      return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: mode === 'facts' ? 2 : 4, problems, facts: mode === 'facts', perPage: mode === 'facts' ? FACTS_PER_PAGE[base.layout] : PER_PAGE[base.layout] } };
+      return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: mode === 'facts' ? 2 : 4, problems, facts: mode === 'facts', ...gridOf(base.layout, base.size, mode === 'facts') } };
     }
     if (type === 'place-value' || type === 'rounding') {
       const nsGrade = oneOf(q.grade, ['4', '5'], '4') === '5' ? 5 : 4;
@@ -93,7 +128,7 @@ function build(pathname, q) {
         const kind = oneOf(q.kind, ['mixed', 'place', 'value', 'digit'], 'mixed');
         const problems = numberSense.placeValue(rng, { grade: nsGrade, digits, numbers, decimals: decimalsOpt, kind, count: intIn(q.count, 6, 30, 12) });
         const subtitle = `Grade ${nsGrade} place value: ${scopeText}, ${size}${numbers !== 'whole' && nsGrade === 5 ? ' (decimals to the thousandths)' : ''}`;
-        return { ...meta, subtitle, partial: 'numsheet', locals: { ...base, subtitle, problems, style: 'ask', heading: '', perPage: 12 } };
+        return { ...meta, subtitle, partial: 'numsheet', locals: { ...base, subtitle, problems, style: 'ask', heading: '', perPage: NUM_PER.ask[base.size] } };
       }
       const place = oneOf(q.place, ['mixed', ...numberSense.ROUND_ORDER.map(String)], 'mixed');
       const bad = numberSense.validRoundPlace(nsGrade, digits, place);
@@ -101,7 +136,7 @@ function build(pathname, q) {
       const problems = numberSense.rounding(rng, { grade: nsGrade, digits, numbers, decimals: decimalsOpt, place, count: intIn(q.count, 6, 30, 12) });
       const listStyle = place !== 'mixed';
       const subtitle = `Grade ${nsGrade} rounding: ${listStyle ? `to the nearest ${numberSense.ROUND_NAMES[place]}` : 'mixed places'}, ${listStyle && Number(place) <= 0 ? 'decimals to the thousandths' : `${scopeText}, ${size}`}`;
-      return { ...meta, subtitle, partial: 'numsheet', locals: { ...base, subtitle, problems, style: listStyle ? 'list' : 'round', heading: listStyle ? `Round each number to the nearest ${numberSense.ROUND_NAMES[place]}.` : '', perPage: listStyle ? 20 : 12 } };
+      return { ...meta, subtitle, partial: 'numsheet', locals: { ...base, subtitle, problems, style: listStyle ? 'list' : 'round', heading: listStyle ? `Round each number to the nearest ${numberSense.ROUND_NAMES[place]}.` : '', perPage: NUM_PER[listStyle ? 'list' : 'round'][base.size] } };
     }
     if (type === 'spiral-review') {
       const grade = oneOf(q.grade, ['3', '4', '5'], '5');
@@ -123,7 +158,7 @@ function build(pathname, q) {
       const placeText = { 1: 'tenths', 2: 'hundredths', 3: 'thousandths', mixed: 'tenths to thousandths' }[places];
       const verb = { add: 'addition', sub: 'subtraction', mul: 'multiplication', div: 'division' }[op];
       const subtitle = `Decimal ${verb} (${placeText})`;
-      return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: digits + 4, problems, perPage: PER_PAGE[base.layout] } };
+      return { ...meta, subtitle, partial: 'math', locals: { ...base, subtitle, digits: digits + 4, problems, ...gridOf(base.layout, base.size) } };
     }
     if (type === 'fractions') {
       const op = oneOf(q.op, ['add', 'sub', 'mul', 'div'], 'add');
@@ -134,7 +169,7 @@ function build(pathname, q) {
       const problems = fractionProblems(rng, { op, den, form, maxDen: intIn(q.maxden, 4, 20, 8), count: intIn(q.count, 5, 50, 20) });
       const verb = { add: 'addition', sub: 'subtraction', mul: 'multiplication', div: 'division' }[op];
       const subtitle = `Fraction ${verb} (${{ like: 'like denominators', unlike: 'unlike denominators', mixed: 'like and unlike denominators' }[den]}${form === 'mixed' ? ', mixed numbers' : form === 'mix' ? ', fractions and mixed numbers' : ''})`;
-      return { ...meta, subtitle, partial: 'math', locals: { ...base, layout, subtitle, digits: 3, problems, perPage: PER_PAGE[layout] } };
+      return { ...meta, subtitle, partial: 'math', locals: { ...base, layout, subtitle, digits: 3, problems, ...gridOf(layout, base.size) } };
     }
     const level = oneOf(q.level, wp.LEVELS, 'mixed');
     const result = wp.wordProblems(rng, { grade, level, op: oneOf(q.op, wp.OPS, 'mixed'), kind: oneOf(q.kind, wp.KINDS, 'whole'), steps: oneOf(q.steps, wp.STEPS, 'mixed'), count: intIn(q.count, 3, 20, 10) });
@@ -185,4 +220,4 @@ function fromUrl(url) {
   return { built, url: `${pathname}?${search}` };
 }
 
-module.exports = { PER_PAGE, FACTS_PER_PAGE, build, fromUrl, isSheetPath, validSeed, newSeed, MATH_TYPES, WRITING_TYPES };
+module.exports = { PER_PAGE, FACTS_PER_PAGE, SIZES, GRID, FACTS_GRID, gridOf, build, fromUrl, isSheetPath, validSeed, newSeed, MATH_TYPES, WRITING_TYPES };
