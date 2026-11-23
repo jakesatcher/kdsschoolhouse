@@ -22,12 +22,12 @@ test('one dyslexia-friendly typeface for the site and every worksheet, served fr
 
 test('the header offers four text sizes and the saved choice is drawn on the first paint', async () => {
   const std = await agent.get('/');
-  assert.match(std.text, /<html lang="en" class="ts-1">/);
+  assert.match(std.text, /<html lang="en" class="ts-1 ff-andika">/);
   for (const n of [1, 2, 3, 4]) assert.match(std.text, new RegExp(`data-ts="${n}"`));
   const big = await agent.get('/').set('Cookie', 'ts=3');
-  assert.match(big.text, /class="ts-3"/);
+  assert.match(big.text, /class="ts-3 ff-andika"/);
   assert.match(big.text, /data-ts="3" aria-pressed="true"/);
-  assert.match((await agent.get('/').set('Cookie', 'ts=9')).text, /class="ts-1"/); // anything else is ignored
+  assert.match((await agent.get('/').set('Cookie', 'ts=9')).text, /class="ts-1 ff-andika"/); // anything else is ignored
 });
 
 test('fixed-grid math sheets cancel the zoom (they have their own font size), reading sheets scale; math form defaults follow the choice', async () => {
@@ -37,4 +37,15 @@ test('fixed-grid math sheets cancel the zoom (they have their own font size), re
   assert.match(css, /html\.ts-3 \.sheet\.fixed \{ zoom: \.6666667; \}/);
   const form = await agent.get('/math/addition').set('Cookie', 'ts=4');
   assert.match(form.text, /<option value="largest" selected>/);
+});
+
+test('teachers can choose the typeface: four choices, remembered in a cookie, unknown values ignored', async () => {
+  const std = await agent.get('/');
+  assert.match(std.text, /class="ts-1 ff-andika"/);
+  for (const f of ['andika', 'atkinson', 'lexend', 'opendyslexic']) assert.match(std.text, new RegExp(`<option value="${f}"`));
+  assert.match((await agent.get('/').set('Cookie', 'ff=opendyslexic; ts=2')).text, /class="ts-2 ff-opendyslexic"/);
+  assert.match((await agent.get('/').set('Cookie', 'ff=comic-sans')).text, /ff-andika/);
+  for (const f of ['atkinson-hyperlegible', 'lexend', 'opendyslexic']) for (const w of [400, 700]) assert.ok(fs.existsSync(path.join(__dirname, '..', 'public', 'fonts', `${f}-latin-${w}-normal.woff2`)), `${f} ${w}`);
+  for (const k of ['atkinson', 'lexend', 'opendyslexic']) assert.match(css, new RegExp(`html\\.ff-${k} \\{ --font:`));
+  assert.match(css, /\.vp, \.div-bracket, \.fvp \{ font-family: var\(--font-num\)/);
 });

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="ts-<%= textSize %>">
+<html lang="en" class="ts-<%= textSize %> ff-<%= fontFace %>">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -36,7 +36,11 @@
     <form method="post" action="/logout"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="link" type="submit">Sign out</button></form>
   </div>
   <% } %>
-  <div class="textsize" role="group" aria-label="Text size">
+  <div class="textsize" role="group" aria-label="Reading text">
+    <label class="fontpick"><span class="ts-label">Font</span>
+      <select data-font aria-label="Typeface">
+        <% [['andika', 'Andika (easy to read)'], ['atkinson', 'Atkinson Hyperlegible'], ['lexend', 'Lexend'], ['opendyslexic', 'OpenDyslexic']].forEach(function (o) { %><option value="<%= o[0] %>" <%= fontFace === o[0] ? 'selected' : '' %>><%= o[1] %></option><% }) %>
+      </select></label>
     <span class="ts-label">Text size</span>
     <% [[1, 'Standard'], [2, 'Large'], [3, 'Extra large'], [4, 'Maximum']].forEach(function (o) { %><button type="button" class="ts-btn ts-b<%= o[0] %>" data-ts="<%= o[0] %>" aria-pressed="<%= textSize === o[0] ? 'true' : 'false' %>" title="<%= o[1] %> text" aria-label="<%= o[1] %> text">A</button><% }) %>
   </div>

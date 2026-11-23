@@ -87,6 +87,8 @@ function createApp() {
     // Reader's text-size choice (1 standard .. 4 maximum). A plain cookie so the page is drawn at that size from the first paint.
     const m = /(?:^|;\s*)ts=([1-4])(?:;|$)/.exec(req.headers.cookie || '');
     res.locals.textSize = m ? Number(m[1]) : 1;
+    const f = /(?:^|;\s*)ff=(andika|atkinson|lexend|opendyslexic)(?:;|$)/.exec(req.headers.cookie || '');
+    res.locals.fontFace = f ? f[1] : 'andika';
     next();
   });
   app.use(flash);

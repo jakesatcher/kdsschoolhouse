@@ -78,7 +78,15 @@ document.querySelectorAll('form[data-extra-post]').forEach((f) => f.addEventList
 // Text size: remembered in a cookie (the server draws the page at that size next time) and applied at once.
 document.querySelectorAll('[data-ts]').forEach((b) => b.addEventListener('click', () => {
   const n = Number(b.dataset.ts);
-  document.documentElement.className = document.documentElement.className.replace(/\bts-\d\b/g, '').trim() + ' ts-' + n;
+  document.documentElement.classList.remove('ts-1', 'ts-2', 'ts-3', 'ts-4'); document.documentElement.classList.add('ts-' + n);
   document.querySelectorAll('[data-ts]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
   document.cookie = 'ts=' + n + '; Max-Age=31536000; Path=/; SameSite=Lax' + (location.protocol === 'https:' ? '; Secure' : '');
+}));
+
+// Typeface: same idea. Only the four known names are ever stored.
+document.querySelectorAll('select[data-font]').forEach((sel) => sel.addEventListener('change', () => {
+  const root = document.documentElement;
+  [...root.classList].filter((c) => c.startsWith('ff-')).forEach((c) => root.classList.remove(c));
+  root.classList.add('ff-' + sel.value);
+  document.cookie = 'ff=' + sel.value + '; Max-Age=31536000; Path=/; SameSite=Lax' + (location.protocol === 'https:' ? '; Secure' : '');
 }));

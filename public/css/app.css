@@ -3,13 +3,20 @@
 @font-face { font-family: "Andika"; font-style: normal; font-weight: 400; font-display: swap; src: url("/static/fonts/andika-latin-ext-400-normal.woff2") format("woff2"); unicode-range: U+0100-02AF,U+1E00-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF; }
 @font-face { font-family: "Andika"; font-style: normal; font-weight: 700; font-display: swap; src: url("/static/fonts/andika-latin-700-normal.woff2") format("woff2"); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
 @font-face { font-family: "Andika"; font-style: normal; font-weight: 700; font-display: swap; src: url("/static/fonts/andika-latin-ext-700-normal.woff2") format("woff2"); unicode-range: U+0100-02AF,U+1E00-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+/* Other typefaces a teacher can choose (all open licences, files in public/fonts). */
+@font-face { font-family: "Atkinson Hyperlegible"; font-style: normal; font-weight: 400; font-display: swap; src: url("/static/fonts/atkinson-hyperlegible-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Atkinson Hyperlegible"; font-style: normal; font-weight: 700; font-display: swap; src: url("/static/fonts/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Lexend"; font-style: normal; font-weight: 400; font-display: swap; src: url("/static/fonts/lexend-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Lexend"; font-style: normal; font-weight: 700; font-display: swap; src: url("/static/fonts/lexend-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "OpenDyslexic"; font-style: normal; font-weight: 400; font-display: swap; src: url("/static/fonts/opendyslexic-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "OpenDyslexic"; font-style: normal; font-weight: 700; font-display: swap; src: url("/static/fonts/opendyslexic-latin-700-normal.woff2") format("woff2"); }
 /* KDS Schoolhouse: a 90s teen-sitcom classroom look. Neon on deep purple, thick ink outlines, hard offset shadows. */
 :root {
   --ink: #14082e; --paper: #fffdf6; --muted: #5b4b7a;
   --pink: #ff2d95; --pink-deep: #e6007e; --cyan: #00e5ff; --purple: #7a2cff; --purple-deep: #2b0a5a;
   --yellow: #ffe500; --lime: #39ff14; --orange: #ff7a00;
   --link: #5b1fd0; --ok-bg: #d9ffe0; --ok-text: #0b5a22; --err-bg: #ffe0ee; --err-text: #8a0036;
-  --radius: 14px; --font: "Andika", "Atkinson Hyperlegible", "Verdana", sans-serif; --font-head: var(--font);
+  --radius: 14px; --font: "Andika", "Atkinson Hyperlegible", "Verdana", sans-serif; --font-num: var(--font); --font-head: var(--font);
   color-scheme: light;
 }
 * { box-sizing: border-box; }
@@ -318,3 +325,12 @@ ol.problems.fast li { min-height: 70px; }
 html.ts-2 body { zoom: 1.25; } html.ts-3 body { zoom: 1.5; } html.ts-4 body { zoom: 2; }
 html.ts-2 .sheet.fixed { zoom: .8; } html.ts-3 .sheet.fixed { zoom: .6666667; } html.ts-4 .sheet.fixed { zoom: .5; }
 @media print { .textsize { display: none; } }
+
+/* Typeface chosen by the teacher (header). Lexend and OpenDyslexic have uneven digit widths, so digits in stacked math keep Andika's even widths. */
+html.ff-atkinson { --font: "Atkinson Hyperlegible", "Andika", Verdana, sans-serif; }
+html.ff-lexend { --font: "Lexend", "Andika", Verdana, sans-serif; --font-num: "Andika", Verdana, sans-serif; }
+html.ff-opendyslexic { --font: "OpenDyslexic", "Andika", Verdana, sans-serif; --font-num: "Andika", Verdana, sans-serif; }
+html.ff-opendyslexic body { letter-spacing: 0; word-spacing: 0; }
+.vp, .div-bracket, .fvp { font-family: var(--font-num); }
+.fontpick { display: flex; align-items: center; gap: 6px; } .fontpick select { padding: 3px 6px; }
+.textsize { flex-wrap: wrap; gap: 6px 14px; }
