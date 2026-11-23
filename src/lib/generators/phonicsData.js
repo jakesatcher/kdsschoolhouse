@@ -51,6 +51,21 @@ const CATEGORIES = [
     ],
   },
   {
+    id: 'vowel-teams', name: 'Vowel Teams (vowel digraphs)', grades: '1-3',
+    note: 'Two vowels working together to make one sound, such as ai, ee, oa and oo.',
+    subtypes: [
+      { id: 'ai-ay', name: 'ai and ay (long a)', real: w('rain train pain tail mail nail sail snail wait paint chain brain plain trail day play stay way say gray tray spray clay pray today away'), nonsense: w('zaip vait naib laim paig yaid zay vay fray pley glay blay') },
+      { id: 'ee-ea', name: 'ee and ea (long e)', real: w('bee see tree feet seed week green sleep sheep street teeth beep deep keep seat eat read beach team leaf bean meat peach dream clean'), nonsense: w('zeep veet neeb leem peeg yeed zeap veat neab leam peag yead') },
+      { id: 'oa-ow', name: 'oa and ow (long o)', real: w('boat coat goat road toad soap load foam coach toast float throat snow blow grow show slow flow row low bowl yellow window'), nonsense: w('zoab voat noag poap yoad zow bowb lowp yowt') },
+      { id: 'igh-ie', name: 'igh and ie (long i)', real: w('high light night right sight tight bright flight fright might fight sigh pie tie lie die cried tried fried flies spied dried'), nonsense: w('zigh vight kighp lighb pight yight zie vie nied lipe') },
+      { id: 'oo', name: 'oo (long and short)', real: w('moon soon food pool cool tool zoo room broom spoon school boot hoop roof book look cook foot good hook wood wool stood'), nonsense: w('zoon voob noop poog yood zook vook lood pook') },
+      { id: 'ou-ow', name: 'ou and ow (as in out, cow)', real: w('out loud cloud house mouse mouth couch found round sound ground pound count cow now how brown down town crown clown owl frown'), nonsense: w('zout vound nout loun pown yout vown nowd lowt') },
+      { id: 'oi-oy', name: 'oi and oy', real: w('oil boil coil foil soil coin join point voice noise moist toy boy joy enjoy royal annoy cowboy destroy employ'), nonsense: w('zoil voin noip loib poit yoid zoy voy noyb loyp') },
+      { id: 'au-aw', name: 'au and aw', real: w('haul gauze sauce cause pause fault launch author straw saw paw claw draw jaw lawn yawn dawn crawl shawl hawk awful'), nonsense: w('zaul vaub naut laum pauk yaut zaw vaw nawb lawp') },
+      { id: 'ew-ue', name: 'ew and ue (long u)', real: w('new few grew blew flew drew chew crew stew threw blue clue glue true due sue cue value rescue statue argue'), nonsense: w('zew vew newb lewp pewt yewd zue vue nueb luep') },
+    ],
+  },
+  {
     id: 'r-controlled', name: 'R-Controlled Vowels (bossy r)', grades: '1-2',
     note: 'The r changes the vowel sound.',
     subtypes: [
