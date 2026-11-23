@@ -10,7 +10,7 @@ test.before(async () => { await resetDb(); await createUser({ username: 't@examp
 test.after(() => db.pool.end());
 
 const count = (html, re) => (html.match(re) || []).length;
-const pages = (html) => count(html, /<article class="sheet">/g);
+const pages = (html) => count(html, /<article class="sheet fixed">/g);
 const olClass = (html) => (/<ol class="problems ([^"]*)"/.exec(html) || [])[1] || '';
 
 test('grid sheets: larger type means fewer problems per page, with matching grid classes', async () => {
@@ -40,7 +40,7 @@ test('multiplication and division facts, decimals, fractions and word problems a
   const pv = (size) => agent.get(`/math/place-value/worksheet?grade=5&count=12&size=${size}&key=0&seed=2`);
   assert.strictEqual(pages((await pv('regular')).text), 1); assert.strictEqual(pages((await pv('larger')).text), 2); assert.strictEqual(pages((await pv('largest')).text), 2);
   assert.match((await pv('largest')).text, /nsz-largest/);
-  assert.strictEqual(count((await agent.get('/math/rounding/worksheet?grade=4&place=3&count=20&size=larger&key=0&seed=2')).text, /<article class="sheet">/g), 2);
+  assert.strictEqual(count((await agent.get('/math/rounding/worksheet?grade=4&place=3&count=20&size=larger&key=0&seed=2')).text, /<article class="sheet fixed">/g), 2);
 });
 
 test('the form offers Regular, Larger and Largest for math problem pages, and not for fast facts or spiral review', async () => {
@@ -68,7 +68,7 @@ test('Fast Facts: 50 problems a page, one tab for multiplication and one for div
   const seven = (await agent.get('/math/fast-facts-multiplication/worksheet?factor=7&range=12&layout=horizontal&key=0&seed=2')).text;
   assert.ok([...seven.matchAll(/<div class="hp">(\d+) × (\d+) =/g)].every((x) => x[1] === '7' || x[2] === '7'));
   const noDivZero = (await agent.get('/math/fast-facts-division/worksheet?factor=0&layout=horizontal&key=0&seed=2')).text; assert.ok(![...noDivZero.matchAll(/÷ 0 =/g)].length);
-  assert.strictEqual((await agent.get('/math/fast-facts-multiplication/worksheet?pages=99&layout=horizontal&key=0&seed=2')).text.match(/<article class="sheet">/g).length, 1, 'an invalid page count falls back to one page');
+  assert.strictEqual((await agent.get('/math/fast-facts-multiplication/worksheet?pages=99&layout=horizontal&key=0&seed=2')).text.match(/<article class="sheet fixed">/g).length, 1, 'an invalid page count falls back to one page');
   assert.strictEqual(count((await agent.get('/math/fast-facts-multiplication/worksheet?key=0&seed=2')).text, /problems horizontal/g), 1, 'across is the default');
 });
 

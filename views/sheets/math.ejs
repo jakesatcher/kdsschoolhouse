@@ -1,6 +1,6 @@
 <% const pages = []; for (let i = 0; i < problems.length; i += perPage) pages.push(problems.slice(i, i + perPage)); %>
 <% pages.forEach(function (page, pi) { %>
-<article class="sheet">
+<article class="sheet fixed">
   <%- include('_head') %>
   <ol class="problems <%= layout %> d<%= digits %><%= typeof facts !== 'undefined' && facts ? ' facts' : '' %><%= typeof gridClass !== 'undefined' && gridClass ? ' ' + gridClass : '' %>">
     <% page.forEach(function (p, i) { %><li><span class="pn"><%= pi * perPage + i + 1 %>.</span><%- include('../learn/_vproblem', { p, layout }) %></li><% }) %>
@@ -8,7 +8,7 @@
 </article>
 <% }) %>
 <% if (includeKey) { %>
-<article class="sheet key">
+<article class="sheet key fixed">
   <h1>Answer Key</h1><p class="sheet-sub"><%= subtitle %></p>
   <ol class="keylist"><% problems.forEach(function (p) { %><li><%= p.expr || p.operands.map(function (n) { return typeof n === 'string' ? n : Number(n).toLocaleString('en-US'); }).join(' ' + p.op + ' ') %> = <strong><%= p.answerText %></strong></li><% }) %></ol>
 </article>

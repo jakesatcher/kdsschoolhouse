@@ -1,4 +1,4 @@
-<article class="sheet">
+<article class="sheet fixed">
   <%- include('_head') %>
   <ol class="words-problems wp-<%= typeof size !== 'undefined' ? size : 'regular' %>">
     <% problems.forEach(function (p) { %><li>
@@ -15,7 +15,7 @@
   </ol>
 </article>
 <% if (includeKey) { %>
-<article class="sheet key">
+<article class="sheet key fixed">
   <h1>Answer Key</h1><p class="sheet-sub"><%= subtitle %></p>
   <ol class="keylist"><% problems.forEach(function (p) { %><li><strong><%= p.answerText %></strong> <small class="muted">(<%= p.steps > 1 ? 'multi-step' : 'one step' %>)</small><% if (p.solution) { %><br><small class="muted"><%= p.solution %></small><% } %></li><% }) %></ol>
 </article>

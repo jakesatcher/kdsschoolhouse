@@ -74,3 +74,11 @@ document.querySelectorAll('form[data-extra-post]').forEach((f) => f.addEventList
   if (!f.querySelector('input[name=_csrf]')) { const i = document.createElement('input'); i.type = 'hidden'; i.name = '_csrf'; i.value = f.dataset.csrf; f.appendChild(i); }
   const b = f.querySelector('button[type=submit]'); if (b) { b.disabled = true; b.textContent = 'Writing your practice… this can take a moment.'; }
 }));
+
+// Text size: remembered in a cookie (the server draws the page at that size next time) and applied at once.
+document.querySelectorAll('[data-ts]').forEach((b) => b.addEventListener('click', () => {
+  const n = Number(b.dataset.ts);
+  document.documentElement.className = document.documentElement.className.replace(/\bts-\d\b/g, '').trim() + ' ts-' + n;
+  document.querySelectorAll('[data-ts]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+  document.cookie = 'ts=' + n + '; Max-Age=31536000; Path=/; SameSite=Lax' + (location.protocol === 'https:' ? '; Secure' : '');
+}));

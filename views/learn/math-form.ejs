@@ -119,7 +119,7 @@
     <% } %>
     <% if (type !== 'spiral-review' && !/^fast-facts/.test(type)) { %>
       <label>Font size <small class="muted">(larger type means fewer problems on each page)</small>
-        <select name="size"><% [['regular', 'Regular'], ['larger', 'Larger'], ['largest', 'Largest']].forEach(function (o) { %><option value="<%= o[0] %>" <%= (q.size || 'regular') === o[0] ? 'selected' : '' %>><%= o[1] %></option><% }) %></select>
+        <select name="size"><% [['regular', 'Regular'], ['larger', 'Larger'], ['largest', 'Largest']].forEach(function (o) { %><option value="<%= o[0] %>" <%= (q.size || ['regular', 'larger', 'largest', 'largest'][textSize - 1]) === o[0] ? 'selected' : '' %>><%= o[1] %></option><% }) %></select>
       </label>
     <% } %>
     <label class="check"><input type="hidden" name="key" value="0"><input type="checkbox" name="key" value="1" checked> Include answer key on a separate page</label>

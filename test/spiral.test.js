@@ -341,12 +341,12 @@ test('Spiral Review pages render through the app, are pinned to a seed, and carr
   assert.match(page.text, /Practice 7/); assert.ok(!/>Test \d/.test(page.text)); assert.match(page.text, /Answer Key/);
   assert.ok(!/\sstyle=/.test(page.text.replace(/<svg[\s\S]*?<\/svg>/g, '')), 'CSP forbids inline styles');
   assert.ok(!/<script/i.test(page.text.replace(/<script src="\/static\/js\/app\.js[^"]*"[^>]*><\/script>/g, '')), 'no inline scripts');
-  const sheetOf = (html) => html.match(/<article class="sheet spiral-sheet">[\s\S]*?<\/article>/)[0];
+  const sheetOf = (html) => html.match(/<article class="sheet spiral-sheet fixed">[\s\S]*?<\/article>/)[0];
   assert.strictEqual(sheetOf(page.text), sheetOf((await agent.get('/math/spiral-review/worksheet?grade=5&practice=7&seed=9&key=1')).text), 'same seed, same sheet');
   assert.strictEqual((await agent.get('/math/spiral-review/worksheet?grade=5&test=7&seed=9&key=0')).text.includes('Answer Key'), false);
   const three = await agent.get('/math/spiral-review/worksheet?grade=4&practice=12&seed=3&pages=3&key=0');
   assert.strictEqual((three.text.match(/class="sp-box"/g) || []).length, 30);
-  assert.strictEqual((three.text.match(/<article class="sheet spiral-sheet">/g) || []).length, 3);
+  assert.strictEqual((three.text.match(/<article class="sheet spiral-sheet fixed">/g) || []).length, 3);
   const redirect = await agent.get('/math/spiral-review/worksheet?grade=4&practice=2');
   assert.strictEqual(redirect.status, 302); assert.match(redirect.headers.location, /seed=\d+/);
   // hostile or odd input falls back safely

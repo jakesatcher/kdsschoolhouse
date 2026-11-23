@@ -1,6 +1,6 @@
 <% const pages = []; for (let i = 0; i < problems.length; i += perPage) pages.push(problems.slice(i, i + perPage)); %>
 <% pages.forEach(function (page, pi) { %>
-<article class="sheet">
+<article class="sheet fixed">
   <%- include('_head') %>
   <% if (heading) { %><p class="ns-heading"><%= heading %></p><% } %>
   <ol class="ns-list ns-s-<%= style %> nsz-<%= typeof size !== 'undefined' ? size : 'regular' %>" start="<%= pi * perPage + 1 %>">
@@ -22,7 +22,7 @@
 </article>
 <% }) %>
 <% if (includeKey) { %>
-<article class="sheet key">
+<article class="sheet key fixed">
   <h1>Answer Key</h1><p class="sheet-sub"><%= subtitle %></p>
   <ol class="keylist"><% problems.forEach(function (p) { %>
     <li><% if (p.kind === 'round') { %><%= p.plain %> → <strong><%= p.answerText %></strong> <small class="muted">(nearest <%= p.placeName %>)</small>

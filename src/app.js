@@ -84,6 +84,9 @@ function createApp() {
     res.locals.flash = [];
     res.locals.rtext = require('./lib/reading/text');
     res.locals.assetV = assetV;
+    // Reader's text-size choice (1 standard .. 4 maximum). A plain cookie so the page is drawn at that size from the first paint.
+    const m = /(?:^|;\s*)ts=([1-4])(?:;|$)/.exec(req.headers.cookie || '');
+    res.locals.textSize = m ? Number(m[1]) : 1;
     next();
   });
   app.use(flash);

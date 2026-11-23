@@ -1,24 +1,30 @@
+/* Andika (SIL OFL): designed for early readers and learners with dyslexia: distinct b/d/p/q, single-storey a and g, even digit widths. */
+@font-face { font-family: "Andika"; font-style: normal; font-weight: 400; font-display: swap; src: url("/static/fonts/andika-latin-400-normal.woff2") format("woff2"); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: "Andika"; font-style: normal; font-weight: 400; font-display: swap; src: url("/static/fonts/andika-latin-ext-400-normal.woff2") format("woff2"); unicode-range: U+0100-02AF,U+1E00-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: "Andika"; font-style: normal; font-weight: 700; font-display: swap; src: url("/static/fonts/andika-latin-700-normal.woff2") format("woff2"); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: "Andika"; font-style: normal; font-weight: 700; font-display: swap; src: url("/static/fonts/andika-latin-ext-700-normal.woff2") format("woff2"); unicode-range: U+0100-02AF,U+1E00-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF; }
 /* KDS Schoolhouse: a 90s teen-sitcom classroom look. Neon on deep purple, thick ink outlines, hard offset shadows. */
 :root {
   --ink: #14082e; --paper: #fffdf6; --muted: #5b4b7a;
   --pink: #ff2d95; --pink-deep: #e6007e; --cyan: #00e5ff; --purple: #7a2cff; --purple-deep: #2b0a5a;
   --yellow: #ffe500; --lime: #39ff14; --orange: #ff7a00;
   --link: #5b1fd0; --ok-bg: #d9ffe0; --ok-text: #0b5a22; --err-bg: #ffe0ee; --err-text: #8a0036;
-  --radius: 14px; --font-head: "Arial Black", "Arial Rounded MT Bold", Impact, "Trebuchet MS", sans-serif;
+  --radius: 14px; --font: "Andika", "Atkinson Hyperlegible", "Verdana", sans-serif; --font-head: var(--font);
   color-scheme: light;
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
 body {
-  margin: 0; color: var(--ink); font: 16px/1.55 "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+  letter-spacing: .02em; word-spacing: .06em;
+  margin: 0; color: var(--ink); font: 1rem/1.6 var(--font);
   background: url("/static/img/confetti.svg") center top / 260px, linear-gradient(160deg, #2b0a5a 0%, #4a1590 55%, #8a1fa8 100%) fixed;
   background-color: var(--purple-deep); min-height: 100vh;
 }
 a { color: var(--link); }
 .container { max-width: 1040px; margin: 0 auto; padding: 18px 16px 48px; }
-h1, h2, h3 { font-family: var(--font-head); font-style: italic; letter-spacing: -.5px; line-height: 1.15; }
-h1 { font-size: clamp(1.7rem, 5vw, 2.4rem); margin: 8px 0 12px; color: var(--yellow); text-shadow: 3px 3px 0 var(--pink), 5px 5px 0 var(--ink); text-transform: uppercase; }
+h1, h2, h3 { font-family: var(--font-head); font-style: normal; font-weight: 700; letter-spacing: 0; line-height: 1.25; }
+h1 { font-size: clamp(1.7rem, 5vw, 2.4rem); margin: 8px 0 12px; color: var(--yellow); text-shadow: 2px 2px 0 var(--ink); text-transform: none; }
 h2 { font-size: 1.3rem; margin: 0 0 8px; }
 .lead, .container > .muted { color: #f1e4ff; font-size: 1.05rem; }
 .card .muted, .sheet .muted, .toolbar .muted { color: var(--muted); }
@@ -29,8 +35,8 @@ h2 { font-size: 1.3rem; margin: 0 0 8px; }
   background: linear-gradient(90deg, #00b8d4 0%, #7a2cff 45%, #ff2d95 100%); border-bottom: 4px solid var(--ink); }
 .topbar::after { content: ""; position: absolute; left: 0; right: 0; bottom: -18px; height: 14px; background: url("/static/img/zigzag.svg") repeat-x; }
 .topbar a, .topbar summary { color: #fff; text-decoration: none; }
-.brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-head); font-style: italic; font-size: 1.2rem; text-shadow: 2px 2px 0 var(--ink); }
-.brand small { display: block; font: 700 .72rem/1 "Trebuchet MS", sans-serif; letter-spacing: 1.5px; text-transform: uppercase; color: var(--yellow); text-shadow: 1px 1px 0 var(--ink); margin-top: 3px; font-style: normal; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-head); font-style: normal; font-size: 1.2rem; text-shadow: 2px 2px 0 var(--ink); }
+.brand small { display: block; font: 700 .72rem/1 var(--font); letter-spacing: .3px; text-transform: none; color: var(--yellow); text-shadow: 1px 1px 0 var(--ink); margin-top: 3px; font-style: normal; }
 nav { display: flex; gap: 8px; flex: 1; flex-wrap: wrap; align-items: center; }
 .menu { position: relative; }
 .menu summary, .navlink { cursor: pointer; list-style: none; padding: 6px 12px; border: 3px solid var(--ink); border-radius: 999px; background: var(--purple-deep); font-weight: 700; box-shadow: 3px 3px 0 var(--ink); display: inline-block; }
@@ -46,7 +52,7 @@ nav { display: flex; gap: 8px; flex: 1; flex-wrap: wrap; align-items: center; }
 .pill.alt { background: var(--cyan); }
 
 /* controls */
-button, .btn { font: 800 .95rem/1.2 "Trebuchet MS", sans-serif; letter-spacing: .3px; text-transform: uppercase; background: var(--pink-deep); color: #fff; border: 3px solid var(--ink); border-radius: 10px; padding: 9px 16px; cursor: pointer; text-decoration: none; display: inline-block; box-shadow: 4px 4px 0 var(--ink); transition: transform .08s, box-shadow .08s; }
+button, .btn { font: 800 .95rem/1.2 var(--font); letter-spacing: .3px; text-transform: none; background: var(--pink-deep); color: #fff; border: 3px solid var(--ink); border-radius: 10px; padding: 9px 16px; cursor: pointer; text-decoration: none; display: inline-block; box-shadow: 4px 4px 0 var(--ink); transition: transform .08s, box-shadow .08s; }
 button:hover, .btn:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--ink); }
 button:active, .btn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--ink); }
 button.secondary, .btn.secondary { background: #fff; color: var(--ink); box-shadow: 4px 4px 0 var(--cyan), 4px 4px 0 3px var(--ink); }
@@ -62,7 +68,7 @@ input:not([type=checkbox]):not([type=radio]), select, textarea { display: block;
 input[type=checkbox], input[type=radio] { width: 20px; height: 20px; accent-color: var(--pink-deep); flex: none; }
 :focus-visible { outline: 4px solid var(--cyan); outline-offset: 2px; }
 fieldset { border: 3px dashed var(--purple); border-radius: 12px; margin: 16px 0; padding: 4px 14px 10px; }
-legend { font-family: var(--font-head); font-style: italic; padding: 0 8px; color: var(--purple); }
+legend { font-family: var(--font-head); font-style: normal; padding: 0 8px; color: var(--purple); }
 
 /* cards */
 .card { background: var(--paper); border: 3px solid var(--ink); border-radius: var(--radius); padding: 20px; margin: 16px 0; box-shadow: 7px 7px 0 var(--pink); }
@@ -82,7 +88,7 @@ ul.plain { list-style: none; padding: 0; margin: 0; } ul.plain li { padding: 5px
 .tabs a { margin-right: 12px; color: #fff; font-weight: 700; } .tabs a.on { color: var(--yellow); text-decoration-thickness: 3px; }
 .table-wrap { overflow-x: auto; border: 3px solid var(--ink); border-radius: 12px; background: #fff; box-shadow: 6px 6px 0 var(--cyan); }
 table { border-collapse: collapse; width: 100%; background: #fff; }
-th { background: var(--purple-deep); color: #fff; font-family: var(--font-head); font-style: italic; font-weight: 400; }
+th { background: var(--purple-deep); color: #fff; font-family: var(--font-head); font-style: normal; font-weight: 400; }
 th, td { text-align: left; padding: 9px 10px; border-bottom: 2px solid #e6dcf7; vertical-align: top; }
 .actions form { display: inline-block; margin: 0 4px 4px 0; }
 .badge { padding: 2px 9px; border-radius: 999px; font-size: .78rem; font-weight: 800; background: #eee; border: 2px solid var(--ink); } .badge.pending { background: var(--yellow); } .badge.approved { background: var(--lime); }
@@ -95,11 +101,11 @@ ul.items { list-style: none; margin: 0; padding: 0; } ul.items li { display: fle
 
 /* worksheets: always black on white, like the paper they print on */
 .sheet { background: #fff; color: #000; border: 3px solid var(--ink); border-radius: 8px; padding: 28px 34px; margin: 0 0 24px; min-height: 9in; box-shadow: 7px 7px 0 var(--cyan); }
-.sheet h1 { margin: 0; font-size: 1.6rem; color: #000; text-shadow: none; text-transform: none; font-family: Arial, Helvetica, sans-serif; font-style: normal; letter-spacing: 0; } .sheet h2 { font-family: Arial, Helvetica, sans-serif; font-style: normal; }
+.sheet h1 { margin: 0; font-size: 1.6rem; color: #000; text-shadow: none; text-transform: none; font-family: var(--font); font-style: normal; letter-spacing: 0; font-weight: 700; } .sheet h2 { font-family: var(--font); font-style: normal; }
 .sheet-sub { margin: 2px 0 8px; color: #333; }
 .namedate { display: flex; justify-content: space-between; gap: 24px; margin: 8px 0 18px; font-weight: 400; }
 .blank { display: inline-block; border-bottom: 1.5px solid #000; width: 200px; height: 1em; vertical-align: baseline; } .blank.short { width: 90px; }
-.legend { font-style: italic; margin: 0 0 12px; }
+.legend { font-style: normal; margin: 0 0 12px; }
 ol.problems { list-style: none; margin: 0; padding: 0; display: grid; gap: 22px 12px; grid-template-columns: repeat(5, 1fr); }
 ol.problems.horizontal { grid-template-columns: repeat(3, 1fr); }
 ol.problems.facts:not(.horizontal) { grid-template-columns: repeat(4, 1fr); }
@@ -120,7 +126,7 @@ ol.problems { --lh: 30px; --fs: 20px; --space: 34px; }
 .words-problems { padding-left: 22px; } .words-problems li { margin-bottom: 8px; break-inside: avoid; font-size: 1.1rem; }
 .workspace { height: 100px; border: 1px dashed #aaa; border-radius: 6px; margin: 6px 0; } .answerline { margin: 4px 0 16px; }
 .keylist { columns: 2; font-size: 1.05rem; } .keylist.single { columns: 1; } .keylist.single li { margin-bottom: 10px; break-inside: avoid; }
-.tag { display: inline-block; font-size: .72rem; text-transform: uppercase; letter-spacing: .5px; border: 1px solid #000; border-radius: 4px; padding: 0 5px; margin-right: 4px; }
+.tag { display: inline-block; font-size: .72rem; text-transform: none; letter-spacing: .5px; border: 1px solid #000; border-radius: 4px; padding: 0 5px; margin-right: 4px; }
 .wordgrid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; counter-reset: w; }
 .wordgrid li { counter-increment: w; font-size: 1.6rem; padding: 6px 0; } .wordgrid li::before { content: counter(w) "."; font-size: .75rem; margin-right: 6px; color: #444; }
 .wordgrid.write { grid-template-columns: repeat(2, 1fr); } .wordgrid.write .blank { width: 55%; margin-left: 12px; }
@@ -169,7 +175,7 @@ ol.questions { padding-left: 24px; } ol.questions li { margin-bottom: 14px; brea
 }
 
 /* pep-talk bubble under the home page greeting */
-.greeting { display: inline-block; position: relative; margin: 6px 0 14px; padding: 10px 16px; max-width: 46em; background: var(--yellow); color: var(--ink); border: 3px solid var(--ink); border-radius: 14px; box-shadow: 4px 4px 0 var(--pink); font: 800 1.05rem/1.35 "Trebuchet MS", sans-serif; transform: rotate(-.6deg); }
+.greeting { display: inline-block; position: relative; margin: 6px 0 14px; padding: 10px 16px; max-width: 46em; background: var(--yellow); color: var(--ink); border: 3px solid var(--ink); border-radius: 14px; box-shadow: 4px 4px 0 var(--pink); font: 800 1.05rem/1.35 var(--font); transform: rotate(-.6deg); }
 .greeting::before { content: ""; position: absolute; left: 22px; top: -13px; border: 7px solid transparent; border-bottom: 10px solid var(--ink); }
 
 /* Printing math worksheets: vertical = 5 columns x 5 rows (25 per page); horizontal = 3 columns x 5 rows (15 per page).
@@ -204,33 +210,33 @@ ol.questions { padding-left: 24px; } ol.questions li { margin-bottom: 14px; brea
 /* ---------- Spiral Review: a ten-box test page ---------- */
 .spiral-sheet { --space: 16px; --lh: 24px; padding: 18px 22px; page: spiral; }
 .sp-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 2px; }
-.sp-name { flex: 1; max-width: 55%; border: 2px solid #000; border-radius: 10px; padding: 5px 12px; font: 600 1.05rem Arial, sans-serif; display: flex; gap: 8px; align-items: flex-end; } .sp-name .blank { flex: 1; width: auto; }
-.sp-tag { border: 2px solid #000; border-radius: 10px; padding: 5px 18px; font: 700 1.4rem Arial, sans-serif; letter-spacing: .02em; }
+.sp-name { flex: 1; max-width: 55%; border: 2px solid #000; border-radius: 10px; padding: 5px 12px; font: 600 1.05rem var(--font); display: flex; gap: 8px; align-items: flex-end; } .sp-name .blank { flex: 1; width: auto; }
+.sp-tag { border: 2px solid #000; border-radius: 10px; padding: 5px 18px; font: 700 1.4rem var(--font); letter-spacing: .02em; }
 .sp-sub { margin: 3px 2px 6px; font-size: .8rem; color: #444; }
 .sp-grid { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: minmax(1.78in, auto); border: 2px solid #000; }
 .sp-box { position: relative; border: 1px solid #000; padding: 4px 6px 4px 24px; min-width: 0; display: flex; overflow: hidden; }
-.sp-n { position: absolute; left: 6px; top: 4px; font: 700 .95rem Arial, sans-serif; }
+.sp-n { position: absolute; left: 6px; top: 4px; font: 700 .95rem var(--font); }
 .sp-parts { display: flex; flex: 1; min-width: 0; } .sp-parts.stack { flex-direction: column; }
 .sp-part { flex: 1; min-width: 0; padding: 0 6px; } .sp-parts:not(.stack) .sp-part + .sp-part { border-left: 1px solid #000; }
 .sp-parts.stack .sp-part + .sp-part { margin-top: 4px; }
-.sp-t, .sp-c, .sp-note { margin: 0 0 4px; font: 400 .88rem/1.28 Arial, Helvetica, sans-serif; color: #000; }
-.sp-c { text-align: center; font-size: 1.1rem; margin: 5px 0; } .sp-note { font-size: .74rem; font-style: italic; }
-.sp-line { margin: 5px 0 2px; font: 400 .88rem Arial, sans-serif; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 2px 6px; clear: both; } .sp-parts.multi .sp-line .blank { flex-basis: 52px; } .sp-line .blank { flex: 0 0 90px; }
+.sp-t, .sp-c, .sp-note { margin: 0 0 4px; font: 400 .88rem/1.28 var(--font); color: #000; }
+.sp-c { text-align: center; font-size: 1.1rem; margin: 5px 0; } .sp-note { font-size: .74rem; font-style: normal; }
+.sp-line { margin: 5px 0 2px; font: 400 .88rem var(--font); display: flex; flex-wrap: wrap; align-items: flex-end; gap: 2px 6px; clear: both; } .sp-parts.multi .sp-line .blank { flex-basis: 52px; } .sp-line .blank { flex: 0 0 90px; }
 .sp-lines { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; margin-top: 6px; clear: both; } .sp-lines .blank { width: 100%; }
 .sp-svg { margin: 2px 0; text-align: center; } .sp-svg svg { max-width: 100%; height: auto; }
 .sp-split { display: flex; gap: 8px; align-items: flex-start; } .sp-sl { flex: 1; min-width: 0; } .sp-sr { flex: 0 0 auto; } .sp-sr .sp-svg { margin: 0; }
 .sp-t .mn, .sp-c .mn { vertical-align: middle; } .sp-t .mn { margin: -4px 0; } .sp-t .fr { font-size: .82em; line-height: 1.05; } .sp-t .mn .wh { font-size: 1em; }
 .sp-vp, .sp-ld { font-size: 1.3rem; margin: 4px auto; display: block; width: max-content; }
-.sp-table { border-collapse: collapse; margin: 3px auto; font: 400 .8rem Arial, sans-serif; } .sp-table th, .sp-table td { border: 1.5px solid #000; padding: 2px 10px; min-width: 56px; height: 19px; text-align: center; background: none; color: #000; font-style: normal; text-transform: none; font-weight: 400; } .sp-table th { font-weight: 700; }
-.sp-cmps { display: grid; gap: 4px; margin-top: 3px; } .sp-cmp { display: flex; align-items: center; justify-content: center; gap: 10px; font: 400 .92rem Arial, sans-serif; } .sp-cmp .a { min-width: 62px; text-align: right; } .sp-cmp .b { min-width: 62px; }
+.sp-table { border-collapse: collapse; margin: 3px auto; font: 400 .8rem var(--font); } .sp-table th, .sp-table td { border: 1.5px solid #000; padding: 2px 10px; min-width: 56px; height: 19px; text-align: center; background: none; color: #000; font-style: normal; text-transform: none; font-weight: 400; } .sp-table th { font-weight: 700; }
+.sp-cmps { display: grid; gap: 4px; margin-top: 3px; } .sp-cmp { display: flex; align-items: center; justify-content: center; gap: 10px; font: 400 .92rem var(--font); } .sp-cmp .a { min-width: 62px; text-align: right; } .sp-cmp .b { min-width: 62px; }
 .circ { display: inline-block; width: 24px; height: 24px; border: 1.8px solid #000; border-radius: 50%; }
-.sp-match { display: flex; justify-content: space-between; gap: 40px; margin: 3px 8px; font: 400 .85rem Arial, sans-serif; } .sp-match ul { list-style: none; margin: 0; padding: 0; } .sp-match li { display: flex; align-items: center; gap: 6px; padding: 2px 0; } .sp-match .dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #000; }
-.sp-list { margin: 3px 0; } .sp-row { font: 400 .95rem Arial, sans-serif; margin: 5px 0; line-height: 1.2; } .sp-row .blank { width: 70px; margin-left: 6px; }
-.sp-wholes { border-collapse: collapse; width: 100%; margin-top: 4px; table-layout: fixed; } .sp-wholes td { border: 1.5px solid #000; height: 26px; text-align: center; font: 400 .72rem Arial, sans-serif; } .sp-wholes td.w { background: #d8d8d8; }
+.sp-match { display: flex; justify-content: space-between; gap: 40px; margin: 3px 8px; font: 400 .85rem var(--font); } .sp-match ul { list-style: none; margin: 0; padding: 0; } .sp-match li { display: flex; align-items: center; gap: 6px; padding: 2px 0; } .sp-match .dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #000; }
+.sp-list { margin: 3px 0; } .sp-row { font: 400 .95rem var(--font); margin: 5px 0; line-height: 1.2; } .sp-row .blank { width: 70px; margin-left: 6px; }
+.sp-wholes { border-collapse: collapse; width: 100%; margin-top: 4px; table-layout: fixed; } .sp-wholes td { border: 1.5px solid #000; height: 26px; text-align: center; font: 400 .72rem var(--font); } .sp-wholes td.w { background: #d8d8d8; }
 .sp-boxdraw { width: 1in; height: 1in; border: 1.5px solid #000; margin: 4px auto; }
-.sp-bul { margin: 2px 0 3px 16px; padding: 0; font: 400 .82rem/1.3 Arial, sans-serif; } .sp-bul.plain { list-style: none; margin-left: 4px; font-size: .8rem; line-height: 1.15; } .sp-bul .blank { width: 36px; }
+.sp-bul { margin: 2px 0 3px 16px; padding: 0; font: 400 .82rem/1.3 var(--font); } .sp-bul.plain { list-style: none; margin-left: 4px; font-size: .8rem; line-height: 1.15; } .sp-bul .blank { width: 36px; }
 .sp-bul.inline { display: flex; flex-wrap: nowrap; gap: 4px 8px; margin: 3px 0 2px 2px; font-size: .78rem; } .sp-bul.inline li { white-space: nowrap; } .sp-bul.inline .blank { width: 22px; border-bottom: 1.5px solid #000; }
-.sp-points { font: 400 .82rem/1.4 Arial, sans-serif; margin: 2px 0 4px; }
+.sp-points { font: 400 .82rem/1.4 var(--font); margin: 2px 0 4px; }
 .sp-side .sp-table th, .sp-side .sp-table td { min-width: 0; padding: 2px 5px; font-size: .74rem; }
 .sp-side { display: flex; gap: 8px; align-items: flex-start; } .sp-side .sl { flex: 1; min-width: 0; } .sp-side .sr { flex: 0 0 auto; }
 .sp-space.s { height: 18px; } .sp-space.m { height: 40px; } .sp-space.l { height: 80px; }
@@ -258,7 +264,7 @@ ol.questions { padding-left: 24px; } ol.questions li { margin-bottom: 14px; brea
 .ns-s-list .blank { width: 130px; }
 
 /* Word problems: tables, lettered parts, choices and notes */
-.wp-note { margin: 2px 0 4px; font-size: .85rem; font-style: italic; color: #333; }
+.wp-note { margin: 2px 0 4px; font-size: .85rem; font-style: normal; color: #333; }
 .wp-table { border-collapse: collapse; margin: 6px 0; font-size: .95rem; } .wp-table caption { font-weight: 700; text-align: left; padding-bottom: 3px; }
 .wp-table th, .wp-table td { border: 1.5px solid #000; padding: 3px 14px; text-align: left; background: none; color: #000; font-weight: 400; text-transform: none; font-style: normal; } .wp-table thead th { font-weight: 700; } .wp-table tbody th { font-weight: 400; }
 .wp-choices { list-style: none; margin: 4px 0 4px 8px; padding: 0; } .wp-choices li { margin: 2px 0; }
@@ -301,3 +307,14 @@ ol.problems.fast li { min-height: 70px; }
 /* sentences and passages from the phonics / sight word lists */
 .wt-list { padding-left: 34px; margin: 10px 0; } .wt-list li { font-size: 1.7rem; line-height: 1.5; margin: 0 0 20px; break-inside: avoid; }
 .wt-passage p { font-size: 1.7rem; line-height: 1.85; margin: 0 0 14px; }
+
+/* Text size for readers who need larger print. The whole page is zoomed; worksheets with a fixed grid of problems
+   (math, place value, spiral review, word problems) cancel the zoom because they have their own Font size choice. */
+.textsize { margin-left: auto; display: flex; align-items: center; gap: 6px; color: #fff; }
+.ts-label { font-size: .85rem; margin-right: 2px; }
+.ts-btn { padding: 2px 9px; min-width: 38px; background: #fff; color: var(--ink); border: 2px solid var(--ink); border-radius: 8px; box-shadow: none; font-weight: 700; line-height: 1.2; cursor: pointer; }
+.ts-b1 { font-size: .85rem; } .ts-b2 { font-size: 1.05rem; } .ts-b3 { font-size: 1.3rem; } .ts-b4 { font-size: 1.6rem; }
+.ts-btn[aria-pressed="true"] { background: var(--yellow); box-shadow: 0 0 0 3px var(--ink); }
+html.ts-2 body { zoom: 1.25; } html.ts-3 body { zoom: 1.5; } html.ts-4 body { zoom: 2; }
+html.ts-2 .sheet.fixed { zoom: .8; } html.ts-3 .sheet.fixed { zoom: .6666667; } html.ts-4 .sheet.fixed { zoom: .5; }
+@media print { .textsize { display: none; } }
