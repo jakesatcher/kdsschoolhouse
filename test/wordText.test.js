@@ -77,3 +77,24 @@ test('clear messages: no real words, AI not set up, unusable replies; and the fo
   // the plain word sheet is unchanged
   assert.match((await agent.get('/reading/sight-words/worksheet?list=primer&count=10&seed=4&extra=none')).text, /wordgrid/);
 });
+
+test('a full paragraph of up to 7 sentences: asked for 5 to 7, checked, retried, editable, and offered on both forms', async () => {
+  const w8 = ['cat', 'hat', 'mat', 'bat', 'rat', 'sat', 'fat', 'pat'];
+  assert.deepStrictEqual(wt.plan(w8, 'paragraph').sentences, [5, 7]);
+  const seven = (n) => Array.from({ length: n }, (_, i) => `The ${w8[i % 8]} sat on the ${w8[(i + 1) % 8]}.`).join(' ');
+  assert.match(wt.check({ passage: seven(8) }, w8, 'paragraph').problems.join(' '), /5 to 7/);
+  assert.match(wt.check({ passage: seven(3) }, w8, 'paragraph').problems.join(' '), /5 to 7/);
+  assert.deepStrictEqual(wt.check({ passage: seven(7) }, w8, 'paragraph').problems, []);
+  assert.match(wt.buildPrompt({ words: w8, mode: 'paragraph', level: 'grade 1' }), /5 to 7 sentences\. Never more than 7/);
+  const calls = stub([
+    () => JSON.stringify({ title: 'Too long', passage: seven(9) }),
+    (req) => { const w = wordsIn(req.messages[0].content); return JSON.stringify({ title: 'A Big Day', passage: Array.from({ length: 7 }, (_, i) => `I see the ${w[i * 2]} and the ${w[i * 2 + 1]}.`).join(' ') }); },
+  ]);
+  const res = await post('/reading/phonics/with-text', { category: 'cvc', subtype: 'all', mix: 'real', format: 'list', mark: '1', key: '1', extra: 'paragraph' });
+  assert.strictEqual(res.status, 302); assert.strictEqual(calls.length, 2);
+  const page = await agent.get(res.headers.location); assert.match(page.text, /A Big Day/); assert.match(page.text, /wt-passage/); assert.match(page.text, /with a paragraph/); assert.match(page.text, /Words used in the paragraph/);
+  const ref = res.headers.location.split('/').pop();
+  const saved = await post(`/reading/doc/${ref}/edit`, { passage_title: 'My Day', passage: 'I see a cat. I see a hat.' });
+  assert.strictEqual(saved.status, 302);
+  for (const f of ['/reading/phonics', '/reading/sight-words']) assert.match((await agent.get(f)).text, /<option value="paragraph"[^>]*>Add a full paragraph \(up to 7 sentences\)/);
+});

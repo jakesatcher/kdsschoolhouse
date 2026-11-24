@@ -1,6 +1,6 @@
 'use strict';
 
-// Sentences and short passages (3 to 5 sentences) written from a phonics or sight-word worksheet's words.
+// Sentences, short passages (3 to 5 sentences) and full paragraphs (5 to 7 sentences) written from a phonics or sight-word worksheet's words.
 // The writer is asked to use the words exactly as spelled, to keep every other word easy for an early reader, and the reply is
 // checked: enough of the words must appear, sentence counts and lengths must fit, and the passage must be 3 to 5 sentences.
 const ai = require('./reading/ai');
@@ -26,6 +26,7 @@ const clean = (v, max) => String(v == null ? '' : v).replace(/[\u0000-\u0008\u00
 // How many sentences to ask for, and how many of the words must show up
 const plan = (words, mode) => {
   const n = words.length;
+  if (mode === 'paragraph') return { sentences: [5, 7], need: Math.min(n, 8) };
   if (mode === 'passage') return { sentences: [3, 5], need: Math.min(n, 6) };
   const k = Math.max(5, Math.min(12, Math.ceil(n / 2)));
   return { sentences: [k, k + 2], need: Math.ceil(n * 0.8), k };
@@ -35,15 +36,15 @@ function buildPrompt({ words, mode, level, topic }, feedback = '') {
   const p = plan(words, mode);
   const nm = promptNames(Math.random, 3, 3);
   const lines = [
-    mode === 'passage' ? 'Write ONE short passage (a tiny story or a few facts) of 3 to 5 sentences.' : `Write ${p.k} short sentences (each one is its own sentence; a sentence may use one or two target words).`,
+    mode === 'paragraph' ? 'Write ONE full paragraph (a short story or a few connected facts) of 5 to 7 sentences. Never more than 7 sentences.' : mode === 'passage' ? 'Write ONE short passage (a tiny story or a few facts) of 3 to 5 sentences.' : `Write ${p.k} short sentences (each one is its own sentence; a sentence may use one or two target words).`,
     `Reader level: ${level}.`,
     `Target words: <word_list>${words.join(', ')}</word_list>`,
-    mode === 'passage' ? `Use at least ${p.need} of the target words in the passage. Make the sentences connect so it reads like a story.` : `Every target word should appear in at least one sentence (at least ${p.need} of them must).`,
+    mode !== 'sentences' ? `Use at least ${p.need} of the target words in the ${mode === 'paragraph' ? 'paragraph' : 'passage'}. Make the sentences connect so it reads like a story.` : `Every target word should appear in at least one sentence (at least ${p.need} of them must).`,
     'Keep each sentence under 12 words (under 8 words for very early readers).',
     `Names to use for characters: boys ${nm.boys.join(', ')}; girls ${nm.girls.join(', ')}.`,
   ];
   if (topic) lines.push(`Theme (optional): <word_list>${String(topic).replace(/[<>]/g, ' ')}</word_list>`);
-  lines.push(`Return JSON: ${JSON.stringify(mode === 'passage' ? { title: 'a short title', passage: 'the passage' } : { sentences: ['sentence one', 'sentence two'] })}`);
+  lines.push(`Return JSON: ${JSON.stringify(mode !== 'sentences' ? { title: 'a short title', passage: mode === 'paragraph' ? 'the paragraph' : 'the passage' } : { sentences: ['sentence one', 'sentence two'] })}`);
   if (feedback) lines.push('', `Your previous reply had problems: ${feedback} Fix them and return the complete JSON again.`);
   return lines.join('\n');
 }
@@ -58,10 +59,10 @@ function parseJson(text) {
 function check(obj, words, mode) {
   const p = plan(words, mode); const problems = [];
   let body; let sentences;
-  if (mode === 'passage') {
-    body = clean(obj && obj.passage, 800).replace(/\n+/g, ' ');
+  if (mode !== 'sentences') {
+    body = clean(obj && obj.passage, 1100).replace(/\n+/g, ' ');
     sentences = sentencesOf(body);
-    if (sentences.length < 3 || sentences.length > 5) problems.push(`The passage had ${sentences.length} sentences; it must have 3 to 5.`);
+    if (sentences.length < p.sentences[0] || sentences.length > p.sentences[1]) problems.push(`The ${mode === 'paragraph' ? 'paragraph' : 'passage'} had ${sentences.length} sentences; it must have ${p.sentences[0]} to ${p.sentences[1]}.`);
   } else {
     sentences = (Array.isArray(obj && obj.sentences) ? obj.sentences : []).map((s) => clean(s, 200)).filter(Boolean).slice(0, 16);
     body = sentences.join(' ');
@@ -72,7 +73,7 @@ function check(obj, words, mode) {
   const used = words.filter((w) => hasWord(body, w));
   if (used.length < p.need) problems.push(`Only ${used.length} target words were used; at least ${p.need} are needed. Missing: ${words.filter((w) => !used.includes(w)).slice(0, 8).join(', ')}.`);
   if (/\b(NaN|undefined|null)\b/.test(body)) problems.push('The text contains bad characters.');
-  return { body, sentences, used, problems, title: mode === 'passage' ? clean(obj && obj.title, 80) : '' };
+  return { body, sentences, used, problems, title: mode !== 'sentences' ? clean(obj && obj.title, 80) : '' };
 }
 
 async function generateWordText({ words, mode, level = 'kindergarten to grade 1', topic = '' }) {
@@ -89,7 +90,7 @@ async function generateWordText({ words, mode, level = 'kindergarten to grade 1'
     feedback = res.problems.join(' ');
   }
   // settle for a usable best effort when the only problem is a shortfall of words or a count slightly off
-  if (best && best.sentences.length >= (mode === 'passage' ? 3 : 4) && best.used.length >= Math.ceil(plan(clean_, mode).need / 2)) return { ...best, words: clean_, settled: true };
+  if (best && best.sentences.length >= (mode === 'sentences' ? 4 : mode === 'paragraph' ? 5 : 3) && best.used.length >= Math.ceil(plan(clean_, mode).need / 2)) return { ...best, words: clean_, settled: true };
   throw new ai.AiError('The writing assistant could not write text that used the words well enough. Please try again.', 'bad_output');
 }
 

@@ -1,11 +1,11 @@
 <%- include('../partials/head') %>
 <h1>Edit reading practice</h1>
-<p class="muted">Change any of the <%= c.practiceMode === 'passage' ? 'passage' : 'sentences' %>. The word list page stays as it is.</p>
+<p class="muted">Change any of the <%= c.practiceMode === 'sentences' ? 'sentences' : c.practiceMode === 'paragraph' ? 'paragraph' : 'passage' %>. The word list page stays as it is.</p>
 <%- include('../partials/errors', { error: undefined, errors }) %>
 <div class="card">
   <form method="post" action="/reading/doc/<%= ref %>/edit" class="settings">
     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-    <% if (c.practiceMode === 'passage') { %>
+    <% if (c.practiceMode !== 'sentences') { %>
       <label>Title <input name="passage_title" value="<%= c.passageTitle %>" maxlength="80"></label>
       <label>Passage <textarea name="passage" rows="8" maxlength="800"><%= c.passage %></textarea></label>
     <% } else { %>

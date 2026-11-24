@@ -33,7 +33,7 @@ function handler(kind) {
   const formPath = isPhonics ? '/reading/phonics' : '/reading/sight-words';
   return async (req, res) => {
     const b = req.body;
-    const mode = oneOf(b.extra, ['sentences', 'passage'], 'sentences');
+    const mode = oneOf(b.extra, ['sentences', 'passage', 'paragraph'], 'sentences');
     const q = isPhonics
       ? { category: str(b.category), subtype: str(b.subtype), mix: str(b.mix), format: str(b.format), mark: str(b.mark), key: str(b.key) }
       : { list: str(b.list), count: str(b.count), order: str(b.order), format: str(b.format) };
@@ -54,8 +54,8 @@ function handler(kind) {
     await audit(req, 'ai_generate', 'reading', kind, { mode });
     const content = {
       kind: 'wordtext', subject: 'reading', skill: kind, skillName: isPhonics ? 'Phonics' : 'Sight Words', grade: null,
-      title: built.title, subtitleText: `${built.subtitle} · with ${mode === 'passage' ? 'a short passage' : 'sentences'}`, sheetKind: kind, sheetFormat: built.locals.format,
-      markNonsense: !!built.locals.markNonsense, wordList: result.words, practiceMode: mode, sentences: mode === 'sentences' ? text.sentences : [], passage: mode === 'passage' ? text.body : '',
+      title: built.title, subtitleText: `${built.subtitle} · with ${mode === 'paragraph' ? 'a paragraph' : mode === 'passage' ? 'a short passage' : 'sentences'}`, sheetKind: kind, sheetFormat: built.locals.format,
+      markNonsense: !!built.locals.markNonsense, wordList: result.words, practiceMode: mode, sentences: mode === 'sentences' ? text.sentences : [], passage: mode !== 'sentences' ? text.body : '',
       passageTitle: text.title || '', targets: text.words, includeKey: isPhonics ? flag(b.key, true) : false, ai: true,
     };
     res.redirect(`/reading/doc/${docs.putDraft(req, content)}`);

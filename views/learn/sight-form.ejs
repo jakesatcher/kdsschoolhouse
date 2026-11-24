@@ -8,7 +8,7 @@
     <label>Order <select name="order"><option value="alphabetical">Alphabetical</option><option value="random" <%= q.order === 'random' ? 'selected' : '' %>>Random (the first N of a shuffled list)</option></select></label>
     <label>Format <select name="format"><option value="list">Word list</option><option value="cards" <%= q.format === 'cards' ? 'selected' : '' %>>Flash cards (cut out)</option><option value="trace" <%= q.format === 'trace' ? 'selected' : '' %>>Read, trace and write</option></select></label>
     <label>Reading practice <small class="muted">(written from the words on this sheet)</small>
-      <select name="extra"><option value="none">Just the words</option><option value="sentences" <%= q.extra === 'sentences' ? 'selected' : '' %>>Add sentences that use the words</option><option value="passage" <%= q.extra === 'passage' ? 'selected' : '' %>>Add a short passage (3-5 sentences) that uses the words</option></select>
+      <select name="extra"><option value="none">Just the words</option><option value="sentences" <%= q.extra === 'sentences' ? 'selected' : '' %>>Add sentences that use the words</option><option value="passage" <%= q.extra === 'passage' ? 'selected' : '' %>>Add a short passage (3-5 sentences) that uses the words</option><option value="paragraph" <%= q.extra === 'paragraph' ? 'selected' : '' %>>Add a full paragraph (up to 7 sentences) that uses the words</option></select>
     </label>
     <button type="submit">Create worksheet</button>
   </form>

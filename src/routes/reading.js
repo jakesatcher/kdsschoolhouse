@@ -87,7 +87,7 @@ router.post('/reading/doc/:ref/edit', async (req, res, next) => {
   if (doc.content.kind === 'wordtext') {
     const c = doc.content;
     const sentences = c.practiceMode === 'sentences' ? str(b.sentences).split('\n').map((l) => strip(l, 200)).filter(Boolean).slice(0, 16) : [];
-    const passage = c.practiceMode === 'passage' ? strip(b.passage, 800) : '';
+    const passage = c.practiceMode !== 'sentences' ? strip(b.passage, 1100) : '';
     if (c.practiceMode === 'sentences' ? !sentences.length : !passage) { req.flash('error', 'Keep some text on the page.'); return res.redirect(`/reading/doc/${req.params.ref}/edit`); }
     await docs.updateDoc(req, doc, { ...c, sentences, passage, passageTitle: strip(b.passage_title, 80), includeKey: flag(b.key, true) });
     req.flash('ok', 'Changes saved.');

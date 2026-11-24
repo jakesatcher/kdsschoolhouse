@@ -22,7 +22,7 @@
     <label class="check"><input type="hidden" name="mark" value="0"><input type="checkbox" name="mark" value="1" checked> Mark nonsense words with a ◇ for students</label>
     <label class="check"><input type="hidden" name="key" value="0"><input type="checkbox" name="key" value="1" checked> Include teacher key (shows which words are nonsense)</label>
     <label>Reading practice <small class="muted">(written from the words on this sheet)</small>
-      <select name="extra"><option value="none">Just the words</option><option value="sentences" <%= q.extra === 'sentences' ? 'selected' : '' %>>Add sentences that use the words</option><option value="passage" <%= q.extra === 'passage' ? 'selected' : '' %>>Add a short passage (3-5 sentences) that uses the words</option></select>
+      <select name="extra"><option value="none">Just the words</option><option value="sentences" <%= q.extra === 'sentences' ? 'selected' : '' %>>Add sentences that use the words</option><option value="passage" <%= q.extra === 'passage' ? 'selected' : '' %>>Add a short passage (3-5 sentences) that uses the words</option><option value="paragraph" <%= q.extra === 'paragraph' ? 'selected' : '' %>>Add a full paragraph (up to 7 sentences) that uses the words</option></select>
     </label>
     <button type="submit">Create worksheet</button>
   </form>
